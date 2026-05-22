@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient -->
+    <radialGradient id="bgGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#1e293b" />
+      <stop offset="100%" stop-color="#0f172a" />
+    </radialGradient>
+    
+    <!-- Gold Gradient for Note Card -->
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fbbf24" />
+      <stop offset="50%" stop-color="#f59e0b" />
+      <stop offset="100%" stop-color="#d97706" />
+    </linearGradient>
+
+    <!-- Glassmorphic Overlay Gradient -->
+    <linearGradient id="glassGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.15" />
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.02" />
+    </linearGradient>
+    
+    <!-- Drop Shadow for Depth -->
+    <filter id="shadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000000" flood-opacity="0.5" />
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="512" height="512" rx="128" fill="url(#bgGrad)" />
+
+  <g filter="url(#shadow)">
+    <!-- Note Card Shadow Backdrop -->
+    <rect x="128" y="112" width="256" height="288" rx="24" fill="#000000" opacity="0.3" />
+    
+    <!-- Note Card (Gold) -->
+    <rect x="128" y="112" width="256" height="288" rx="24" fill="url(#goldGrad)" />
+    
+    <!-- Glassmorphic Top half overlay -->
+    <rect x="128" y="112" width="256" height="144" rx="24" fill="url(#glassGrad)" />
+
+    <!-- Checklist Item 1 -->
+    <rect x="168" y="164" width="28" height="28" rx="7" stroke="#78350f" stroke-width="5" fill="none" opacity="0.5" />
+    <line x1="212" y1="178" x2="344" y2="178" stroke="#78350f" stroke-width="8" stroke-linecap="round" opacity="0.4" />
+
+    <!-- Checklist Item 2 (Checked) -->
+    <rect x="168" y="216" width="28" height="28" rx="7" stroke="#78350f" stroke-width="5" fill="none" opacity="0.5" />
+    <path d="M174,230 L180,236 L190,222" stroke="#78350f" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.6" />
+    <line x1="212" y1="230" x2="312" y2="230" stroke="#78350f" stroke-width="8" stroke-linecap="round" opacity="0.4" />
+
+    <!-- Checklist Item 3 -->
+    <rect x="168" y="268" width="28" height="28" rx="7" stroke="#78350f" stroke-width="5" fill="none" opacity="0.5" />
+    <line x1="212" y1="282" x2="344" y2="282" stroke="#78350f" stroke-width="8" stroke-linecap="round" opacity="0.4" />
+
+    <!-- Checklist Item 4 -->
+    <rect x="168" y="320" width="28" height="28" rx="7" stroke="#78350f" stroke-width="5" fill="none" opacity="0.5" />
+    <line x1="212" y1="334" x2="276" y2="334" stroke="#78350f" stroke-width="8" stroke-linecap="round" opacity="0.4" />
+  </g>
+</svg>

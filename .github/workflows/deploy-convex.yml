@@ -1,0 +1,27 @@
+name: Deploy Convex Functions
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'convex/**'
+      - '.github/workflows/deploy-convex.yml'
+      - 'convex.json'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Deploy to Convex
+        run: npx --yes convex deploy
+        env:
+          CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
