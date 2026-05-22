@@ -39,8 +39,10 @@ self.addEventListener('activate', (event) => {
 
 // Fetch Event (Cache First, Network Fallback)
 self.addEventListener('fetch', (event) => {
-  // Avoid intercepting Filen API or PouchDB local adapter changes
-  if (event.request.url.includes('filen.io') ||
+  // Avoid intercepting Vite HMR/dev-server requests, Filen API, or PouchDB local adapter changes
+  if (event.request.url.includes('/@vite/') ||
+      event.request.url.includes('/@id/') ||
+      event.request.url.includes('filen.io') ||
       event.request.url.includes('_session') || 
       event.request.url.includes('_local') || 
       event.request.url.includes('/_changes') || 

@@ -70,8 +70,20 @@
     <!-- Main Content Panel (Sidebar + Notes Grid) -->
     <div class="main-body">
 
+      <!-- Sidebar overlay backdrop for mobile -->
+      <div id="sidebar-overlay" class="sidebar-overlay"></div>
+
       <!-- Collapsible Sidebar -->
       <aside id="app-sidebar" class="sidebar">
+        <div class="sidebar-mobile-header">
+          <div class="logo-area">
+            <img src="icon.svg" alt="Noten Logo" class="app-logo-small">
+            <span class="app-title">Noten</span>
+          </div>
+          <button id="btn-sidebar-close-mobile" class="btn-icon" aria-label="Close Menu">
+            <i data-lucide="x"></i>
+          </button>
+        </div>
         <nav class="sidebar-nav">
           <ul>
             <li>
@@ -200,6 +212,9 @@
       <div id="modal-images-preview" class="note-images-preview hidden"></div>
       <input type="file" id="modal-image-input" accept="image/*" multiple class="hidden">
       <div class="modal-header">
+        <button id="btn-modal-back" class="btn-icon modal-back-btn" aria-label="Go back" title="Save and close">
+          <i data-lucide="arrow-left"></i>
+        </button>
         <input type="text" id="modal-title" data-i18n-placeholder="modal_title_placeholder" placeholder="Title">
         <button id="btn-modal-pin" class="btn-icon" data-i18n-title="btn_modal_pin_title" title="Pin note">
           <i data-lucide="pin"></i>
@@ -218,25 +233,28 @@
 
       <div class="modal-footer">
         <div class="modal-toolbar">
-          <!-- Modal Color Picker -->
-          <div class="color-picker-wrapper">
-            <button class="btn-icon" data-i18n-title="btn_creator_color_title" title="Change color"><i data-lucide="palette"></i></button>
-            <div class="color-palette-popup">
-              <button class="color-option default" data-color="default" data-i18n-title="color_default" title="Default"></button>
-              <button class="color-option red" data-color="red" data-i18n-title="color_red" title="Red"></button>
-              <button class="color-option orange" data-color="orange" data-i18n-title="color_orange" title="Orange"></button>
-              <button class="color-option yellow" data-color="yellow" data-i18n-title="color_yellow" title="Yellow"></button>
-              <button class="color-option green" data-color="green" data-i18n-title="color_green" title="Green"></button>
-              <button class="color-option teal" data-color="teal" data-i18n-title="color_teal" title="Teal"></button>
-              <button class="color-option blue" data-color="blue" data-i18n-title="color_blue" title="Blue"></button>
-              <button class="color-option purple" data-color="purple" data-i18n-title="color_purple" title="Purple"></button>
-              <button class="color-option pink" data-color="pink" data-i18n-title="color_pink" title="Pink"></button>
+          <div class="modal-toolbar-buttons">
+            <!-- Modal Color Picker -->
+            <div class="color-picker-wrapper">
+              <button class="btn-icon" data-i18n-title="btn_creator_color_title" title="Change color"><i data-lucide="palette"></i></button>
+              <div class="color-palette-popup">
+                <button class="color-option default" data-color="default" data-i18n-title="color_default" title="Default"></button>
+                <button class="color-option red" data-color="red" data-i18n-title="color_red" title="Red"></button>
+                <button class="color-option orange" data-color="orange" data-i18n-title="color_orange" title="Orange"></button>
+                <button class="color-option yellow" data-color="yellow" data-i18n-title="color_yellow" title="Yellow"></button>
+                <button class="color-option green" data-color="green" data-i18n-title="color_green" title="Green"></button>
+                <button class="color-option teal" data-color="teal" data-i18n-title="color_teal" title="Teal"></button>
+                <button class="color-option blue" data-color="blue" data-i18n-title="color_blue" title="Blue"></button>
+                <button class="color-option purple" data-color="purple" data-i18n-title="color_purple" title="Purple"></button>
+                <button class="color-option pink" data-color="pink" data-i18n-title="color_pink" title="Pink"></button>
+              </div>
             </div>
+            <button id="btn-modal-checklist-toggle" class="btn-icon hidden" data-i18n-title="btn_modal_checklist_toggle_title" title="Toggle checklist view"><i data-lucide="list-checks"></i></button>
+            <button id="btn-modal-image" class="btn-icon" data-i18n-title="btn_modal_image_title" title="Add image"><i data-lucide="image"></i></button>
+            <button id="btn-modal-archive" class="btn-icon" data-i18n-title="btn_modal_archive_title" title="Archive"><i data-lucide="archive"></i></button>
+            <button id="btn-modal-trash" class="btn-icon" data-i18n-title="btn_modal_trash_delete_title" title="Delete"><i data-lucide="trash-2"></i></button>
+            <button id="btn-modal-delete-forever" class="btn-icon hidden" data-i18n-title="btn_modal_trash_delete_forever_title" title="Delete forever"><i data-lucide="trash-2"></i></button>
           </div>
-          <button id="btn-modal-checklist-toggle" class="btn-icon hidden" data-i18n-title="btn_modal_checklist_toggle_title" title="Toggle checklist view"><i data-lucide="list-checks"></i></button>
-          <button id="btn-modal-image" class="btn-icon" data-i18n-title="btn_modal_image_title" title="Add image"><i data-lucide="image"></i></button>
-          <button id="btn-modal-archive" class="btn-icon" data-i18n-title="btn_modal_archive_title" title="Archive"><i data-lucide="archive"></i></button>
-          <button id="btn-modal-trash" class="btn-icon" data-i18n-title="btn_modal_trash_delete_title" title="Delete"><i data-lucide="trash-2"></i></button>
           <span class="last-edited-label" id="modal-last-edited" data-i18n="modal_last_edited">Edited 2 mins ago</span>
         </div>
         <button id="btn-modal-close" class="btn btn-primary" data-i18n="btn_modal_close">Close</button>
@@ -345,6 +363,11 @@
       <img id="lightbox-image" src="" alt="Fullscreen view">
     </div>
   </div>
+
+  <!-- Floating Action Button (Mobile Only) -->
+  <button id="btn-fab-create" class="btn-fab" aria-label="Create Note" title="Create Note">
+    <i data-lucide="plus"></i>
+  </button>
 
   <!-- JavaScript Modules -->
   <script type="module" src="js/app.js"></script>

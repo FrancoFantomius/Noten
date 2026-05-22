@@ -27,6 +27,8 @@ const elements = {
   // Header
   btnSidebarToggle: document.getElementById('btn-sidebar-toggle'),
   sidebar: document.getElementById('app-sidebar'),
+  sidebarOverlay: document.getElementById('sidebar-overlay'),
+  btnSidebarCloseMobile: document.getElementById('btn-sidebar-close-mobile'),
   searchInput: document.getElementById('search-input'),
   btnSearchClear: document.getElementById('btn-search-clear'),
   syncStatus: document.getElementById('sync-status'),
@@ -70,15 +72,19 @@ const elements = {
   modalBodyText: document.getElementById('modal-body-text'),
   modalTagsList: document.getElementById('modal-tags-list'),
   modalTagInput: document.getElementById('modal-tag-input'),
+  btnModalBack: document.getElementById('btn-modal-back'),
   btnModalPin: document.getElementById('btn-modal-pin'),
   btnModalArchive: document.getElementById('btn-modal-archive'),
   btnModalTrash: document.getElementById('btn-modal-trash'),
+  btnModalDeleteForever: document.getElementById('btn-modal-delete-forever'),
+  modalColorPickerWrapper: document.querySelector('#note-modal .color-picker-wrapper'),
   btnModalClose: document.getElementById('btn-modal-close'),
   modalLastEdited: document.getElementById('modal-last-edited'),
   btnModalImage: document.getElementById('btn-modal-image'),
   modalImageInput: document.getElementById('modal-image-input'),
   modalImagesPreview: document.getElementById('modal-images-preview'),
   modalChecklistView: document.getElementById('modal-checklist-view'),
+  modalBody: document.querySelector('#note-modal .modal-body'),
   btnModalChecklistToggle: document.getElementById('btn-modal-checklist-toggle'),
   
   // Settings Modal
@@ -89,7 +95,10 @@ const elements = {
   // Lightbox Modal
   lightboxModal: document.getElementById('lightbox-modal'),
   lightboxImage: document.getElementById('lightbox-image'),
-  btnLightboxClose: document.getElementById('btn-lightbox-close')
+  btnLightboxClose: document.getElementById('btn-lightbox-close'),
+
+  // Floating Action Button
+  btnFabCreate: document.getElementById('btn-fab-create')
 };
 
 // State Variables for Creator/Modal
@@ -108,6 +117,14 @@ export function initUI(callbacks) {
   
   // Header Actions
   elements.btnSidebarToggle.addEventListener('click', toggleSidebar);
+  elements.sidebarOverlay.addEventListener('click', () => {
+    elements.sidebar.classList.remove('mobile-open');
+    elements.sidebarOverlay.classList.remove('active');
+  });
+  elements.btnSidebarCloseMobile.addEventListener('click', () => {
+    elements.sidebar.classList.remove('mobile-open');
+    elements.sidebarOverlay.classList.remove('active');
+  });
   elements.btnSettingsOpen.addEventListener('click', () => {
     if (onOpenSettingsCallback) onOpenSettingsCallback();
   });
@@ -125,8 +142,10 @@ export function initUI(callbacks) {
     }
   });
 
-  // Apply saved theme
-  const savedTheme = localStorage.getItem('theme') || 'dark';
+  // Apply saved theme (default to device preference if not set)
+  const systemPrefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+  const defaultTheme = systemPrefersLight ? 'light' : 'dark';
+  const savedTheme = localStorage.getItem('theme') || defaultTheme;
   if (savedTheme === 'light') {
     elements.themeToggle.checked = false;
     document.body.classList.remove('dark-theme');
@@ -232,6 +251,7 @@ export function initUI(callbacks) {
   
   // Edit Modal Event Handlers
   elements.btnModalClose.addEventListener('click', saveAndCloseModal);
+  elements.btnModalBack.addEventListener('click', saveAndCloseModal);
   
   // Closing Modal on background click
   elements.noteModal.addEventListener('click', (e) => {
@@ -279,6 +299,32 @@ export function initUI(callbacks) {
         elements.modalTagInput.value = '';
         renderModalTags();
       }
+    }
+  });
+
+  // Focus textarea/checklist when clicking empty area of modal body
+  elements.modalBody.addEventListener('click', (e) => {
+    // Avoid focusing if clicking on interactive elements like inputs, buttons, checkboxes, tag badges/remove buttons
+    if (
+      e.target.closest('input') ||
+      e.target.closest('button') ||
+      e.target.closest('label') ||
+      e.target.closest('.tag-badge') ||
+      e.target.closest('.tag-input-wrapper')
+    ) {
+      return;
+    }
+
+    if (isModalChecklistMode) {
+      const inputs = elements.modalChecklistView.querySelectorAll('.modal-checklist-input');
+      if (inputs.length > 0) {
+        inputs[inputs.length - 1].focus();
+      } else {
+        const addBtn = elements.modalChecklistView.querySelector('.modal-checklist-add');
+        if (addBtn) addBtn.focus();
+      }
+    } else {
+      elements.modalBodyText.focus();
     }
   });
 
@@ -360,17 +406,30 @@ export function initUI(callbacks) {
       const note = decryptedNotes.find(n => n.id === editingNoteId);
       if (note) {
         if (note.isTrashed) {
-          // If already in trash, permanently delete
-          if (confirm(t('confirm_delete_note'))) {
-            await onDeleteNoteCallback(note.id);
-            closeModal();
-          }
+          // Restore note from trash
+          note.isTrashed = false;
+          note.updatedAt = Date.now();
+          await onSaveNoteCallback(note.id, note);
+          closeModal();
         } else {
           // Send to trash
           note.isTrashed = true;
           note.isPinned = false;
           note.updatedAt = Date.now();
           await onSaveNoteCallback(note.id, note);
+          closeModal();
+        }
+      }
+    }
+  });
+
+  // Modal Delete Forever Action
+  elements.btnModalDeleteForever.addEventListener('click', async () => {
+    if (editingNoteId) {
+      const note = decryptedNotes.find(n => n.id === editingNoteId);
+      if (note && note.isTrashed) {
+        if (confirm(t('confirm_delete_note'))) {
+          await onDeleteNoteCallback(note.id);
           closeModal();
         }
       }
@@ -403,6 +462,11 @@ export function initUI(callbacks) {
     }
   });
 
+  // FAB Event Handler
+  elements.btnFabCreate.addEventListener('click', () => {
+    openNewNoteModal();
+  });
+
   // Initial Lucide Icons rendering
   lucide.createIcons();
 }
@@ -416,7 +480,8 @@ function toggleSidebar() {
   
   // On mobile, use separate class to display slide-in overlay
   if (window.innerWidth <= 768) {
-    elements.sidebar.classList.toggle('mobile-open');
+    const isMobileOpen = elements.sidebar.classList.toggle('mobile-open');
+    elements.sidebarOverlay.classList.toggle('active', isMobileOpen);
   }
 }
 
@@ -425,6 +490,7 @@ export function setCategory(category) {
   
   // Close mobile sidebar on select
   elements.sidebar.classList.remove('mobile-open');
+  elements.sidebarOverlay.classList.remove('active');
   
   // Highlight sidebar item if it's main category
   elements.navItems.forEach(i => {
@@ -686,14 +752,26 @@ function renderCardsToGrid(notes, gridElement) {
     const isChecklist = hasChecklistItems(note.body);
     card.innerHTML = `
       ${coverHtml}
+      ${!note.isTrashed ? `
       <button class="btn-icon note-card-pin ${note.isPinned ? 'active' : ''}" title="${note.isPinned ? t('btn_unpin_note_title') : t('btn_pin_note_title')}">
         <i data-lucide="pin"></i>
       </button>
+      ` : ''}
       ${note.title ? `<h3 class="note-card-title">${escapeHtml(note.title)}</h3>` : ''}
       ${note.body && !isChecklist ? `<div class="note-card-body ${isTruncated ? 'truncated' : ''}">${escapeHtml(bodyText)}</div>` : ''}
       ${tagsHtml}
       <div class="note-card-footer">
         <span>${formatDate(note.updatedAt)}</span>
+        ${note.isTrashed ? `
+          <div class="note-card-trash-actions">
+            <button class="btn-icon btn-card-restore" title="${t('btn_modal_trash_restore_title')}">
+              <i data-lucide="rotate-ccw"></i>
+            </button>
+            <button class="btn-icon btn-card-delete-forever" title="${t('btn_modal_trash_delete_forever_title')}">
+              <i data-lucide="trash-2"></i>
+            </button>
+          </div>
+        ` : ''}
       </div>
     `;
 
@@ -717,11 +795,19 @@ function renderCardsToGrid(notes, gridElement) {
     // Click Card to Open Modal (Avoid triggering on Pin, checkbox, or grid image clicks)
     card.addEventListener('click', (e) => {
       const pinBtn = card.querySelector('.note-card-pin');
+      const restoreBtn = card.querySelector('.btn-card-restore');
+      const deleteForeverBtn = card.querySelector('.btn-card-delete-forever');
       const gridImg = e.target.closest('.grid-image-wrapper img');
       const checklistClick = e.target.closest('.checklist-item');
       if (pinBtn && (e.target === pinBtn || pinBtn.contains(e.target))) {
         e.stopPropagation();
         toggleNotePin(note.id);
+      } else if (restoreBtn && (e.target === restoreBtn || restoreBtn.contains(e.target))) {
+        e.stopPropagation();
+        restoreNote(note.id);
+      } else if (deleteForeverBtn && (e.target === deleteForeverBtn || deleteForeverBtn.contains(e.target))) {
+        e.stopPropagation();
+        deleteNoteForever(note.id);
       } else if (gridImg) {
         e.stopPropagation();
         openLightbox(gridImg.src);
@@ -743,6 +829,24 @@ async function toggleNotePin(noteId) {
     note.isPinned = !note.isPinned;
     note.updatedAt = Date.now();
     await onSaveNoteCallback(note.id, note);
+  }
+}
+
+async function restoreNote(noteId) {
+  const note = decryptedNotes.find(n => n.id === noteId);
+  if (note) {
+    note.isTrashed = false;
+    note.updatedAt = Date.now();
+    await onSaveNoteCallback(note.id, note);
+  }
+}
+
+async function deleteNoteForever(noteId) {
+  const note = decryptedNotes.find(n => n.id === noteId);
+  if (note) {
+    if (confirm(t('confirm_delete_note'))) {
+      await onDeleteNoteCallback(note.id);
+    }
   }
 }
 
@@ -827,6 +931,25 @@ function openNoteModal(noteId) {
   elements.btnModalTrash.title = note.isTrashed ? t('btn_modal_trash_restore_title') : t('btn_modal_trash_delete_title');
   elements.btnModalTrash.className = note.isTrashed ? 'btn-icon text-green' : 'btn-icon';
 
+  const isTrashed = note.isTrashed || false;
+
+  // Set inputs to read-only/disabled
+  elements.modalTitle.readOnly = isTrashed;
+  elements.modalBodyText.readOnly = isTrashed;
+
+  // Toggle tags input wrapper visibility
+  const tagInputWrapper = elements.modalTagInput.closest('.tag-input-wrapper');
+  if (tagInputWrapper) {
+    tagInputWrapper.classList.toggle('hidden', isTrashed);
+  }
+
+  // Toggle non-trash toolbars, show delete forever
+  elements.modalColorPickerWrapper.classList.toggle('hidden', isTrashed);
+  elements.btnModalImage.classList.toggle('hidden', isTrashed);
+  elements.btnModalArchive.classList.toggle('hidden', isTrashed);
+  elements.btnModalPin.classList.toggle('hidden', isTrashed);
+  elements.btnModalDeleteForever.classList.toggle('hidden', !isTrashed);
+
   // Checklist mode detection
   const noteHasChecklist = hasChecklistItems(note.body);
   if (noteHasChecklist) {
@@ -845,29 +968,119 @@ function openNoteModal(noteId) {
     elements.modalBodyText.classList.remove('hidden');
   }
 
+  if (isTrashed) {
+    elements.btnModalChecklistToggle.classList.add('hidden');
+  }
+
   elements.noteModal.classList.add('active');
   lucide.createIcons();
   
   // Focus appropriate element
-  if (isModalChecklistMode) {
-    const firstInput = elements.modalChecklistView.querySelector('.modal-checklist-input');
-    if (firstInput) setTimeout(() => firstInput.focus(), 100);
-  } else {
-    setTimeout(() => elements.modalBodyText.focus(), 100);
+  if (!isTrashed) {
+    if (isModalChecklistMode) {
+      const firstInput = elements.modalChecklistView.querySelector('.modal-checklist-input');
+      if (firstInput) setTimeout(() => firstInput.focus(), 100);
+    } else {
+      setTimeout(() => elements.modalBodyText.focus(), 100);
+    }
   }
+}
+
+function openNewNoteModal() {
+  editingNoteId = 'note_' + crypto.randomUUID();
+  elements.modalTitle.value = '';
+  elements.modalBodyText.value = '';
+  isModalPinned = false;
+  elements.btnModalPin.classList.remove('active');
+  modalActiveColor = 'default';
+  elements.modalCard.className = `modal-card color-default`;
+
+  elements.modalTitle.readOnly = false;
+  elements.modalBodyText.readOnly = false;
+
+  const tagInputWrapper = elements.modalTagInput.closest('.tag-input-wrapper');
+  if (tagInputWrapper) {
+    tagInputWrapper.classList.remove('hidden');
+  }
+
+  elements.modalColorPickerWrapper.classList.remove('hidden');
+  elements.btnModalImage.classList.remove('hidden');
+  elements.btnModalArchive.classList.remove('hidden');
+  elements.btnModalPin.classList.remove('hidden');
+  elements.btnModalDeleteForever.classList.add('hidden');
+  
+  // Set color popup selection
+  const modalColors = elements.noteModal.querySelectorAll('.color-option');
+  modalColors.forEach(opt => {
+    const c = opt.getAttribute('data-color');
+    opt.classList.toggle('active', c === 'default');
+  });
+  
+  noteModalTags = [];
+  renderModalTags();
+
+  noteModalImages = [];
+  renderModalImages();
+  
+  elements.modalLastEdited.textContent = '';
+  
+  elements.btnModalArchive.innerHTML = '<i data-lucide="archive"></i>';
+  elements.btnModalArchive.title = t('btn_modal_archive_title');
+  
+  elements.btnModalTrash.innerHTML = '<i data-lucide="trash-2"></i>';
+  elements.btnModalTrash.title = t('btn_modal_trash_delete_title');
+  elements.btnModalTrash.className = 'btn-icon';
+
+  isModalChecklistMode = false;
+  elements.btnModalChecklistToggle.classList.add('hidden');
+  elements.btnModalChecklistToggle.classList.remove('active');
+  elements.modalChecklistView.classList.add('hidden');
+  elements.modalChecklistView.innerHTML = '';
+  elements.modalBodyText.classList.remove('hidden');
+
+  elements.noteModal.classList.add('active');
+  lucide.createIcons();
+  
+  setTimeout(() => elements.modalBodyText.focus(), 100);
 }
 
 async function saveAndCloseModal() {
   if (!editingNoteId) return;
 
   const note = decryptedNotes.find(n => n.id === editingNoteId);
-  if (note) {
-    const titleVal = elements.modalTitle.value.trim();
-    // If in checklist mode, serialize the checklist back to text
-    const bodyVal = isModalChecklistMode
-      ? serializeModalChecklist()
-      : elements.modalBodyText.value.trim();
-    
+  if (note && note.isTrashed) {
+    // Trashed notes are read-only, do not save any changes.
+    closeModal();
+    return;
+  }
+
+  const titleVal = elements.modalTitle.value.trim();
+  // If in checklist mode, serialize the checklist back to text
+  const bodyVal = isModalChecklistMode
+    ? serializeModalChecklist()
+    : elements.modalBodyText.value.trim();
+
+  if (!note) {
+    // Brand new note created via the modal/FAB
+    if (titleVal || bodyVal || noteModalTags.length > 0 || noteModalImages.length > 0) {
+      const noteObj = {
+        title: titleVal,
+        body: bodyVal,
+        tags: [...noteModalTags],
+        color: modalActiveColor,
+        isPinned: isModalPinned,
+        isArchived: false,
+        isTrashed: false,
+        images: [...noteModalImages],
+        createdAt: Date.now(),
+        updatedAt: Date.now()
+      };
+      if (onSaveNoteCallback) {
+        await onSaveNoteCallback(editingNoteId, noteObj);
+      }
+    }
+  } else {
+    // Existing note
     const hasChanged = note.title !== titleVal || 
                        note.body !== bodyVal || 
                        note.color !== modalActiveColor || 
@@ -906,21 +1119,28 @@ function closeModal() {
 
 function renderModalTags() {
   elements.modalTagsList.innerHTML = '';
+  const note = decryptedNotes.find(n => n.id === editingNoteId);
+  const isTrashed = note && note.isTrashed;
+
   noteModalTags.forEach(tag => {
     const span = document.createElement('span');
     span.className = 'tag-badge';
-    span.innerHTML = `
-      #${tag}
-      <button class="btn-remove-tag" data-tag="${tag}">
-        <i data-lucide="x"></i>
-      </button>
-    `;
-    span.querySelector('button').addEventListener('click', (e) => {
-      e.stopPropagation();
-      const removeVal = e.currentTarget.getAttribute('data-tag');
-      noteModalTags = noteModalTags.filter(t => t !== removeVal);
-      renderModalTags();
-    });
+    if (isTrashed) {
+      span.innerHTML = `#${tag}`;
+    } else {
+      span.innerHTML = `
+        #${tag}
+        <button class="btn-remove-tag" data-tag="${tag}">
+          <i data-lucide="x"></i>
+        </button>
+      `;
+      span.querySelector('button').addEventListener('click', (e) => {
+        e.stopPropagation();
+        const removeVal = e.currentTarget.getAttribute('data-tag');
+        noteModalTags = noteModalTags.filter(t => t !== removeVal);
+        renderModalTags();
+      });
+    }
     elements.modalTagsList.appendChild(span);
   });
   lucide.createIcons();
@@ -1117,6 +1337,9 @@ function renderModalChecklist(bodyText) {
   elements.modalChecklistView.innerHTML = '';
   const lines = bodyText.split('\n');
   let consecutiveText = [];
+  
+  const note = decryptedNotes.find(n => n.id === editingNoteId);
+  const isTrashed = note && note.isTrashed;
 
   const flushTextLines = () => {
     if (consecutiveText.length > 0) {
@@ -1125,6 +1348,7 @@ function renderModalChecklist(bodyText) {
       textEl.value = consecutiveText.join('\n');
       textEl.rows = consecutiveText.length;
       textEl.placeholder = t('checklist_text_placeholder');
+      textEl.readOnly = isTrashed;
       autoResizeTextarea(textEl);
       textEl.addEventListener('input', () => autoResizeTextarea(textEl));
       elements.modalChecklistView.appendChild(textEl);
@@ -1144,12 +1368,12 @@ function renderModalChecklist(bodyText) {
 
       item.innerHTML = `
         <label class="checklist-checkbox">
-          <input type="checkbox" ${isChecked ? 'checked' : ''}>
+          <input type="checkbox" ${isChecked ? 'checked' : ''} ${isTrashed ? 'disabled' : ''}>
           <span class="checklist-checkmark">
             <svg viewBox="0 0 14 14"><polyline points="2.5 7 5.5 10.5 11.5 3.5"></polyline></svg>
           </span>
         </label>
-        <input type="text" class="modal-checklist-input" value="">
+        <input type="text" class="modal-checklist-input" value="" ${isTrashed ? 'readonly' : ''}>
         <button class="modal-checklist-delete btn-icon" title="${t('checklist_remove_item_title')}">
           <i data-lucide="x"></i>
         </button>
@@ -1160,33 +1384,41 @@ function renderModalChecklist(bodyText) {
 
       // Checkbox toggle
       const checkbox = item.querySelector('input[type="checkbox"]');
-      checkbox.addEventListener('change', () => {
-        item.classList.toggle('checked', checkbox.checked);
-      });
+      if (!isTrashed) {
+        checkbox.addEventListener('change', () => {
+          item.classList.toggle('checked', checkbox.checked);
+        });
+      }
 
       // Delete item
-      item.querySelector('.modal-checklist-delete').addEventListener('click', (e) => {
-        e.stopPropagation();
-        item.remove();
-      });
+      if (isTrashed) {
+        item.querySelector('.modal-checklist-delete').classList.add('hidden');
+      } else {
+        item.querySelector('.modal-checklist-delete').addEventListener('click', (e) => {
+          e.stopPropagation();
+          item.remove();
+        });
+      }
 
       // Enter key = add new item below
-      const textInput = item.querySelector('.modal-checklist-input');
-      textInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          addModalChecklistItem(item);
-        } else if (e.key === 'Backspace' && textInput.value === '') {
-          e.preventDefault();
-          // Focus previous item's input
-          const prevItem = item.previousElementSibling;
-          if (prevItem && prevItem.classList.contains('modal-checklist-item')) {
-            const prevInput = prevItem.querySelector('.modal-checklist-input');
-            if (prevInput) prevInput.focus();
+      if (!isTrashed) {
+        const textInput = item.querySelector('.modal-checklist-input');
+        textInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            addModalChecklistItem(item);
+          } else if (e.key === 'Backspace' && textInput.value === '') {
+            e.preventDefault();
+            // Focus previous item's input
+            const prevItem = item.previousElementSibling;
+            if (prevItem && prevItem.classList.contains('modal-checklist-item')) {
+              const prevInput = prevItem.querySelector('.modal-checklist-input');
+              if (prevInput) prevInput.focus();
+            }
+            item.remove();
           }
-          item.remove();
-        }
-      });
+        });
+      }
 
       elements.modalChecklistView.appendChild(item);
     } else {
@@ -1196,14 +1428,16 @@ function renderModalChecklist(bodyText) {
 
   flushTextLines();
 
-  // Add "new item" button
-  const addBtn = document.createElement('button');
-  addBtn.className = 'modal-checklist-add';
-  addBtn.innerHTML = '<i data-lucide="plus"></i> <span>' + t('checklist_add_item') + '</span>';
-  addBtn.addEventListener('click', () => {
-    addModalChecklistItem(null);
-  });
-  elements.modalChecklistView.appendChild(addBtn);
+  if (!isTrashed) {
+    // Add "new item" button
+    const addBtn = document.createElement('button');
+    addBtn.className = 'modal-checklist-add';
+    addBtn.innerHTML = '<i data-lucide="plus"></i> <span>' + t('checklist_add_item') + '</span>';
+    addBtn.addEventListener('click', () => {
+      addModalChecklistItem(null);
+    });
+    elements.modalChecklistView.appendChild(addBtn);
+  }
 
   lucide.createIcons();
 }
@@ -1370,7 +1604,10 @@ function renderCreatorImages() {
 
 function renderModalImages() {
   const container = elements.modalImagesPreview;
-  renderImageGrid(container, noteModalImages, true, (index) => {
+  const note = decryptedNotes.find(n => n.id === editingNoteId);
+  const isTrashed = note && note.isTrashed;
+  
+  renderImageGrid(container, noteModalImages, !isTrashed, (index) => {
     noteModalImages.splice(index, 1);
     renderModalImages();
   });

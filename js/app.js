@@ -56,6 +56,17 @@ window.addEventListener('DOMContentLoaded', async () => {
  */
 function registerServiceWorker() {
   if ('serviceWorker' in navigator) {
+    // During local development, unregister any active service workers to prevent caching/HMR issues
+    if (import.meta.env.DEV) {
+      navigator.serviceWorker.getRegistrations().then((registrations) => {
+        for (const registration of registrations) {
+          registration.unregister();
+          console.log('[App] Unregistered active Service Worker for development');
+        }
+      });
+      return;
+    }
+
     navigator.serviceWorker.register('./sw.js')
       .then((reg) => {
         console.log('[App] Service Worker registered successfully', reg);

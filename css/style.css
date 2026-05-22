@@ -1030,6 +1030,9 @@ input, textarea, button {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  flex-grow: 1;
+  flex-shrink: 1;
+  flex-basis: auto;
 }
 
 .modal-checklist-item {
@@ -1273,7 +1276,9 @@ input, textarea, button {
   box-shadow: var(--shadow-modal);
   display: flex;
   flex-direction: column;
-  max-height: 85vh;
+  height: 80vh;
+  min-height: 600px;
+  max-height: 90vh;
   transform: scale(0.95) translateY(10px);
   transition: transform 0.25s var(--transition-bounce);
   overflow: hidden;
@@ -1305,6 +1310,7 @@ input, textarea, button {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  flex: 1;
 }
 
 .modal-body textarea {
@@ -1313,6 +1319,13 @@ input, textarea, button {
   line-height: 1.6;
   width: 100%;
   color: var(--text-primary);
+}
+
+#modal-body-text {
+  flex-grow: 1;
+  flex-shrink: 1;
+  flex-basis: auto;
+  min-height: 150px;
 }
 
 .modal-footer {
@@ -1532,28 +1545,79 @@ input:checked + .slider:before {
   border-radius: var(--radius-full);
 }
 
+/* Sidebar Overlay Backdrop */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  z-index: 990;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+/* Sidebar Branding for Mobile Drawer */
+.sidebar-mobile-header {
+  display: none;
+}
+
+/* Floating Action Button (FAB) */
+.btn-fab {
+  display: none;
+}
+
+/* Modal toolbar layout */
+.modal-toolbar-buttons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Modal Back Arrow Button */
+.modal-header .modal-back-btn {
+  display: none;
+}
+
 /* ==========================================================================
    Responsive Queries
    ========================================================================== */
 
 @media (max-width: 768px) {
   :root {
-    --sidebar-width: 240px;
+    --sidebar-width: 280px;
   }
   
+  .sidebar-overlay.active {
+    display: block;
+    opacity: 1;
+  }
+
   .sidebar {
     position: fixed;
-    top: var(--header-height);
+    top: 0;
     bottom: 0;
     left: 0;
-    z-index: 90;
+    height: 100vh;
+    z-index: 1000;
     transform: translateX(-100%);
     transition: transform 0.3s ease;
+    box-shadow: none;
   }
   
   .sidebar.mobile-open {
     transform: translateX(0);
-    width: 240px;
+    width: 280px;
+    box-shadow: var(--shadow-modal);
+  }
+
+  .sidebar-mobile-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 8px;
   }
   
   .header-center {
@@ -1580,6 +1644,89 @@ input:checked + .slider:before {
     flex-direction: column;
     align-items: stretch;
   }
+
+  /* Show FAB and hide creator */
+  .btn-fab {
+    display: flex;
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 56px;
+    height: 56px;
+    border-radius: var(--radius-full);
+    background-color: var(--accent);
+    color: #0f172a;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 80;
+    transition: transform var(--transition-speed), background-color var(--transition-speed), box-shadow var(--transition-speed);
+  }
+  
+  .btn-fab:hover {
+    background-color: var(--accent-hover);
+    transform: scale(1.05);
+  }
+  
+  .btn-fab:active {
+    transform: scale(0.95);
+  }
+  
+  .btn-fab i {
+    width: 24px;
+    height: 24px;
+  }
+  
+  #note-creator {
+    display: none !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .main-header {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto;
+    height: auto;
+    padding: 12px 16px;
+    gap: 12px 0;
+  }
+  
+  .header-left {
+    grid-column: 1;
+    grid-row: 1;
+    justify-content: flex-start;
+  }
+  
+  .header-right {
+    grid-column: 2;
+    grid-row: 1;
+    justify-content: flex-end;
+  }
+  
+  .header-center {
+    grid-column: 1 / span 2;
+    grid-row: 2;
+    margin: 0;
+    max-width: none;
+  }
+
+  .main-body {
+    height: auto;
+  }
+  
+  .sync-badge .sync-text {
+    display: none;
+  }
+  
+  .sync-badge {
+    padding: 0;
+    width: 40px;
+    height: 40px;
+    justify-content: center;
+    border-radius: var(--radius-full);
+  }
 }
 
 @media (max-width: 480px) {
@@ -1588,7 +1735,7 @@ input:checked + .slider:before {
   }
   
   .main-header {
-    padding: 0 12px;
+    padding: 12px 16px;
   }
   
   .logo-area span {
@@ -1606,8 +1753,59 @@ input:checked + .slider:before {
 
   .modal-card {
     height: 100vh;
+    height: 100dvh;
+    min-height: 100vh;
+    min-height: 100dvh;
     max-height: 100vh;
+    max-height: 100dvh;
     border-radius: 0;
+  }
+}
+
+@media (max-width: 576px) {
+  .modal-header .modal-back-btn {
+    display: inline-flex;
+    margin-right: 8px;
+  }
+  
+  .modal-card {
+    height: 100vh;
+    height: 100dvh;
+    min-height: 100vh;
+    min-height: 100dvh;
+    max-height: 100vh;
+    max-height: 100dvh;
+    border-radius: 0;
+  }
+  
+  #btn-modal-close {
+    display: none !important;
+  }
+  
+  .modal-footer {
+    padding: 12px 16px;
+  }
+  
+  .modal-toolbar {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .modal-toolbar-buttons {
+    display: flex;
+    gap: 4px;
+  }
+  
+  .modal-toolbar .btn-icon {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .last-edited-label {
+    margin-left: 0;
+    font-size: 0.7rem;
   }
 }
 
@@ -1801,6 +1999,41 @@ input:checked + .slider:before {
 .lightbox-close i {
   width: 20px;
   height: 20px;
+}
+
+/* Trash and Restore Elements styles */
+.text-green {
+  color: #10b981 !important;
+}
+
+.text-green:hover {
+  background-color: rgba(16, 185, 129, 0.1) !important;
+}
+
+.note-card-trash-actions {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.note-card-trash-actions .btn-icon {
+  width: 32px;
+  height: 32px;
+}
+
+.note-card-trash-actions .btn-icon i {
+  width: 16px;
+  height: 16px;
+}
+
+.note-card-trash-actions .btn-card-restore:hover {
+  color: #10b981;
+  background-color: rgba(16, 185, 129, 0.1);
+}
+
+.note-card-trash-actions .btn-card-delete-forever:hover {
+  color: var(--danger);
+  background-color: rgba(239, 68, 68, 0.1);
 }
 
 
