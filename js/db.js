@@ -128,6 +128,7 @@ export async function saveNote(id, noteObj) {
       isPinned: noteObj.isPinned || false,
       isArchived: noteObj.isArchived || false,
       isTrashed: noteObj.isTrashed || false,
+      images: noteObj.images || [],
       createdAt: noteObj.createdAt || Date.now()
     };
     
@@ -184,6 +185,7 @@ export async function loadAllNotes() {
         isPinned: doc.isPinned || false,
         isArchived: doc.isArchived || false,
         isTrashed: doc.isTrashed || false,
+        images: doc.images || [],
         createdAt: doc.createdAt || Date.now(),
         updatedAt: doc.updatedAt || Date.now(),
         synced: doc.synced || false,
@@ -417,6 +419,7 @@ async function runSync() {
         isPinned: localDoc.isPinned,
         isArchived: localDoc.isArchived,
         isTrashed: localDoc.isTrashed,
+        images: localDoc.images || [],
         createdAt: localDoc.createdAt
       };
       
@@ -456,6 +459,7 @@ async function runSync() {
         isPinned: payload.isPinned || false,
         isArchived: payload.isArchived || false,
         isTrashed: payload.isTrashed || false,
+        images: payload.images || [],
         createdAt: payload.createdAt || Date.now(),
         synced: true,
         lastSynced: Date.now(),

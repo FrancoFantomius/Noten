@@ -6,6 +6,8 @@ let activeCategory = 'notes'; // 'notes', 'archive', 'trash', or 'tag:TagName'
 let decryptedNotes = [];       // Cache of all decrypted notes in memory
 let noteCreatorTags = [];      // Current tags in the note creator
 let noteModalTags = [];        // Current tags in the edit modal
+let noteCreatorImages = [];    // Current image attachments in creator
+let noteModalImages = [];      // Current image attachments in modal
 let activeColor = 'default';   // Color chosen in creator
 let modalActiveColor = 'default';
 
@@ -43,6 +45,9 @@ const elements = {
   btnCreatorArchive: document.getElementById('btn-creator-archive'),
   btnCreatorClose: document.getElementById('btn-creator-close'),
   btnQuickTodo: document.getElementById('btn-quick-todo'),
+  btnCreatorImage: document.getElementById('btn-creator-image'),
+  creatorImageInput: document.getElementById('creator-image-input'),
+  creatorImagesPreview: document.getElementById('creator-images-preview'),
   
   // Feeds
   notesViewContent: document.getElementById('notes-view-content'),
@@ -67,6 +72,9 @@ const elements = {
   btnModalTrash: document.getElementById('btn-modal-trash'),
   btnModalClose: document.getElementById('btn-modal-close'),
   modalLastEdited: document.getElementById('modal-last-edited'),
+  btnModalImage: document.getElementById('btn-modal-image'),
+  modalImageInput: document.getElementById('modal-image-input'),
+  modalImagesPreview: document.getElementById('modal-images-preview'),
   
   // Settings Modal
   settingsModal: document.getElementById('settings-modal'),
@@ -153,6 +161,14 @@ export function initUI(callbacks) {
       }
     }
   });
+
+  // Switch from creator title to creator body on Enter
+  elements.creatorTitle.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      elements.creatorBody.focus();
+    }
+  });
   
   // Creator Pin Toggle
   elements.btnCreatorPin.addEventListener('click', () => {
@@ -182,6 +198,26 @@ export function initUI(callbacks) {
     elements.creatorBody.value = '- [ ] ';
     elements.creatorBody.focus();
   });
+
+  // Creator Image actions
+  elements.btnCreatorImage.addEventListener('click', (e) => {
+    e.stopPropagation();
+    elements.creatorImageInput.click();
+  });
+
+  elements.creatorImageInput.addEventListener('change', async (e) => {
+    const files = Array.from(e.target.files);
+    for (const file of files) {
+      try {
+        const compressed = await compressImage(file);
+        noteCreatorImages.push(compressed);
+      } catch (err) {
+        console.error('Failed to compress image:', err);
+      }
+    }
+    e.target.value = '';
+    renderCreatorImages();
+  });
   
   // Edit Modal Event Handlers
   elements.btnModalClose.addEventListener('click', saveAndCloseModal);
@@ -190,6 +226,16 @@ export function initUI(callbacks) {
   elements.noteModal.addEventListener('click', (e) => {
     if (e.target === elements.noteModal) {
       saveAndCloseModal();
+    }
+  });
+
+  // Close open note modal on Escape key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      if (editingNoteId) {
+        e.preventDefault();
+        saveAndCloseModal();
+      }
     }
   });
 
@@ -222,6 +268,34 @@ export function initUI(callbacks) {
         elements.modalTagInput.value = '';
         renderModalTags();
       }
+    }
+  });
+
+  // Modal Image actions
+  elements.btnModalImage.addEventListener('click', (e) => {
+    e.stopPropagation();
+    elements.modalImageInput.click();
+  });
+
+  elements.modalImageInput.addEventListener('change', async (e) => {
+    const files = Array.from(e.target.files);
+    for (const file of files) {
+      try {
+        const compressed = await compressImage(file);
+        noteModalImages.push(compressed);
+      } catch (err) {
+        console.error('Failed to compress image:', err);
+      }
+    }
+    e.target.value = '';
+    renderModalImages();
+  });
+
+  // Switch from modal title to modal body on Enter
+  elements.modalTitle.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      elements.modalBodyText.focus();
     }
   });
 
@@ -356,7 +430,9 @@ function expandNoteCreator() {
   activeColor = 'default';
   elements.noteCreator.className = 'note-creator-container color-default';
   noteCreatorTags = [];
+  noteCreatorImages = [];
   renderCreatorTags();
+  renderCreatorImages();
   
   // Focus content body
   elements.creatorBody.focus();
@@ -367,7 +443,7 @@ async function closeNoteCreator() {
   const body = elements.creatorBody.value.trim();
   
   // Auto save note if there is any content
-  if (title || body || noteCreatorTags.length > 0) {
+  if (title || body || noteCreatorTags.length > 0 || noteCreatorImages.length > 0) {
     const noteId = 'note_' + crypto.randomUUID();
     const noteObj = {
       title: title,
@@ -377,6 +453,7 @@ async function closeNoteCreator() {
       isPinned: isCreatorPinned,
       isArchived: false,
       isTrashed: false,
+      images: [...noteCreatorImages],
       createdAt: Date.now(),
       updatedAt: Date.now()
     };
@@ -391,6 +468,8 @@ async function closeNoteCreator() {
   elements.creatorTitle.value = '';
   elements.creatorBody.value = '';
   noteCreatorTags = [];
+  noteCreatorImages = [];
+  renderCreatorImages();
   
   // Collapse UI
   elements.creatorCollapsed.classList.remove('hidden');
@@ -433,19 +512,29 @@ export function renderNotesFeed() {
   
   // Filter notes by category, tags, and search
   const filtered = decryptedNotes.filter(note => {
-    // 1. Category Filter
-    if (activeCategory === 'notes') {
-      if (note.isArchived || note.isTrashed) return false;
-    } else if (activeCategory === 'archive') {
-      if (!note.isArchived || note.isTrashed) return false;
-    } else if (activeCategory === 'trash') {
-      if (!note.isTrashed) return false;
-    } else if (activeCategory.startsWith('tag:')) {
-      const targetTag = activeCategory.substring(4);
-      if (note.isTrashed || !note.tags.includes(targetTag)) return false;
+    // 1. Category/Search Filter
+    if (searchQuery) {
+      // Search across notes and archive (excluding trash)
+      if (note.isTrashed) return false;
+      if (activeCategory.startsWith('tag:')) {
+        const targetTag = activeCategory.substring(4);
+        if (!note.tags.includes(targetTag)) return false;
+      }
+    } else {
+      // Normal filtering by active category when not searching
+      if (activeCategory === 'notes') {
+        if (note.isArchived || note.isTrashed) return false;
+      } else if (activeCategory === 'archive') {
+        if (!note.isArchived || note.isTrashed) return false;
+      } else if (activeCategory === 'trash') {
+        if (!note.isTrashed) return false;
+      } else if (activeCategory.startsWith('tag:')) {
+        const targetTag = activeCategory.substring(4);
+        if (note.isTrashed || !note.tags.includes(targetTag)) return false;
+      }
     }
     
-    // 2. Search Query Filter
+    // 2. Search Query Matching
     if (searchQuery) {
       const matchTitle = note.title.toLowerCase().includes(searchQuery);
       const matchBody = note.body.toLowerCase().includes(searchQuery);
@@ -463,8 +552,11 @@ export function renderNotesFeed() {
   const pinned = filtered.filter(n => n.isPinned);
   const unpinned = filtered.filter(n => !n.isPinned);
 
+  // Show pinned section only if there are pinned notes, we are in 'notes' category, and NOT searching
+  const showPinnedSection = pinned.length > 0 && activeCategory === 'notes' && !searchQuery;
+
   // Render Pinned Section
-  if (pinned.length > 0 && activeCategory === 'notes') {
+  if (showPinnedSection) {
     elements.pinnedSection.classList.remove('hidden');
     renderCardsToGrid(pinned, elements.pinnedGrid);
   } else {
@@ -472,11 +564,12 @@ export function renderNotesFeed() {
     elements.pinnedGrid.innerHTML = '';
   }
 
-  // Render Unpinned Section
-  if (unpinned.length > 0) {
-    renderCardsToGrid(unpinned, elements.notesGrid);
+  // Render Unpinned Section (or all notes if pinned section is hidden)
+  const mainGridNotes = showPinnedSection ? unpinned : filtered;
+  if (mainGridNotes.length > 0) {
+    renderCardsToGrid(mainGridNotes, elements.notesGrid);
     // Show section title "Notes" only if we have pinned notes active too
-    if (pinned.length > 0 && activeCategory === 'notes') {
+    if (showPinnedSection) {
       elements.sectionTitleFeed.classList.remove('hidden');
     } else {
       elements.sectionTitleFeed.classList.add('hidden');
@@ -488,6 +581,12 @@ export function renderNotesFeed() {
 
   // Handle Empty State display
   if (filtered.length === 0) {
+    if (searchQuery) {
+      elements.emptyStateTitle.textContent = "No results found";
+      elements.emptyStateDesc.textContent = "We couldn't find any notes matching your search.";
+    } else {
+      updateEmptyStateDetails();
+    }
     elements.emptyState.classList.remove('hidden');
     elements.notesViewContent.classList.add('hidden');
   } else {
@@ -519,7 +618,18 @@ function renderCardsToGrid(notes, gridElement) {
       `;
     }
 
+    // Cover image check
+    let coverHtml = '';
+    if (note.images && note.images.length > 0) {
+      coverHtml = `
+        <div class="note-card-image">
+          <img src="${note.images[0]}" alt="Cover image">
+        </div>
+      `;
+    }
+
     card.innerHTML = `
+      ${coverHtml}
       <button class="btn-icon note-card-pin ${note.isPinned ? 'active' : ''}" title="${note.isPinned ? 'Unpin note' : 'Pin note'}">
         <i data-lucide="pin"></i>
       </button>
@@ -534,7 +644,7 @@ function renderCardsToGrid(notes, gridElement) {
     // Click Card to Open Modal (Avoid triggering on Pin click)
     card.addEventListener('click', (e) => {
       const pinBtn = card.querySelector('.note-card-pin');
-      if (e.target === pinBtn || pinBtn.contains(e.target)) {
+      if (pinBtn && (e.target === pinBtn || pinBtn.contains(e.target))) {
         e.stopPropagation();
         toggleNotePin(note.id);
       } else {
@@ -608,7 +718,7 @@ function openNoteModal(noteId) {
   elements.modalTitle.value = note.title || '';
   elements.modalBodyText.value = note.body || '';
   isModalPinned = note.isPinned || false;
-  elements.btnCreatorPin.classList.toggle('active', isModalPinned);
+  elements.btnModalPin.classList.toggle('active', isModalPinned);
   modalActiveColor = note.color || 'default';
   elements.modalCard.className = `modal-card color-${modalActiveColor}`;
   
@@ -621,6 +731,9 @@ function openNoteModal(noteId) {
   
   noteModalTags = [...note.tags];
   renderModalTags();
+
+  noteModalImages = note.images ? [...note.images] : [];
+  renderModalImages();
   
   // Setup footer labels
   elements.modalLastEdited.textContent = `Edited ${formatDate(note.updatedAt)}`;
@@ -652,7 +765,8 @@ async function saveAndCloseModal() {
                        note.body !== bodyVal || 
                        note.color !== modalActiveColor || 
                        note.isPinned !== isModalPinned ||
-                       JSON.stringify(note.tags) !== JSON.stringify(noteModalTags);
+                       JSON.stringify(note.tags) !== JSON.stringify(noteModalTags) ||
+                       JSON.stringify(note.images || []) !== JSON.stringify(noteModalImages);
     
     if (hasChanged) {
       note.title = titleVal;
@@ -660,6 +774,7 @@ async function saveAndCloseModal() {
       note.color = modalActiveColor;
       note.isPinned = isModalPinned;
       note.tags = [...noteModalTags];
+      note.images = [...noteModalImages];
       note.updatedAt = Date.now();
       
       await onSaveNoteCallback(note.id, note);
@@ -672,6 +787,8 @@ async function saveAndCloseModal() {
 function closeModal() {
   elements.noteModal.classList.remove('active');
   editingNoteId = null;
+  noteModalImages = [];
+  renderModalImages();
 }
 
 function renderModalTags() {
@@ -774,4 +891,105 @@ function formatDate(timestamp) {
   }
   
   return date.toLocaleDateString([], { year: 'numeric', month: 'short', day: 'numeric' });
+}
+
+/**
+ * Compress image using Canvas API
+ */
+function compressImage(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target.result;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+        
+        const maxDim = 1024;
+        if (width > maxDim || height > maxDim) {
+          if (width > height) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          } else {
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
+          }
+        }
+        
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        // Compress as JPEG at 75% quality
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.75);
+        resolve(dataUrl);
+      };
+      img.onerror = (err) => reject(err);
+    };
+    reader.onerror = (err) => reject(err);
+  });
+}
+
+function renderCreatorImages() {
+  const container = elements.creatorImagesPreview;
+  if (!container) return;
+  
+  container.innerHTML = '';
+  if (noteCreatorImages.length === 0) {
+    container.classList.add('hidden');
+    return;
+  }
+  
+  container.classList.remove('hidden');
+  noteCreatorImages.forEach((imgSrc, index) => {
+    const item = document.createElement('div');
+    item.className = 'preview-image-item';
+    item.innerHTML = `
+      <img src="${imgSrc}" alt="Attached image preview">
+      <button class="btn-remove-image" data-index="${index}" title="Remove image">
+        <i data-lucide="x"></i>
+      </button>
+    `;
+    item.querySelector('.btn-remove-image').addEventListener('click', (e) => {
+      e.stopPropagation();
+      noteCreatorImages.splice(index, 1);
+      renderCreatorImages();
+    });
+    container.appendChild(item);
+  });
+  lucide.createIcons();
+}
+
+function renderModalImages() {
+  const container = elements.modalImagesPreview;
+  if (!container) return;
+  
+  container.innerHTML = '';
+  if (noteModalImages.length === 0) {
+    container.classList.add('hidden');
+    return;
+  }
+  
+  container.classList.remove('hidden');
+  noteModalImages.forEach((imgSrc, index) => {
+    const item = document.createElement('div');
+    item.className = 'preview-image-item';
+    item.innerHTML = `
+      <img src="${imgSrc}" alt="Attached image preview">
+      <button class="btn-remove-image" data-index="${index}" title="Remove image">
+        <i data-lucide="x"></i>
+      </button>
+    `;
+    item.querySelector('.btn-remove-image').addEventListener('click', (e) => {
+      e.stopPropagation();
+      noteModalImages.splice(index, 1);
+      renderModalImages();
+    });
+    container.appendChild(item);
+  });
+  lucide.createIcons();
 }

@@ -1,34 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Noten — Secure E2E Encrypted Notes</title>
-  
+  <title>Noten</title>
+
   <!-- SEO Meta Tags -->
-  <meta name="description" content="A fast, local-first, end-to-end encrypted notes application. Fully private note-taking, syncing securely via PouchDB and Filen.">
+  <meta name="description"
+    content="A fast, local-first, end-to-end encrypted notes application. Fully private note-taking, syncing securely via PouchDB and Filen.">
   <link rel="icon" href="./icon.svg" type="image/svg+xml">
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#f59e0b">
-  
+
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
+
   <!-- CSS Stylesheet -->
   <link rel="stylesheet" href="css/style.css">
-  
+
   <!-- PouchDB -->
   <script src="https://cdn.jsdelivr.net/npm/pouchdb@8.0.1/dist/pouchdb.min.js"></script>
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
 </head>
+
 <body class="dark-theme">
 
   <!-- Main Application Wrapper -->
   <div id="app-container" class="app-layout">
-    
+
     <!-- Top Header / Navigation -->
     <header class="main-header">
       <div class="header-left">
@@ -40,17 +44,17 @@
           <span class="app-title">Noten</span>
         </div>
       </div>
-      
+
       <div class="header-center">
         <div class="search-bar">
           <i data-lucide="search" class="search-icon"></i>
-          <input type="text" id="search-input" placeholder="Search decrypted notes, tags...">
+          <input type="text" id="search-input" placeholder="Search notes, tags, ...">
           <button id="btn-search-clear" class="btn-icon hidden" aria-label="Clear Search">
             <i data-lucide="x"></i>
           </button>
         </div>
       </div>
-      
+
       <div class="header-right">
         <!-- Sync Indicator Badge -->
         <div id="sync-status" class="sync-badge offline" title="Sync Offline">
@@ -65,7 +69,7 @@
 
     <!-- Main Content Panel (Sidebar + Notes Grid) -->
     <div class="main-body">
-      
+
       <!-- Collapsible Sidebar -->
       <aside id="app-sidebar" class="sidebar">
         <nav class="sidebar-nav">
@@ -89,9 +93,9 @@
               </button>
             </li>
           </ul>
-          
+
           <div class="sidebar-divider"></div>
-          
+
           <div class="tags-section">
             <span class="section-title">Tags</span>
             <ul id="sidebar-tags-list">
@@ -103,28 +107,31 @@
 
       <!-- Notes Feed Area -->
       <main class="content-panel">
-        
+
         <!-- Note Creator Component -->
         <div id="note-creator" class="note-creator-container">
           <!-- Minimized state -->
           <div id="creator-collapsed" class="creator-collapsed">
             <span>Take a secure note...</span>
             <div class="creator-actions-collapsed">
-              <button id="btn-quick-todo" class="btn-icon" title="New checklist"><i data-lucide="check-square"></i></button>
+              <button id="btn-quick-todo" class="btn-icon" title="New checklist"><i
+                  data-lucide="check-square"></i></button>
             </div>
           </div>
 
           <!-- Expanded state -->
           <div id="creator-expanded" class="creator-expanded hidden">
+            <div id="creator-images-preview" class="note-images-preview hidden"></div>
+            <input type="file" id="creator-image-input" accept="image/*" multiple class="hidden">
             <div class="creator-title-row">
               <input type="text" id="creator-title" placeholder="Title" autocomplete="off">
               <button id="btn-creator-pin" class="btn-icon" title="Pin note">
                 <i data-lucide="pin"></i>
               </button>
             </div>
-            
+
             <textarea id="creator-body" placeholder="Take a secure note..." rows="3"></textarea>
-            
+
             <!-- Dynamic tags input / list in note creator -->
             <div id="creator-tags-list" class="note-tags-container"></div>
             <div class="tag-input-wrapper">
@@ -149,10 +156,12 @@
                     <button class="color-option pink" data-color="pink" title="Pink"></button>
                   </div>
                 </div>
+                <button id="btn-creator-image" class="btn-icon" title="Add image"><i data-lucide="image"></i></button>
                 <!-- Archive/Trash helper inside creator -->
-                <button id="btn-creator-archive" class="btn-icon" title="Archive note"><i data-lucide="archive"></i></button>
+                <button id="btn-creator-archive" class="btn-icon" title="Archive note"><i
+                    data-lucide="archive"></i></button>
               </div>
-              
+
               <button id="btn-creator-close" class="btn btn-text">Close</button>
             </div>
           </div>
@@ -188,22 +197,24 @@
   <!-- Note Editor Modal -->
   <div id="note-modal" class="modal-overlay">
     <div class="modal-card" id="modal-card-element">
+      <div id="modal-images-preview" class="note-images-preview hidden"></div>
+      <input type="file" id="modal-image-input" accept="image/*" multiple class="hidden">
       <div class="modal-header">
         <input type="text" id="modal-title" placeholder="Title">
         <button id="btn-modal-pin" class="btn-icon" title="Pin note">
           <i data-lucide="pin"></i>
         </button>
       </div>
-      
+
       <div class="modal-body">
         <textarea id="modal-body-text" placeholder="Note" rows="6"></textarea>
-        
+
         <div id="modal-tags-list" class="note-tags-container"></div>
         <div class="tag-input-wrapper">
           <input type="text" id="modal-tag-input" placeholder="Add tag + press Enter...">
         </div>
       </div>
-      
+
       <div class="modal-footer">
         <div class="modal-toolbar">
           <!-- Modal Color Picker -->
@@ -221,6 +232,7 @@
               <button class="color-option pink" data-color="pink" title="Pink"></button>
             </div>
           </div>
+          <button id="btn-modal-image" class="btn-icon" title="Add image"><i data-lucide="image"></i></button>
           <button id="btn-modal-archive" class="btn-icon" title="Archive"><i data-lucide="archive"></i></button>
           <button id="btn-modal-trash" class="btn-icon" title="Delete"><i data-lucide="trash-2"></i></button>
           <span class="last-edited-label" id="modal-last-edited">Edited 2 mins ago</span>
@@ -237,13 +249,13 @@
         <h2>Settings & Secure Sync</h2>
         <button id="btn-settings-close" class="btn-icon" aria-label="Close settings"><i data-lucide="x"></i></button>
       </div>
-      
+
       <div class="settings-body">
-        
+
         <!-- Tab: Appearance -->
         <section class="settings-section">
           <h3>Appearance</h3>
-          
+
           <div class="settings-row">
             <div class="settings-info">
               <span class="settings-label">Dark Theme</span>
@@ -259,18 +271,19 @@
         <!-- Tab: Filen Sync -->
         <section class="settings-section">
           <h3>Encrypted Sync (Filen)</h3>
-          <p class="section-help">Configure synchronization with your personal Filen account. All notes synced will be fully encrypted client-side; Filen will never see your password or plaintext notes.</p>
-          
+          <p class="section-help">Configure synchronization with your personal Filen account. All notes synced will be
+            fully encrypted client-side; Filen will never see your password or plaintext notes.</p>
+
           <div class="input-group">
             <label for="sync-email">Filen Email</label>
             <input type="email" id="sync-email" placeholder="your-email@example.com">
           </div>
-          
+
           <div class="input-group">
             <label for="sync-password">Filen Password</label>
             <input type="password" id="sync-password" placeholder="Enter your Filen password...">
           </div>
-          
+
           <div class="input-group">
             <label for="sync-twofactor">Two-Factor Auth Code (Optional)</label>
             <input type="text" id="sync-twofactor" placeholder="6-digit code if enabled...">
@@ -287,7 +300,7 @@
         <section class="settings-section">
           <h3>Local Backups</h3>
           <p class="section-help">Export your notes to a JSON file or import notes from a previous backup.</p>
-          
+
           <div class="backup-actions">
             <button id="btn-export-backup" class="btn btn-secondary" title="Export JSON notes backup">
               <i data-lucide="download"></i> Export Backup
@@ -302,7 +315,7 @@
             <p id="import-status-text" class="status-message"></p>
           </div>
         </section>
-        
+
       </div>
     </div>
   </div>
@@ -310,4 +323,5 @@
   <!-- JavaScript Modules -->
   <script type="module" src="js/app.js"></script>
 </body>
+
 </html>
