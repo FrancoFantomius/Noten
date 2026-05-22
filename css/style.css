@@ -1340,123 +1340,196 @@ input:checked + .slider:before {
 }
 
 /* ==========================================================================
-   Note Image Attachments
+   Note Image Attachments Grid
    ========================================================================== */
 
-.note-images-preview {
+/* Card Cover Image Header */
+.note-card-image {
+  margin: -16px -16px 8px -16px;
+  overflow: hidden;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  max-height: 220px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+/* Flex responsive image grid layout */
+.image-grid-row {
   display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  padding: 16px 24px 0 24px;
+  padding: 0;
+  gap: 4px;
   width: 100%;
 }
 
-.note-creator-container .note-images-preview {
-  padding: 16px 20px 4px 20px;
+.image-grid-column {
+  flex: 1 1 0px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
-.preview-image-item {
+.grid-image-wrapper {
   position: relative;
-  width: 80px;
-  height: 80px;
-  border-radius: var(--radius-md);
+  width: 100%;
   overflow: hidden;
-  border: 1px solid var(--border-color);
-  box-shadow: var(--shadow-card);
-  transition: transform var(--transition-speed);
 }
 
-.preview-image-item:hover {
-  transform: scale(1.04);
-}
-
-.preview-image-item img {
+.grid-image-wrapper img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
+  transition: transform 0.3s var(--transition-bounce);
 }
 
-.preview-image-item .btn-remove-image {
+.note-card:hover .grid-image-wrapper img {
+  transform: scale(1.04);
+}
+
+/* Creator and Modal Preview image grid specific styling */
+#modal-images-preview,
+#creator-images-preview {
+  width: 100%;
+  max-height: 380px;
+  overflow-y: auto;
+  padding: 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+#modal-images-preview .image-grid-row,
+#creator-images-preview .image-grid-row {
+  padding: 12px;
+  gap: 8px;
+}
+
+#modal-images-preview .image-grid-column,
+#creator-images-preview .image-grid-column {
+  gap: 8px;
+}
+
+#modal-images-preview .grid-image-wrapper,
+#creator-images-preview .grid-image-wrapper {
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-card);
+  max-height: 240px;
+}
+
+/* Image remove button inside interactive grid */
+.grid-image-wrapper .btn-remove-image {
   position: absolute;
-  top: 4px;
-  right: 4px;
+  top: 8px;
+  right: 8px;
   background-color: rgba(14, 17, 23, 0.85);
+  backdrop-filter: blur(4px);
   color: #f87171;
   border-radius: var(--radius-full);
-  width: 18px;
-  height: 18px;
+  width: 24px;
+  height: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  border: none;
-  font-size: 10px;
-  transition: background-color var(--transition-speed), transform var(--transition-speed);
+  border: 1px solid var(--border-color);
+  font-size: 11px;
+  opacity: 0;
+  transition: background-color var(--transition-speed), transform var(--transition-speed), opacity var(--transition-speed);
+  z-index: 10;
 }
 
-.preview-image-item .btn-remove-image:hover {
+.grid-image-wrapper:hover .btn-remove-image {
+  opacity: 1;
+}
+
+.grid-image-wrapper .btn-remove-image:hover {
   background-color: var(--danger);
   color: white;
   transform: scale(1.1);
 }
 
-/* Card Cover Image */
-.note-card-image {
-  margin: -16px -16px 8px -16px;
-  overflow: hidden;
-  border-radius: var(--radius-md) var(--radius-md) 0 0;
-  max-height: 200px;
-  border-bottom: 1px solid var(--border-color);
+.grid-image-wrapper .btn-remove-image i {
+  width: 12px;
+  height: 12px;
+  pointer-events: none;
 }
 
-.note-card-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  transition: transform 0.3s ease;
+/* Responsive queries for image grids */
+@media (max-width: 600px) {
+  #modal-images-preview .image-grid-row,
+  #creator-images-preview .image-grid-row {
+    flex-direction: column;
+  }
 }
 
-.note-card:hover .note-card-image img {
-  transform: scale(1.02);
-}
+/* ==========================================================================
+   Fullscreen Lightbox Overlay (Google Keep Style)
+   ========================================================================== */
 
-/* Full-width open note modal images */
-#modal-images-preview {
+.lightbox-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(10, 11, 14, 0.95);
+  backdrop-filter: blur(10px);
+  z-index: 10000;
   display: flex;
-  flex-direction: column;
-  padding: 0;
-  gap: 0;
-  max-height: 320px;
-  overflow-y: auto;
-  border-bottom: 1px solid var(--border-color);
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
 }
 
-#modal-images-preview .preview-image-item {
-  width: 100%;
-  height: 280px;
-  border-radius: 0;
-  border: none;
-  border-bottom: 1px solid var(--border-color);
-  box-shadow: none;
-  transform: none;
-  flex-shrink: 0;
+.lightbox-overlay.active {
+  opacity: 1;
+  pointer-events: all;
 }
 
-#modal-images-preview .preview-image-item:last-child {
-  border-bottom: none;
+.lightbox-content {
+  max-width: 90vw;
+  max-height: 90vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: scale(0.92);
+  transition: transform 0.3s var(--transition-bounce);
 }
 
-#modal-images-preview .preview-image-item:hover {
-  transform: none;
+.lightbox-overlay.active .lightbox-content {
+  transform: scale(1);
 }
 
-#modal-images-preview .preview-image-item .btn-remove-image {
-  top: 12px;
-  right: 12px;
-  width: 26px;
-  height: 26px;
-  font-size: 12px;
+.lightbox-content img {
+  max-width: 100%;
+  max-height: 90vh;
+  object-fit: contain;
+  border-radius: var(--radius-md);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
+
+.lightbox-close {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  background-color: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(4px);
+  color: white !important;
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  z-index: 10001;
+  cursor: pointer;
+}
+
+.lightbox-close:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white !important;
+  transform: scale(1.08) rotate(90deg);
+}
+
+.lightbox-close i {
+  width: 20px;
+  height: 20px;
+}
+
+
 

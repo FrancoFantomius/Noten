@@ -79,7 +79,12 @@ const elements = {
   // Settings Modal
   settingsModal: document.getElementById('settings-modal'),
   btnSettingsClose: document.getElementById('btn-settings-close'),
-  themeToggle: document.getElementById('theme-toggle')
+  themeToggle: document.getElementById('theme-toggle'),
+
+  // Lightbox Modal
+  lightboxModal: document.getElementById('lightbox-modal'),
+  lightboxImage: document.getElementById('lightbox-image'),
+  btnLightboxClose: document.getElementById('btn-lightbox-close')
 };
 
 // State Variables for Creator/Modal
@@ -347,6 +352,19 @@ export function initUI(callbacks) {
     elements.searchInput.value = '';
     elements.btnSearchClear.classList.add('hidden');
     renderNotesFeed();
+  });
+
+  // Lightbox Modal closing event listeners
+  elements.btnLightboxClose.addEventListener('click', closeLightbox);
+  elements.lightboxModal.addEventListener('click', (e) => {
+    if (e.target === elements.lightboxModal || e.target.closest('.lightbox-content')) {
+      closeLightbox();
+    }
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && elements.lightboxModal.classList.contains('active')) {
+      closeLightbox();
+    }
   });
 
   // Initial Lucide Icons rendering
@@ -618,12 +636,12 @@ function renderCardsToGrid(notes, gridElement) {
       `;
     }
 
-    // Cover image check
+    // Image attachments grid check
     let coverHtml = '';
     if (note.images && note.images.length > 0) {
       coverHtml = `
         <div class="note-card-image">
-          <img src="${note.images[0]}" alt="Cover image">
+          ${generateImageGridHtml(note.images)}
         </div>
       `;
     }
@@ -641,12 +659,16 @@ function renderCardsToGrid(notes, gridElement) {
       </div>
     `;
 
-    // Click Card to Open Modal (Avoid triggering on Pin click)
+    // Click Card to Open Modal (Avoid triggering on Pin or grid image clicks)
     card.addEventListener('click', (e) => {
       const pinBtn = card.querySelector('.note-card-pin');
+      const gridImg = e.target.closest('.grid-image-wrapper img');
       if (pinBtn && (e.target === pinBtn || pinBtn.contains(e.target))) {
         e.stopPropagation();
         toggleNotePin(note.id);
+      } else if (gridImg) {
+        e.stopPropagation();
+        openLightbox(gridImg.src);
       } else {
         openNoteModal(note.id);
       }
@@ -936,60 +958,124 @@ function compressImage(file) {
 
 function renderCreatorImages() {
   const container = elements.creatorImagesPreview;
-  if (!container) return;
-  
-  container.innerHTML = '';
-  if (noteCreatorImages.length === 0) {
-    container.classList.add('hidden');
-    return;
-  }
-  
-  container.classList.remove('hidden');
-  noteCreatorImages.forEach((imgSrc, index) => {
-    const item = document.createElement('div');
-    item.className = 'preview-image-item';
-    item.innerHTML = `
-      <img src="${imgSrc}" alt="Attached image preview">
-      <button class="btn-remove-image" data-index="${index}" title="Remove image">
-        <i data-lucide="x"></i>
-      </button>
-    `;
-    item.querySelector('.btn-remove-image').addEventListener('click', (e) => {
-      e.stopPropagation();
-      noteCreatorImages.splice(index, 1);
-      renderCreatorImages();
-    });
-    container.appendChild(item);
+  renderImageGrid(container, noteCreatorImages, true, (index) => {
+    noteCreatorImages.splice(index, 1);
+    renderCreatorImages();
   });
-  lucide.createIcons();
 }
 
 function renderModalImages() {
   const container = elements.modalImagesPreview;
+  renderImageGrid(container, noteModalImages, true, (index) => {
+    noteModalImages.splice(index, 1);
+    renderModalImages();
+  });
+}
+
+/**
+ * Generates responsive image grid HTML string for note cards.
+ */
+function generateImageGridHtml(images) {
+  if (!images || images.length === 0) return '';
+
+  const numCols = Math.min(images.length, 2);
+  const colsHtml = Array.from({ length: numCols }, () => []);
+  const displayImages = images.slice(0, 4);
+
+  displayImages.forEach((imgSrc, index) => {
+    colsHtml[index % numCols].push(`
+      <div class="grid-image-wrapper">
+        <img src="${imgSrc}" alt="Attached image ${index + 1}">
+      </div>
+    `);
+  });
+
+  const colsFormatted = colsHtml.map(colImgs => `
+    <div class="image-grid-column">
+      ${colImgs.join('')}
+    </div>
+  `).join('');
+
+  return `<div class="image-grid-row">${colsFormatted}</div>`;
+}
+
+/**
+ * Renders interactive responsive image grid dynamically inside a DOM container.
+ */
+function renderImageGrid(container, images, isEditable, onRemove) {
   if (!container) return;
   
   container.innerHTML = '';
-  if (noteModalImages.length === 0) {
+  if (!images || images.length === 0) {
     container.classList.add('hidden');
     return;
   }
   
   container.classList.remove('hidden');
-  noteModalImages.forEach((imgSrc, index) => {
-    const item = document.createElement('div');
-    item.className = 'preview-image-item';
-    item.innerHTML = `
-      <img src="${imgSrc}" alt="Attached image preview">
-      <button class="btn-remove-image" data-index="${index}" title="Remove image">
-        <i data-lucide="x"></i>
-      </button>
-    `;
-    item.querySelector('.btn-remove-image').addEventListener('click', (e) => {
-      e.stopPropagation();
-      noteModalImages.splice(index, 1);
-      renderModalImages();
-    });
-    container.appendChild(item);
+
+  const row = document.createElement('div');
+  row.className = 'image-grid-row';
+
+  const numCols = Math.min(images.length, 4);
+  const cols = Array.from({ length: numCols }, () => {
+    const col = document.createElement('div');
+    col.className = 'image-grid-column';
+    return col;
   });
+
+  images.forEach((imgSrc, index) => {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'grid-image-wrapper';
+
+    const img = document.createElement('img');
+    img.src = imgSrc;
+    img.alt = `Attached image ${index + 1}`;
+    img.style.cursor = 'pointer';
+    img.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openLightbox(imgSrc);
+    });
+    wrapper.appendChild(img);
+
+    if (isEditable) {
+      const btn = document.createElement('button');
+      btn.className = 'btn-remove-image';
+      btn.setAttribute('data-index', index);
+      btn.title = 'Remove image';
+      btn.innerHTML = '<i data-lucide="x"></i>';
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        onRemove(index);
+      });
+      wrapper.appendChild(btn);
+    }
+
+    cols[index % numCols].appendChild(wrapper);
+  });
+
+  cols.forEach(col => row.appendChild(col));
+  container.appendChild(row);
   lucide.createIcons();
+}
+
+/**
+ * Opens the fullscreen image lightbox.
+ */
+function openLightbox(src) {
+  elements.lightboxImage.src = src;
+  elements.lightboxModal.classList.add('active');
+  elements.lightboxModal.classList.remove('hidden');
+}
+
+/**
+ * Closes the fullscreen image lightbox.
+ */
+function closeLightbox() {
+  elements.lightboxModal.classList.remove('active');
+  setTimeout(() => {
+    if (!elements.lightboxModal.classList.contains('active')) {
+      elements.lightboxModal.classList.add('hidden');
+      elements.lightboxImage.src = '';
+    }
+  }, 200);
 }
