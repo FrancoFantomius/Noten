@@ -48,7 +48,7 @@
       <div class="header-center">
         <div class="search-bar">
           <i data-lucide="search" class="search-icon"></i>
-          <input type="text" id="search-input" placeholder="Search notes, tags, ...">
+          <input type="text" id="search-input" data-i18n-placeholder="search_placeholder" placeholder="Search notes, tags, ...">
           <button id="btn-search-clear" class="btn-icon hidden" aria-label="Clear Search">
             <i data-lucide="x"></i>
           </button>
@@ -59,9 +59,9 @@
         <!-- Sync Indicator Badge -->
         <div id="sync-status" class="sync-badge offline" title="Sync Offline">
           <i data-lucide="cloud-off"></i>
-          <span class="sync-text">Offline</span>
+          <span class="sync-text" data-i18n="sync_offline">Offline</span>
         </div>
-        <button id="btn-settings-open" class="btn-icon" title="Settings" aria-label="Open Settings">
+        <button id="btn-settings-open" class="btn-icon" data-i18n-title="btn_settings_open_title" data-i18n-aria="btn_settings_open_title" title="Settings" aria-label="Open Settings">
           <i data-lucide="settings"></i>
         </button>
       </div>
@@ -77,19 +77,19 @@
             <li>
               <button class="nav-item active" data-category="notes">
                 <i data-lucide="lightbulb"></i>
-                <span class="nav-label">Notes</span>
+                <span class="nav-label" data-i18n="nav_notes">Notes</span>
               </button>
             </li>
             <li>
               <button class="nav-item" data-category="archive">
                 <i data-lucide="archive"></i>
-                <span class="nav-label">Archive</span>
+                <span class="nav-label" data-i18n="nav_archive">Archive</span>
               </button>
             </li>
             <li>
               <button class="nav-item" data-category="trash">
                 <i data-lucide="trash-2"></i>
-                <span class="nav-label">Trash</span>
+                <span class="nav-label" data-i18n="nav_trash">Trash</span>
               </button>
             </li>
           </ul>
@@ -97,7 +97,7 @@
           <div class="sidebar-divider"></div>
 
           <div class="tags-section">
-            <span class="section-title">Tags</span>
+            <span class="section-title" data-i18n="tags_section_title">Tags</span>
             <ul id="sidebar-tags-list">
               <!-- Dynamically populated tags list -->
             </ul>
@@ -112,9 +112,9 @@
         <div id="note-creator" class="note-creator-container">
           <!-- Minimized state -->
           <div id="creator-collapsed" class="creator-collapsed">
-            <span>Take a secure note...</span>
+            <span data-i18n="creator_collapsed_prompt">Take a secure note...</span>
             <div class="creator-actions-collapsed">
-              <button id="btn-quick-todo" class="btn-icon" title="New checklist"><i
+              <button id="btn-quick-todo" class="btn-icon" data-i18n-title="btn_quick_todo_title" title="New checklist"><i
                   data-lucide="check-square"></i></button>
             </div>
           </div>
@@ -124,18 +124,18 @@
             <div id="creator-images-preview" class="note-images-preview hidden"></div>
             <input type="file" id="creator-image-input" accept="image/*" multiple class="hidden">
             <div class="creator-title-row">
-              <input type="text" id="creator-title" placeholder="Title" autocomplete="off">
-              <button id="btn-creator-pin" class="btn-icon" title="Pin note">
+              <input type="text" id="creator-title" data-i18n-placeholder="creator_title_placeholder" placeholder="Title" autocomplete="off">
+              <button id="btn-creator-pin" class="btn-icon" data-i18n-title="btn_creator_pin_title" title="Pin note">
                 <i data-lucide="pin"></i>
               </button>
             </div>
 
-            <textarea id="creator-body" placeholder="Take a secure note..." rows="3"></textarea>
+            <textarea id="creator-body" data-i18n-placeholder="creator_body_placeholder" placeholder="Take a secure note..." rows="3"></textarea>
 
             <!-- Dynamic tags input / list in note creator -->
             <div id="creator-tags-list" class="note-tags-container"></div>
             <div class="tag-input-wrapper">
-              <input type="text" id="creator-tag-input" placeholder="Add tag + press Enter...">
+              <input type="text" id="creator-tag-input" data-i18n-placeholder="creator_tag_input_placeholder" placeholder="Add tag + press Enter...">
             </div>
 
             <!-- Toolbar and Actions -->
@@ -143,26 +143,26 @@
               <div class="creator-toolbar">
                 <!-- Color Selector Button -->
                 <div class="color-picker-wrapper">
-                  <button class="btn-icon" title="Change color"><i data-lucide="palette"></i></button>
+                  <button class="btn-icon" data-i18n-title="btn_creator_color_title" title="Change color"><i data-lucide="palette"></i></button>
                   <div class="color-palette-popup">
-                    <button class="color-option default active" data-color="default" title="Default"></button>
-                    <button class="color-option red" data-color="red" title="Red"></button>
-                    <button class="color-option orange" data-color="orange" title="Orange"></button>
-                    <button class="color-option yellow" data-color="yellow" title="Yellow"></button>
-                    <button class="color-option green" data-color="green" title="Green"></button>
-                    <button class="color-option teal" data-color="teal" title="Teal"></button>
-                    <button class="color-option blue" data-color="blue" title="Blue"></button>
-                    <button class="color-option purple" data-color="purple" title="Purple"></button>
-                    <button class="color-option pink" data-color="pink" title="Pink"></button>
+                    <button class="color-option default active" data-color="default" data-i18n-title="color_default" title="Default"></button>
+                    <button class="color-option red" data-color="red" data-i18n-title="color_red" title="Red"></button>
+                    <button class="color-option orange" data-color="orange" data-i18n-title="color_orange" title="Orange"></button>
+                    <button class="color-option yellow" data-color="yellow" data-i18n-title="color_yellow" title="Yellow"></button>
+                    <button class="color-option green" data-color="green" data-i18n-title="color_green" title="Green"></button>
+                    <button class="color-option teal" data-color="teal" data-i18n-title="color_teal" title="Teal"></button>
+                    <button class="color-option blue" data-color="blue" data-i18n-title="color_blue" title="Blue"></button>
+                    <button class="color-option purple" data-color="purple" data-i18n-title="color_purple" title="Purple"></button>
+                    <button class="color-option pink" data-color="pink" data-i18n-title="color_pink" title="Pink"></button>
                   </div>
                 </div>
-                <button id="btn-creator-image" class="btn-icon" title="Add image"><i data-lucide="image"></i></button>
+                <button id="btn-creator-image" class="btn-icon" data-i18n-title="btn_creator_image_title" title="Add image"><i data-lucide="image"></i></button>
                 <!-- Archive/Trash helper inside creator -->
-                <button id="btn-creator-archive" class="btn-icon" title="Archive note"><i
+                <button id="btn-creator-archive" class="btn-icon" data-i18n-title="btn_creator_archive_title" title="Archive note"><i
                     data-lucide="archive"></i></button>
               </div>
 
-              <button id="btn-creator-close" class="btn btn-text">Close</button>
+              <button id="btn-creator-close" class="btn btn-text" data-i18n="btn_creator_close">Close</button>
             </div>
           </div>
         </div>
@@ -171,13 +171,13 @@
         <div id="notes-view-content" class="notes-view-content">
           <!-- Pinned Section -->
           <div id="pinned-section" class="notes-section hidden">
-            <h2 class="section-header">Pinned</h2>
+            <h2 class="section-header" data-i18n="section_header_pinned">Pinned</h2>
             <div id="pinned-grid" class="notes-grid"></div>
           </div>
 
           <!-- Unpinned / Main Notes Section -->
           <div id="notes-section" class="notes-section">
-            <h2 id="section-title-feed" class="section-header hidden">Notes</h2>
+            <h2 id="section-title-feed" class="section-header hidden" data-i18n="section_header_notes">Notes</h2>
             <div id="notes-grid" class="notes-grid"></div>
           </div>
 
@@ -186,8 +186,8 @@
             <div class="empty-state-icon">
               <i data-lucide="lightbulb" size="48"></i>
             </div>
-            <h3 id="empty-state-title">No notes here yet</h3>
-            <p id="empty-state-desc">Your encrypted thoughts will appear here.</p>
+            <h3 id="empty-state-title" data-i18n="empty_state_notes_title">No notes here yet</h3>
+            <p id="empty-state-desc" data-i18n="empty_state_notes_desc">Your encrypted thoughts will appear here.</p>
           </div>
         </div>
       </main>
@@ -200,18 +200,19 @@
       <div id="modal-images-preview" class="note-images-preview hidden"></div>
       <input type="file" id="modal-image-input" accept="image/*" multiple class="hidden">
       <div class="modal-header">
-        <input type="text" id="modal-title" placeholder="Title">
-        <button id="btn-modal-pin" class="btn-icon" title="Pin note">
+        <input type="text" id="modal-title" data-i18n-placeholder="modal_title_placeholder" placeholder="Title">
+        <button id="btn-modal-pin" class="btn-icon" data-i18n-title="btn_modal_pin_title" title="Pin note">
           <i data-lucide="pin"></i>
         </button>
       </div>
 
       <div class="modal-body">
-        <textarea id="modal-body-text" placeholder="Note" rows="6"></textarea>
+        <div id="modal-checklist-view" class="modal-checklist hidden"></div>
+        <textarea id="modal-body-text" data-i18n-placeholder="modal_body_placeholder" placeholder="Note" rows="6"></textarea>
 
         <div id="modal-tags-list" class="note-tags-container"></div>
         <div class="tag-input-wrapper">
-          <input type="text" id="modal-tag-input" placeholder="Add tag + press Enter...">
+          <input type="text" id="modal-tag-input" data-i18n-placeholder="modal_tag_input_placeholder" placeholder="Add tag + press Enter...">
         </div>
       </div>
 
@@ -219,25 +220,26 @@
         <div class="modal-toolbar">
           <!-- Modal Color Picker -->
           <div class="color-picker-wrapper">
-            <button class="btn-icon" title="Change color"><i data-lucide="palette"></i></button>
+            <button class="btn-icon" data-i18n-title="btn_creator_color_title" title="Change color"><i data-lucide="palette"></i></button>
             <div class="color-palette-popup">
-              <button class="color-option default" data-color="default" title="Default"></button>
-              <button class="color-option red" data-color="red" title="Red"></button>
-              <button class="color-option orange" data-color="orange" title="Orange"></button>
-              <button class="color-option yellow" data-color="yellow" title="Yellow"></button>
-              <button class="color-option green" data-color="green" title="Green"></button>
-              <button class="color-option teal" data-color="teal" title="Teal"></button>
-              <button class="color-option blue" data-color="blue" title="Blue"></button>
-              <button class="color-option purple" data-color="purple" title="Purple"></button>
-              <button class="color-option pink" data-color="pink" title="Pink"></button>
+              <button class="color-option default" data-color="default" data-i18n-title="color_default" title="Default"></button>
+              <button class="color-option red" data-color="red" data-i18n-title="color_red" title="Red"></button>
+              <button class="color-option orange" data-color="orange" data-i18n-title="color_orange" title="Orange"></button>
+              <button class="color-option yellow" data-color="yellow" data-i18n-title="color_yellow" title="Yellow"></button>
+              <button class="color-option green" data-color="green" data-i18n-title="color_green" title="Green"></button>
+              <button class="color-option teal" data-color="teal" data-i18n-title="color_teal" title="Teal"></button>
+              <button class="color-option blue" data-color="blue" data-i18n-title="color_blue" title="Blue"></button>
+              <button class="color-option purple" data-color="purple" data-i18n-title="color_purple" title="Purple"></button>
+              <button class="color-option pink" data-color="pink" data-i18n-title="color_pink" title="Pink"></button>
             </div>
           </div>
-          <button id="btn-modal-image" class="btn-icon" title="Add image"><i data-lucide="image"></i></button>
-          <button id="btn-modal-archive" class="btn-icon" title="Archive"><i data-lucide="archive"></i></button>
-          <button id="btn-modal-trash" class="btn-icon" title="Delete"><i data-lucide="trash-2"></i></button>
-          <span class="last-edited-label" id="modal-last-edited">Edited 2 mins ago</span>
+          <button id="btn-modal-checklist-toggle" class="btn-icon hidden" data-i18n-title="btn_modal_checklist_toggle_title" title="Toggle checklist view"><i data-lucide="list-checks"></i></button>
+          <button id="btn-modal-image" class="btn-icon" data-i18n-title="btn_modal_image_title" title="Add image"><i data-lucide="image"></i></button>
+          <button id="btn-modal-archive" class="btn-icon" data-i18n-title="btn_modal_archive_title" title="Archive"><i data-lucide="archive"></i></button>
+          <button id="btn-modal-trash" class="btn-icon" data-i18n-title="btn_modal_trash_delete_title" title="Delete"><i data-lucide="trash-2"></i></button>
+          <span class="last-edited-label" id="modal-last-edited" data-i18n="modal_last_edited">Edited 2 mins ago</span>
         </div>
-        <button id="btn-modal-close" class="btn btn-primary">Close</button>
+        <button id="btn-modal-close" class="btn btn-primary" data-i18n="btn_modal_close">Close</button>
       </div>
     </div>
   </div>
@@ -246,69 +248,83 @@
   <div id="settings-modal" class="modal-overlay">
     <div class="modal-card">
       <div class="settings-header">
-        <h2>Settings & Secure Sync</h2>
-        <button id="btn-settings-close" class="btn-icon" aria-label="Close settings"><i data-lucide="x"></i></button>
+        <h2 data-i18n="settings_header">Settings & Secure Sync</h2>
+        <button id="btn-settings-close" class="btn-icon" data-i18n-aria="btn_settings_close_aria" aria-label="Close settings"><i data-lucide="x"></i></button>
       </div>
 
       <div class="settings-body">
 
         <!-- Tab: Appearance -->
         <section class="settings-section">
-          <h3>Appearance</h3>
+          <h3 data-i18n="settings_section_appearance">Appearance</h3>
 
           <div class="settings-row">
             <div class="settings-info">
-              <span class="settings-label">Dark Theme</span>
-              <span class="settings-desc">Toggle between dark and light themes</span>
+              <span class="settings-label" data-i18n="settings_theme_label">Dark Theme</span>
+              <span class="settings-desc" data-i18n="settings_theme_desc">Toggle between dark and light themes</span>
             </div>
             <label class="switch">
               <input type="checkbox" id="theme-toggle" checked>
               <span class="slider round"></span>
             </label>
           </div>
+
+          <div class="settings-row">
+            <div class="settings-info">
+              <span class="settings-label" data-i18n="settings_language_label">Language</span>
+              <span class="settings-desc" data-i18n="settings_language_desc">Choose your preferred application language</span>
+            </div>
+            <select id="language-select" class="select-premium">
+              <option value="en">English</option>
+              <option value="it">Italiano</option>
+              <option value="de">Deutsch</option>
+              <option value="es">Español</option>
+              <option value="fr">Français</option>
+            </select>
+          </div>
         </section>
 
         <!-- Tab: Filen Sync -->
         <section class="settings-section">
-          <h3>Encrypted Sync (Filen)</h3>
-          <p class="section-help">Configure synchronization with your personal Filen account. All notes synced will be
+          <h3 data-i18n="settings_section_sync">Encrypted Sync (Filen)</h3>
+          <p class="section-help" data-i18n="settings_sync_help">Configure synchronization with your personal Filen account. All notes synced will be
             fully encrypted client-side; Filen will never see your password or plaintext notes.</p>
 
           <div class="input-group">
-            <label for="sync-email">Filen Email</label>
-            <input type="email" id="sync-email" placeholder="your-email@example.com">
+            <label for="sync-email" data-i18n="settings_sync_email">Filen Email</label>
+            <input type="email" id="sync-email" data-i18n-placeholder="settings_sync_email_placeholder" placeholder="your-email@example.com">
           </div>
 
           <div class="input-group">
-            <label for="sync-password">Filen Password</label>
-            <input type="password" id="sync-password" placeholder="Enter your Filen password...">
+            <label for="sync-password" data-i18n="settings_sync_password">Filen Password</label>
+            <input type="password" id="sync-password" data-i18n-placeholder="settings_sync_password_placeholder" placeholder="Enter your Filen password...">
           </div>
 
           <div class="input-group">
-            <label for="sync-twofactor">Two-Factor Auth Code (Optional)</label>
-            <input type="text" id="sync-twofactor" placeholder="6-digit code if enabled...">
+            <label for="sync-twofactor" data-i18n="settings_sync_twofactor">Two-Factor Auth Code (Optional)</label>
+            <input type="text" id="sync-twofactor" data-i18n-placeholder="settings_sync_twofactor_placeholder" placeholder="6-digit code if enabled...">
           </div>
 
           <div class="settings-actions">
-            <button id="btn-save-sync" class="btn btn-primary">Save & Enable Sync</button>
-            <button id="btn-disable-sync" class="btn btn-danger hidden">Disable Sync</button>
+            <button id="btn-save-sync" class="btn btn-primary" data-i18n="btn_save_sync">Save & Enable Sync</button>
+            <button id="btn-disable-sync" class="btn btn-danger hidden" data-i18n="btn_disable_sync">Disable Sync</button>
           </div>
           <span id="sync-settings-status" class="status-message"></span>
         </section>
 
         <!-- Tab: Import / Export Backups -->
         <section class="settings-section">
-          <h3>Local Backups</h3>
-          <p class="section-help">Export your notes to a JSON file or import notes from a previous backup.</p>
+          <h3 data-i18n="settings_section_backups">Local Backups</h3>
+          <p class="section-help" data-i18n="settings_backups_help">Export your notes to a JSON file or import notes from a previous backup.</p>
 
           <div class="backup-actions">
-            <button id="btn-export-backup" class="btn btn-secondary" title="Export JSON notes backup">
+            <button id="btn-export-backup" class="btn btn-secondary" data-i18n="btn_export_backup" title="Export JSON notes backup">
               <i data-lucide="download"></i> Export Backup
             </button>
           </div>
 
           <div class="import-actions">
-            <label class="btn btn-secondary file-input-label">
+            <label class="btn btn-secondary file-input-label" data-i18n="btn_import_backup">
               <i data-lucide="upload"></i> Import Backup File
               <input type="file" id="import-file-input" accept=".json" class="hidden">
             </label>
@@ -322,7 +338,7 @@
 
   <!-- Fullscreen Lightbox Modal -->
   <div id="lightbox-modal" class="lightbox-overlay hidden">
-    <button id="btn-lightbox-close" class="btn-icon lightbox-close" title="Close fullscreen view">
+    <button id="btn-lightbox-close" class="btn-icon lightbox-close" data-i18n-title="btn_lightbox_close_title" title="Close fullscreen view">
       <i data-lucide="x"></i>
     </button>
     <div class="lightbox-content">

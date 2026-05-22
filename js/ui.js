@@ -2,6 +2,8 @@
  * Noten - UI Module
  */
 
+import { t, getLanguage } from './i18n.js';
+
 let activeCategory = 'notes'; // 'notes', 'archive', 'trash', or 'tag:TagName'
 let decryptedNotes = [];       // Cache of all decrypted notes in memory
 let noteCreatorTags = [];      // Current tags in the note creator
@@ -10,6 +12,7 @@ let noteCreatorImages = [];    // Current image attachments in creator
 let noteModalImages = [];      // Current image attachments in modal
 let activeColor = 'default';   // Color chosen in creator
 let modalActiveColor = 'default';
+let currentSyncStatus = 'offline';
 
 // Callbacks to communicate with app.js controller
 let onSaveNoteCallback = null;
@@ -75,6 +78,8 @@ const elements = {
   btnModalImage: document.getElementById('btn-modal-image'),
   modalImageInput: document.getElementById('modal-image-input'),
   modalImagesPreview: document.getElementById('modal-images-preview'),
+  modalChecklistView: document.getElementById('modal-checklist-view'),
+  btnModalChecklistToggle: document.getElementById('btn-modal-checklist-toggle'),
   
   // Settings Modal
   settingsModal: document.getElementById('settings-modal'),
@@ -91,6 +96,7 @@ const elements = {
 let isCreatorPinned = false;
 let isModalPinned = false;
 let editingNoteId = null;
+let isModalChecklistMode = false;
 
 /**
  * Initialize UI event listeners
@@ -300,7 +306,37 @@ export function initUI(callbacks) {
   elements.modalTitle.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();
+      if (isModalChecklistMode) {
+        const firstInput = elements.modalChecklistView.querySelector('.modal-checklist-input');
+        if (firstInput) firstInput.focus();
+      } else {
+        elements.modalBodyText.focus();
+      }
+    }
+  });
+
+  // Modal Checklist Toggle
+  elements.btnModalChecklistToggle.addEventListener('click', () => {
+    if (isModalChecklistMode) {
+      // Switch to raw text mode: serialize checklist to textarea
+      const serialized = serializeModalChecklist();
+      elements.modalBodyText.value = serialized;
+      elements.modalChecklistView.classList.add('hidden');
+      elements.modalChecklistView.innerHTML = '';
+      elements.modalBodyText.classList.remove('hidden');
+      isModalChecklistMode = false;
+      elements.btnModalChecklistToggle.classList.remove('active');
       elements.modalBodyText.focus();
+    } else {
+      // Switch to checklist mode: parse textarea into checklist
+      const bodyText = elements.modalBodyText.value;
+      if (hasChecklistItems(bodyText)) {
+        renderModalChecklist(bodyText);
+        elements.modalChecklistView.classList.remove('hidden');
+        elements.modalBodyText.classList.add('hidden');
+        isModalChecklistMode = true;
+        elements.btnModalChecklistToggle.classList.add('active');
+      }
     }
   });
 
@@ -325,7 +361,7 @@ export function initUI(callbacks) {
       if (note) {
         if (note.isTrashed) {
           // If already in trash, permanently delete
-          if (confirm("Permanently delete this note? This cannot be undone.")) {
+          if (confirm(t('confirm_delete_note'))) {
             await onDeleteNoteCallback(note.id);
             closeModal();
           }
@@ -420,18 +456,18 @@ export function setCategory(category) {
 
 function updateEmptyStateDetails() {
   if (activeCategory === 'notes') {
-    elements.emptyStateTitle.textContent = "No notes here yet";
-    elements.emptyStateDesc.textContent = "Your encrypted thoughts will appear here.";
+    elements.emptyStateTitle.textContent = t('empty_state_notes_title');
+    elements.emptyStateDesc.textContent = t('empty_state_notes_desc');
   } else if (activeCategory === 'archive') {
-    elements.emptyStateTitle.textContent = "Archive is empty";
-    elements.emptyStateDesc.textContent = "Archived notes are kept safe here.";
+    elements.emptyStateTitle.textContent = t('empty_state_archive_title');
+    elements.emptyStateDesc.textContent = t('empty_state_archive_desc');
   } else if (activeCategory === 'trash') {
-    elements.emptyStateTitle.textContent = "Trash is empty";
-    elements.emptyStateDesc.textContent = "Notes in trash are stored here.";
+    elements.emptyStateTitle.textContent = t('empty_state_trash_title');
+    elements.emptyStateDesc.textContent = t('empty_state_trash_desc');
   } else if (activeCategory.startsWith('tag:')) {
     const tag = activeCategory.substring(4);
-    elements.emptyStateTitle.textContent = `No notes with #${tag}`;
-    elements.emptyStateDesc.textContent = "Add this tag to your notes to view them here.";
+    elements.emptyStateTitle.textContent = t('empty_state_tags_title', { tag: tag });
+    elements.emptyStateDesc.textContent = t('empty_state_tags_desc');
   }
 }
 
@@ -600,8 +636,8 @@ export function renderNotesFeed() {
   // Handle Empty State display
   if (filtered.length === 0) {
     if (searchQuery) {
-      elements.emptyStateTitle.textContent = "No results found";
-      elements.emptyStateDesc.textContent = "We couldn't find any notes matching your search.";
+      elements.emptyStateTitle.textContent = t('empty_state_search_title');
+      elements.emptyStateDesc.textContent = t('empty_state_search_desc');
     } else {
       updateEmptyStateDetails();
     }
@@ -646,29 +682,52 @@ function renderCardsToGrid(notes, gridElement) {
       `;
     }
 
+    // Build card HTML (body placeholder will be filled after)
+    const isChecklist = hasChecklistItems(note.body);
     card.innerHTML = `
       ${coverHtml}
-      <button class="btn-icon note-card-pin ${note.isPinned ? 'active' : ''}" title="${note.isPinned ? 'Unpin note' : 'Pin note'}">
+      <button class="btn-icon note-card-pin ${note.isPinned ? 'active' : ''}" title="${note.isPinned ? t('btn_unpin_note_title') : t('btn_pin_note_title')}">
         <i data-lucide="pin"></i>
       </button>
       ${note.title ? `<h3 class="note-card-title">${escapeHtml(note.title)}</h3>` : ''}
-      ${note.body ? `<div class="note-card-body ${isTruncated ? 'truncated' : ''}">${escapeHtml(bodyText)}</div>` : ''}
+      ${note.body && !isChecklist ? `<div class="note-card-body ${isTruncated ? 'truncated' : ''}">${escapeHtml(bodyText)}</div>` : ''}
       ${tagsHtml}
       <div class="note-card-footer">
         <span>${formatDate(note.updatedAt)}</span>
       </div>
     `;
 
-    // Click Card to Open Modal (Avoid triggering on Pin or grid image clicks)
+    // If the note has checklist items, build a rich DOM for them
+    if (note.body && isChecklist) {
+      const checklistContainer = buildChecklistDOM(bodyText, note.id, isTruncated);
+      // Insert after title (or after pin button if no title)
+      const titleEl = card.querySelector('.note-card-title');
+      const pinBtn = card.querySelector('.note-card-pin');
+      const insertAfter = titleEl || pinBtn;
+      if (insertAfter && insertAfter.nextSibling) {
+        card.insertBefore(checklistContainer, insertAfter.nextSibling);
+      } else {
+        // fallback: insert before tags or footer
+        const tagsEl = card.querySelector('.card-tags');
+        const footerEl = card.querySelector('.note-card-footer');
+        card.insertBefore(checklistContainer, tagsEl || footerEl);
+      }
+    }
+
+    // Click Card to Open Modal (Avoid triggering on Pin, checkbox, or grid image clicks)
     card.addEventListener('click', (e) => {
       const pinBtn = card.querySelector('.note-card-pin');
       const gridImg = e.target.closest('.grid-image-wrapper img');
+      const checklistClick = e.target.closest('.checklist-item');
       if (pinBtn && (e.target === pinBtn || pinBtn.contains(e.target))) {
         e.stopPropagation();
         toggleNotePin(note.id);
       } else if (gridImg) {
         e.stopPropagation();
         openLightbox(gridImg.src);
+      } else if (checklistClick) {
+        // Don't open modal when clicking checklist items
+        e.stopPropagation();
       } else {
         openNoteModal(note.id);
       }
@@ -704,7 +763,7 @@ function renderSidebarTags() {
   const tags = Array.from(tagsSet).sort();
   
   if (tags.length === 0) {
-    elements.sidebarTagsList.innerHTML = `<li class="sidebar-help-text" style="padding: 8px 12px; font-size: 0.8rem; color: var(--text-secondary);">No tags created</li>`;
+    elements.sidebarTagsList.innerHTML = `<li class="sidebar-help-text" style="padding: 8px 12px; font-size: 0.8rem; color: var(--text-secondary);">${t('sidebar_no_tags')}</li>`;
     return;
   }
 
@@ -758,21 +817,44 @@ function openNoteModal(noteId) {
   renderModalImages();
   
   // Setup footer labels
-  elements.modalLastEdited.textContent = `Edited ${formatDate(note.updatedAt)}`;
+  elements.modalLastEdited.textContent = t('modal_last_edited', { time: formatDate(note.updatedAt) });
   
   // Trash/Archive labels depending on state
   elements.btnModalArchive.innerHTML = note.isArchived ? '<i data-lucide="folder-up"></i>' : '<i data-lucide="archive"></i>';
-  elements.btnModalArchive.title = note.isArchived ? 'Unarchive' : 'Archive';
+  elements.btnModalArchive.title = note.isArchived ? t('btn_modal_archive_unarchive_title') : t('btn_modal_archive_title');
   
   elements.btnModalTrash.innerHTML = note.isTrashed ? '<i data-lucide="rotate-ccw"></i>' : '<i data-lucide="trash-2"></i>';
-  elements.btnModalTrash.title = note.isTrashed ? 'Restore note' : 'Delete note';
+  elements.btnModalTrash.title = note.isTrashed ? t('btn_modal_trash_restore_title') : t('btn_modal_trash_delete_title');
   elements.btnModalTrash.className = note.isTrashed ? 'btn-icon text-green' : 'btn-icon';
+
+  // Checklist mode detection
+  const noteHasChecklist = hasChecklistItems(note.body);
+  if (noteHasChecklist) {
+    isModalChecklistMode = true;
+    elements.btnModalChecklistToggle.classList.remove('hidden');
+    elements.btnModalChecklistToggle.classList.add('active');
+    renderModalChecklist(note.body);
+    elements.modalChecklistView.classList.remove('hidden');
+    elements.modalBodyText.classList.add('hidden');
+  } else {
+    isModalChecklistMode = false;
+    elements.btnModalChecklistToggle.classList.add('hidden');
+    elements.btnModalChecklistToggle.classList.remove('active');
+    elements.modalChecklistView.classList.add('hidden');
+    elements.modalChecklistView.innerHTML = '';
+    elements.modalBodyText.classList.remove('hidden');
+  }
 
   elements.noteModal.classList.add('active');
   lucide.createIcons();
   
-  // Focus main content body
-  setTimeout(() => elements.modalBodyText.focus(), 100);
+  // Focus appropriate element
+  if (isModalChecklistMode) {
+    const firstInput = elements.modalChecklistView.querySelector('.modal-checklist-input');
+    if (firstInput) setTimeout(() => firstInput.focus(), 100);
+  } else {
+    setTimeout(() => elements.modalBodyText.focus(), 100);
+  }
 }
 
 async function saveAndCloseModal() {
@@ -781,7 +863,10 @@ async function saveAndCloseModal() {
   const note = decryptedNotes.find(n => n.id === editingNoteId);
   if (note) {
     const titleVal = elements.modalTitle.value.trim();
-    const bodyVal = elements.modalBodyText.value.trim();
+    // If in checklist mode, serialize the checklist back to text
+    const bodyVal = isModalChecklistMode
+      ? serializeModalChecklist()
+      : elements.modalBodyText.value.trim();
     
     const hasChanged = note.title !== titleVal || 
                        note.body !== bodyVal || 
@@ -810,6 +895,12 @@ function closeModal() {
   elements.noteModal.classList.remove('active');
   editingNoteId = null;
   noteModalImages = [];
+  isModalChecklistMode = false;
+  elements.modalChecklistView.innerHTML = '';
+  elements.modalChecklistView.classList.add('hidden');
+  elements.modalBodyText.classList.remove('hidden');
+  elements.btnModalChecklistToggle.classList.add('hidden');
+  elements.btnModalChecklistToggle.classList.remove('active');
   renderModalImages();
 }
 
@@ -858,29 +949,39 @@ elements.settingsModal.addEventListener('click', (e) => {
 
 // Update sync status indicator UI
 export function updateSyncStatusUI(status) {
+  currentSyncStatus = status;
   const badge = elements.syncStatus;
   badge.className = `sync-badge ${status}`;
   
   let icon = 'cloud-off';
-  let text = 'Offline';
+  let text = t('sync_offline');
   
   if (status === 'syncing') {
     icon = 'refresh-cw';
-    text = 'Syncing';
+    text = t('sync_syncing');
   } else if (status === 'online') {
     icon = 'cloud-lightning';
-    text = 'Sync OK';
+    text = t('sync_online');
   } else if (status === 'error') {
     icon = 'cloud-alert';
-    text = 'Sync Error';
+    text = t('sync_error');
   }
   
   badge.innerHTML = `
     <i data-lucide="${icon}"></i>
     <span class="sync-text">${text}</span>
   `;
-  badge.title = `Sync Status: ${text}`;
+  badge.title = t('sync_status_title', { status: text });
   lucide.createIcons();
+}
+
+/**
+ * Re-render all dynamic UI components when the language is changed.
+ */
+export function retranslateDynamicUI() {
+  renderNotesFeed();
+  renderSidebarTags();
+  updateSyncStatusUI(currentSyncStatus);
 }
 
 // --- Text Utility functions ---
@@ -896,23 +997,326 @@ function escapeHtml(text) {
   return text.replace(/[&<>"']/g, function(m) { return map[m]; });
 }
 
+// --- Checklist Utility functions ---
+
+const CHECKLIST_REGEX = /^- \[([ xX])\] (.*)$/;
+
+/**
+ * Returns true if the body text contains any checklist items (- [ ] or - [x]).
+ */
+function hasChecklistItems(body) {
+  if (!body) return false;
+  return body.split('\n').some(line => CHECKLIST_REGEX.test(line));
+}
+
+/**
+ * Builds a DOM element containing rendered checklist items and plain text.
+ * Checkboxes are interactive and toggle the note body on click.
+ */
+function buildChecklistDOM(bodyText, noteId, isTruncated) {
+  const container = document.createElement('div');
+  container.className = `note-card-body checklist-items ${isTruncated ? 'truncated' : ''}`;
+
+  const lines = bodyText.split('\n');
+  let consecutiveText = [];
+
+  const flushTextLines = () => {
+    if (consecutiveText.length > 0) {
+      const textEl = document.createElement('div');
+      textEl.className = 'checklist-text-line';
+      textEl.textContent = consecutiveText.join('\n');
+      container.appendChild(textEl);
+      consecutiveText = [];
+    }
+  };
+
+  lines.forEach((line, lineIndex) => {
+    const match = line.match(CHECKLIST_REGEX);
+    if (match) {
+      flushTextLines();
+      const isChecked = match[1].toLowerCase() === 'x';
+      const labelText = match[2];
+
+      const item = document.createElement('div');
+      item.className = `checklist-item ${isChecked ? 'checked' : ''}`;
+
+      item.innerHTML = `
+        <label class="checklist-checkbox">
+          <input type="checkbox" ${isChecked ? 'checked' : ''} data-note-id="${noteId}" data-line-index="${lineIndex}">
+          <span class="checklist-checkmark">
+            <svg viewBox="0 0 14 14"><polyline points="2.5 7 5.5 10.5 11.5 3.5"></polyline></svg>
+          </span>
+        </label>
+        <span class="checklist-label">${escapeHtml(labelText)}</span>
+      `;
+
+      // Toggle handler
+      const checkbox = item.querySelector('input[type="checkbox"]');
+      checkbox.addEventListener('change', (e) => {
+        e.stopPropagation();
+        toggleChecklistItem(noteId, lineIndex, e.target.checked);
+        // Immediately update visual state
+        item.classList.toggle('checked', e.target.checked);
+      });
+
+      // Prevent the label click from bubbling to open the modal
+      item.addEventListener('click', (e) => {
+        e.stopPropagation();
+        // If they clicked on the label text rather than the checkbox, toggle it
+        if (!e.target.closest('.checklist-checkbox')) {
+          checkbox.checked = !checkbox.checked;
+          checkbox.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+      });
+
+      container.appendChild(item);
+    } else {
+      consecutiveText.push(line);
+    }
+  });
+
+  flushTextLines();
+  return container;
+}
+
+/**
+ * Toggles a checklist item in the note body at the given line index and saves.
+ */
+async function toggleChecklistItem(noteId, lineIndex, isChecked) {
+  const note = decryptedNotes.find(n => n.id === noteId);
+  if (!note) return;
+
+  const lines = note.body.split('\n');
+  if (lineIndex >= lines.length) return;
+
+  const match = lines[lineIndex].match(CHECKLIST_REGEX);
+  if (!match) return;
+
+  // Replace the checkbox marker
+  const newMarker = isChecked ? 'x' : ' ';
+  lines[lineIndex] = `- [${newMarker}] ${match[2]}`;
+  note.body = lines.join('\n');
+  note.updatedAt = Date.now();
+
+  // Update the modal textarea if this note is currently being edited
+  if (editingNoteId === noteId) {
+    elements.modalBodyText.value = note.body;
+  }
+
+  if (onSaveNoteCallback) {
+    await onSaveNoteCallback(note.id, note);
+  }
+}
+
+/**
+ * Renders an editable checklist view inside the modal.
+ * Each checklist item gets a checkbox + editable text input.
+ * Non-checklist lines get an editable text area.
+ */
+function renderModalChecklist(bodyText) {
+  elements.modalChecklistView.innerHTML = '';
+  const lines = bodyText.split('\n');
+  let consecutiveText = [];
+
+  const flushTextLines = () => {
+    if (consecutiveText.length > 0) {
+      const textEl = document.createElement('textarea');
+      textEl.className = 'modal-checklist-text';
+      textEl.value = consecutiveText.join('\n');
+      textEl.rows = consecutiveText.length;
+      textEl.placeholder = t('checklist_text_placeholder');
+      autoResizeTextarea(textEl);
+      textEl.addEventListener('input', () => autoResizeTextarea(textEl));
+      elements.modalChecklistView.appendChild(textEl);
+      consecutiveText = [];
+    }
+  };
+
+  lines.forEach((line) => {
+    const match = line.match(CHECKLIST_REGEX);
+    if (match) {
+      flushTextLines();
+      const isChecked = match[1].toLowerCase() === 'x';
+      const labelText = match[2];
+
+      const item = document.createElement('div');
+      item.className = `modal-checklist-item ${isChecked ? 'checked' : ''}`;
+
+      item.innerHTML = `
+        <label class="checklist-checkbox">
+          <input type="checkbox" ${isChecked ? 'checked' : ''}>
+          <span class="checklist-checkmark">
+            <svg viewBox="0 0 14 14"><polyline points="2.5 7 5.5 10.5 11.5 3.5"></polyline></svg>
+          </span>
+        </label>
+        <input type="text" class="modal-checklist-input" value="">
+        <button class="modal-checklist-delete btn-icon" title="${t('checklist_remove_item_title')}">
+          <i data-lucide="x"></i>
+        </button>
+      `;
+
+      // Set value via property to avoid XSS from innerHTML
+      item.querySelector('.modal-checklist-input').value = labelText;
+
+      // Checkbox toggle
+      const checkbox = item.querySelector('input[type="checkbox"]');
+      checkbox.addEventListener('change', () => {
+        item.classList.toggle('checked', checkbox.checked);
+      });
+
+      // Delete item
+      item.querySelector('.modal-checklist-delete').addEventListener('click', (e) => {
+        e.stopPropagation();
+        item.remove();
+      });
+
+      // Enter key = add new item below
+      const textInput = item.querySelector('.modal-checklist-input');
+      textInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          addModalChecklistItem(item);
+        } else if (e.key === 'Backspace' && textInput.value === '') {
+          e.preventDefault();
+          // Focus previous item's input
+          const prevItem = item.previousElementSibling;
+          if (prevItem && prevItem.classList.contains('modal-checklist-item')) {
+            const prevInput = prevItem.querySelector('.modal-checklist-input');
+            if (prevInput) prevInput.focus();
+          }
+          item.remove();
+        }
+      });
+
+      elements.modalChecklistView.appendChild(item);
+    } else {
+      consecutiveText.push(line);
+    }
+  });
+
+  flushTextLines();
+
+  // Add "new item" button
+  const addBtn = document.createElement('button');
+  addBtn.className = 'modal-checklist-add';
+  addBtn.innerHTML = '<i data-lucide="plus"></i> <span>' + t('checklist_add_item') + '</span>';
+  addBtn.addEventListener('click', () => {
+    addModalChecklistItem(null);
+  });
+  elements.modalChecklistView.appendChild(addBtn);
+
+  lucide.createIcons();
+}
+
+/**
+ * Adds a new empty checklist item to the modal checklist view.
+ * @param {HTMLElement|null} afterItem - Insert after this item, or at the end if null.
+ */
+function addModalChecklistItem(afterItem) {
+  const item = document.createElement('div');
+  item.className = 'modal-checklist-item';
+
+  item.innerHTML = `
+    <label class="checklist-checkbox">
+      <input type="checkbox">
+      <span class="checklist-checkmark">
+        <svg viewBox="0 0 14 14"><polyline points="2.5 7 5.5 10.5 11.5 3.5"></polyline></svg>
+      </span>
+    </label>
+    <input type="text" class="modal-checklist-input" value="">
+    <button class="modal-checklist-delete btn-icon" title="${t('checklist_remove_item_title')}">
+      <i data-lucide="x"></i>
+    </button>
+  `;
+
+  const checkbox = item.querySelector('input[type="checkbox"]');
+  checkbox.addEventListener('change', () => {
+    item.classList.toggle('checked', checkbox.checked);
+  });
+
+  item.querySelector('.modal-checklist-delete').addEventListener('click', (e) => {
+    e.stopPropagation();
+    item.remove();
+  });
+
+  const textInput = item.querySelector('.modal-checklist-input');
+  textInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      addModalChecklistItem(item);
+    } else if (e.key === 'Backspace' && textInput.value === '') {
+      e.preventDefault();
+      const prevItem = item.previousElementSibling;
+      if (prevItem && prevItem.classList.contains('modal-checklist-item')) {
+        const prevInput = prevItem.querySelector('.modal-checklist-input');
+        if (prevInput) prevInput.focus();
+      }
+      item.remove();
+    }
+  });
+
+  // Insert after the specified item, or before the add button
+  const addButton = elements.modalChecklistView.querySelector('.modal-checklist-add');
+  if (afterItem && afterItem.nextSibling) {
+    elements.modalChecklistView.insertBefore(item, afterItem.nextSibling);
+  } else if (addButton) {
+    elements.modalChecklistView.insertBefore(item, addButton);
+  } else {
+    elements.modalChecklistView.appendChild(item);
+  }
+
+  lucide.createIcons();
+  textInput.focus();
+}
+
+/**
+ * Serializes the modal checklist view back to plain text with - [ ] / - [x] syntax.
+ */
+function serializeModalChecklist() {
+  const children = elements.modalChecklistView.children;
+  const lines = [];
+
+  for (const child of children) {
+    if (child.classList.contains('modal-checklist-item')) {
+      const checkbox = child.querySelector('input[type="checkbox"]');
+      const textInput = child.querySelector('.modal-checklist-input');
+      const marker = checkbox.checked ? 'x' : ' ';
+      lines.push(`- [${marker}] ${textInput.value}`);
+    } else if (child.classList.contains('modal-checklist-text')) {
+      lines.push(child.value);
+    }
+    // Skip the add button
+  }
+
+  return lines.join('\n').trim();
+}
+
+/**
+ * Auto-resize a textarea to fit its content.
+ */
+function autoResizeTextarea(textarea) {
+  textarea.style.height = 'auto';
+  textarea.style.height = textarea.scrollHeight + 'px';
+}
+
 function formatDate(timestamp) {
   const date = new Date(timestamp);
   const now = new Date();
+  const lang = getLanguage();
   
   const isToday = date.toDateString() === now.toDateString();
   
   if (isToday) {
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return date.toLocaleTimeString(lang, { hour: '2-digit', minute: '2-digit' });
   }
   
   // check if this year
   const isThisYear = date.getFullYear() === now.getFullYear();
   if (isThisYear) {
-    return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+    return date.toLocaleDateString(lang, { month: 'short', day: 'numeric' });
   }
   
-  return date.toLocaleDateString([], { year: 'numeric', month: 'short', day: 'numeric' });
+  return date.toLocaleDateString(lang, { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
 /**
@@ -1041,7 +1445,7 @@ function renderImageGrid(container, images, isEditable, onRemove) {
       const btn = document.createElement('button');
       btn.className = 'btn-remove-image';
       btn.setAttribute('data-index', index);
-      btn.title = 'Remove image';
+      btn.title = t('btn_remove_image_title');
       btn.innerHTML = '<i data-lucide="x"></i>';
       btn.addEventListener('click', (e) => {
         e.stopPropagation();

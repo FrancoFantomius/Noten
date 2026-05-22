@@ -385,8 +385,20 @@ async function runSync() {
     try {
       remoteFiles = await filenClient.fs().readdir({ path: '/Noten/notes' });
     } catch (err) {
-      console.error("[Sync] Failed to read remote notes directory:", err);
-      throw err;
+      // If the folder doesn't exist, create it and proceed with empty remote list
+      if (err.message && err.message.includes('not found')) {
+        console.warn("[Sync] Remote notes directory not found, creating it...");
+        try {
+          await filenClient.fs().mkdir({ path: '/Noten' });
+        } catch (e) { /* may already exist */ }
+        try {
+          await filenClient.fs().mkdir({ path: '/Noten/notes' });
+        } catch (e) { /* may already exist */ }
+        remoteFiles = [];
+      } else {
+        console.error("[Sync] Failed to read remote notes directory:", err);
+        throw err;
+      }
     }
 
     // Gather stats of remote files to build remoteMap

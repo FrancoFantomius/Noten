@@ -4,6 +4,7 @@
 
 import * as db from './db.js';
 import * as ui from './ui.js';
+import { t, getLanguage, setLanguage, applyTranslations } from './i18n.js';
 
 // Global In-Memory State
 let cachedNotes = [];
@@ -27,6 +28,9 @@ const dom = {
 // --- Bootstrapping ---
 
 window.addEventListener('DOMContentLoaded', async () => {
+  // Translate static layout components initially
+  applyTranslations();
+
   // 1. Register PWA Service Worker
   registerServiceWorker();
 
@@ -167,6 +171,18 @@ function setupSettingsListeners() {
   // Backup triggers
   dom.btnExportBackup.addEventListener('click', handleExportBackup);
   dom.importFileInput.addEventListener('change', handleImportBackupFile);
+
+  // Language selector change listener
+  const languageSelect = document.getElementById('language-select');
+  if (languageSelect) {
+    languageSelect.value = getLanguage();
+    languageSelect.addEventListener('change', (e) => {
+      const newLang = e.target.value;
+      setLanguage(newLang);
+      applyTranslations();
+      ui.retranslateDynamicUI();
+    });
+  }
 }
 
 async function handleSaveSyncSettings() {
@@ -175,7 +191,7 @@ async function handleSaveSyncSettings() {
   const twoFactorCode = dom.settingsTwofactor.value.trim();
 
   if (!email || !password) {
-    showSyncStatus("Filen Email and Password are required.", "error");
+    showSyncStatus(t('status_credentials_required'), "error");
     return;
   }
 
@@ -187,19 +203,19 @@ async function handleSaveSyncSettings() {
   };
 
   try {
-    showSyncStatus("Connecting to Filen and starting sync...", "info");
+    showSyncStatus(t('status_connecting'), "info");
     
     // Save settings and start sync
     await db.saveSyncSettings(syncSettings);
     db.startSync(syncSettings);
     
     dom.btnDisableSync.classList.remove('hidden');
-    showSyncStatus("Sync enabled successfully. Synchronizing notes...", "success");
+    showSyncStatus(t('status_sync_enabled'), "success");
     
     setTimeout(ui.hideSettings, 1000);
   } catch (err) {
     console.error("Failed to enable sync:", err);
-    showSyncStatus("Failed to start sync. Check credentials and connection.", "error");
+    showSyncStatus(t('status_sync_failed'), "error");
   }
 }
 
@@ -211,7 +227,7 @@ async function handleDisableSync() {
   db.stopSync();
   
   dom.btnDisableSync.classList.add('hidden');
-  showSyncStatus("Sync disabled.", "success");
+  showSyncStatus(t('status_sync_disabled'), "success");
 }
 
 function showSyncStatus(text, type) {
@@ -262,7 +278,7 @@ function handleExportBackup() {
     downloadFile(`noten-backup-${Date.now()}.json`, JSON.stringify(backupObj, null, 2));
   } catch (err) {
     console.error("Export failed:", err);
-    alert("Export failed.");
+    alert(t('status_export_failed'));
   }
 }
 
@@ -280,8 +296,8 @@ function handleImportBackupFile(e) {
       
       // Support both old decrypted notes exports and new backup exports
       if (data.type === 'decrypted_notes' || data.notes) {
-        if (confirm(`Do you want to import ${data.notes.length} notes into your database?`)) {
-          dom.importStatusText.textContent = "Importing notes...";
+        if (confirm(t('confirm_import_notes', { count: data.notes.length }))) {
+          dom.importStatusText.textContent = t('status_importing');
           dom.importStatusText.className = "status-message info";
           
           for (const note of data.notes) {
@@ -291,16 +307,16 @@ function handleImportBackupFile(e) {
             cachedNotes.push({ id: noteId, ...note });
           }
           
-          dom.importStatusText.textContent = `Imported ${data.notes.length} notes successfully!`;
+          dom.importStatusText.textContent = t('status_import_success', { count: data.notes.length });
           dom.importStatusText.className = "status-message success";
           ui.updateNotesData(cachedNotes);
         }
       } else {
-        alert("Invalid file format. Please upload a valid Noten backup.");
+        alert(t('status_import_invalid'));
       }
     } catch (err) {
       console.error(err);
-      alert("Failed to parse JSON file.");
+      alert(t('status_import_failed'));
     } finally {
       dom.importFileInput.value = ''; // Reset input element
     }
