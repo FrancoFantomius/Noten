@@ -35,6 +35,7 @@ const translations = {
     color_pink: "Pink",
     btn_creator_image_title: "Add image",
     btn_creator_archive_title: "Archive note",
+    btn_creator_trash_title: "Discard note",
     btn_creator_close: "Close",
     section_header_pinned: "Pinned",
     section_header_notes: "Notes",
@@ -61,6 +62,8 @@ const translations = {
     btn_modal_trash_delete_forever_title: "Delete forever",
     modal_last_edited: "Edited {time}",
     btn_modal_close: "Close",
+    settings_filen_thanks: "Special thanks to Filen for their {sdk}.",
+    settings_license_notice: "This project is licensed under the GNU Affero General Public License v3 (AGPL-3.0).",
     settings_header: "Settings & Secure Sync",
     btn_settings_close_aria: "Close settings",
     settings_section_appearance: "Appearance",
@@ -88,6 +91,9 @@ const translations = {
     checklist_add_item: "Add item",
     checklist_remove_item_title: "Remove item",
     checklist_text_placeholder: "Text...",
+    checklist_indent_title: "Indent (Tab)",
+    checklist_outdent_title: "Outdent (Shift+Tab)",
+    checklist_drag_title: "Drag to reorder",
     confirm_delete_note: "Permanently delete this note? This cannot be undone.",
     confirm_import_notes: "Do you want to import {count} notes into your database?",
     status_connecting: "Connecting to Filen and starting sync...",
@@ -136,6 +142,7 @@ const translations = {
     color_pink: "Rosa",
     btn_creator_image_title: "Aggiungi immagine",
     btn_creator_archive_title: "Archivia nota",
+    btn_creator_trash_title: "Elimina bozza",
     btn_creator_close: "Chiudi",
     section_header_pinned: "In evidenza",
     section_header_notes: "Note",
@@ -162,6 +169,8 @@ const translations = {
     btn_modal_trash_delete_forever_title: "Elimina definitivamente",
     modal_last_edited: "Modificato {time}",
     btn_modal_close: "Chiudi",
+    settings_filen_thanks: "Un ringraziamento speciale a Filen per il loro {sdk}.",
+    settings_license_notice: "Questo progetto è rilasciato sotto licenza GNU Affero General Public License v3 (AGPL-3.0).",
     settings_header: "Impostazioni e Sincronizzazione Sicura",
     btn_settings_close_aria: "Chiudi impostazioni",
     settings_section_appearance: "Aspetto",
@@ -189,6 +198,9 @@ const translations = {
     checklist_add_item: "Aggiungi elemento",
     checklist_remove_item_title: "Rimuovi elemento",
     checklist_text_placeholder: "Testo...",
+    checklist_indent_title: "Rientra (Tab)",
+    checklist_outdent_title: "Riduci rientro (Shift+Tab)",
+    checklist_drag_title: "Trascina per riordinare",
     confirm_delete_note: "Eliminare permanentemente questa nota? L'azione non può essere annullata.",
     confirm_import_notes: "Vuoi importare {count} note nel database?",
     status_connecting: "Connessione a Filen e avvio sincronizzazione...",
@@ -237,6 +249,7 @@ const translations = {
     color_pink: "Rosa",
     btn_creator_image_title: "Bild hinzufügen",
     btn_creator_archive_title: "Notiz archivieren",
+    btn_creator_trash_title: "Notiz verwerfen",
     btn_creator_close: "Schließen",
     section_header_pinned: "Angeheftet",
     section_header_notes: "Notizen",
@@ -263,6 +276,8 @@ const translations = {
     btn_modal_trash_delete_forever_title: "Endgültig löschen",
     modal_last_edited: "Bearbeitet am {time}",
     btn_modal_close: "Schließen",
+    settings_filen_thanks: "Besonderer Dank geht an Filen für deren {sdk}.",
+    settings_license_notice: "Dieses Projekt ist unter der GNU Affero General Public License v3 (AGPL-3.0) lizenziert.",
     settings_header: "Einstellungen & Sichere Synchronisation",
     btn_settings_close_aria: "Einstellungen schließen",
     settings_section_appearance: "Aussehen",
@@ -290,6 +305,9 @@ const translations = {
     checklist_add_item: "Eintrag hinzufügen",
     checklist_remove_item_title: "Eintrag entfernen",
     checklist_text_placeholder: "Text...",
+    checklist_indent_title: "Einrücken (Tab)",
+    checklist_outdent_title: "Ausrücken (Shift+Tab)",
+    checklist_drag_title: "Ziehen zum Umordnen",
     confirm_delete_note: "Diese Notiz dauerhaft löschen? Dies kann nicht rückgängig gemacht werden.",
     confirm_import_notes: "Möchten Sie {count} Notizen in Ihre Datenbank importieren?",
     status_connecting: "Verbindung zu Filen wird hergestellt und Synchronisation gestartet...",
@@ -338,6 +356,7 @@ const translations = {
     color_pink: "Rosa",
     btn_creator_image_title: "Añadir imagen",
     btn_creator_archive_title: "Archivar nota",
+    btn_creator_trash_title: "Descartar nota",
     btn_creator_close: "Cerrar",
     section_header_pinned: "Fijadas",
     section_header_notes: "Notas",
@@ -364,6 +383,8 @@ const translations = {
     btn_modal_trash_delete_forever_title: "Eliminar permanentemente",
     modal_last_edited: "Editado {time}",
     btn_modal_close: "Cerrar",
+    settings_filen_thanks: "Agradecimiento especial a Filen por su {sdk}.",
+    settings_license_notice: "Este proyecto está bajo la Licencia Pública General de Affero de GNU v3 (AGPL-3.0).",
     settings_header: "Ajustes y Sincronización Segura",
     btn_settings_close_aria: "Cerrar ajustes",
     settings_section_appearance: "Apariencia",
@@ -391,6 +412,9 @@ const translations = {
     checklist_add_item: "Añadir elemento",
     checklist_remove_item_title: "Eliminar elemento",
     checklist_text_placeholder: "Texto...",
+    checklist_indent_title: "Sangrar (Tab)",
+    checklist_outdent_title: "Reducir sangría (Shift+Tab)",
+    checklist_drag_title: "Arrastrar para reordenar",
     confirm_delete_note: "¿Eliminar permanentemente esta nota? Esto no se puede deshacer.",
     confirm_import_notes: "¿Quieres importar {count} notas a tu base de datos?",
     status_connecting: "Conectando a Filen e iniciando sincronización...",
@@ -439,6 +463,7 @@ const translations = {
     color_pink: "Rose",
     btn_creator_image_title: "Ajouter une image",
     btn_creator_archive_title: "Archiver la note",
+    btn_creator_trash_title: "Ignorer la note",
     btn_creator_close: "Fermer",
     section_header_pinned: "Épinglées",
     section_header_notes: "Notes",
@@ -465,6 +490,8 @@ const translations = {
     btn_modal_trash_delete_forever_title: "Supprimer définitivement",
     modal_last_edited: "Modifié {time}",
     btn_modal_close: "Fermer",
+    settings_filen_thanks: "Un grand merci à Filen pour leur {sdk}.",
+    settings_license_notice: "Ce projet est sous licence GNU Affero General Public License v3 (AGPL-3.0).",
     settings_header: "Paramètres & Synchronisation Sécurisée",
     btn_settings_close_aria: "Fermer les paramètres",
     settings_section_appearance: "Apparence",
@@ -492,6 +519,9 @@ const translations = {
     checklist_add_item: "Ajouter un élément",
     checklist_remove_item_title: "Supprimer l'élément",
     checklist_text_placeholder: "Texte...",
+    checklist_indent_title: "Indenter (Tab)",
+    checklist_outdent_title: "Désindenter (Shift+Tab)",
+    checklist_drag_title: "Faire glisser pour réorganiser",
     confirm_delete_note: "Supprimer définitivement cette note ? Cette action est irréversible.",
     confirm_import_notes: "Voulez-vous importer {count} notes dans votre base de données ?",
     status_connecting: "Connexion à Filen et démarrage de la synchronisation...",
@@ -574,6 +604,17 @@ export function applyTranslations(root = document) {
       } else {
         el.appendChild(document.createTextNode(text));
       }
+    }
+  });
+
+  // Translate HTML contents
+  root.querySelectorAll('[data-i18n-html]').forEach(el => {
+    const key = el.getAttribute('data-i18n-html');
+    const text = t(key, {
+      sdk: '<a href="https://github.com/FilenCloudDienste/filen-sdk-ts" target="_blank">SDK</a>'
+    });
+    if (text) {
+      el.innerHTML = text;
     }
   });
 

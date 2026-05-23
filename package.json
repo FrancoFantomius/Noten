@@ -1,8 +1,8 @@
 {
   "name": "noten",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Secure local-first notes with Filen sync integration.",
-  "license": "Apache-2.0",
+  "license": "AGPL-3.0-only",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -11,10 +11,10 @@
     "deploy": "vite build"
   },
   "dependencies": {
-    "@filen/sdk": "^0.3.12"
+    "@filen/sdk": "^0.1.171"
   },
   "devDependencies": {
-    "vite": "^5.0.0",
-    "vite-plugin-node-polyfills": "^0.22.0"
+    "vite": "^8.0.14",
+    "vite-plugin-node-polyfills": "^0.28.0"
   }
 }

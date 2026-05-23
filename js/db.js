@@ -419,7 +419,6 @@ async function runSync() {
 
     // Helper functions for file upload and download
     const uploadNoteToFilen = async (localDoc) => {
-      const filePath = `/Noten/notes/${localDoc._id}.json`;
       const payload = {
         _id: localDoc._id,
         type: localDoc.type,
@@ -434,10 +433,29 @@ async function runSync() {
         images: localDoc.images || [],
         createdAt: localDoc.createdAt
       };
-      
-      const item = await filenClient.fs().writeFile({
-        path: filePath,
-        content: Buffer.from(JSON.stringify(payload), 'utf-8')
+
+      // Resolve the parent directory UUID on Filen
+      const parentUUID = await filenClient.fs().pathToItemUUID({
+        path: '/Noten/notes',
+        type: 'directory'
+      });
+
+      if (!parentUUID) {
+        throw new Error("Could not resolve parent directory UUID on Filen.");
+      }
+
+      // Convert payload to File object for browser-compatible upload
+      const jsonStr = JSON.stringify(payload);
+      const blob = new Blob([jsonStr], { type: 'application/json' });
+      const file = new File([blob], `${localDoc._id}.json`, { 
+        type: 'application/json',
+        lastModified: localDoc.updatedAt 
+      });
+
+      const item = await filenClient.cloud().uploadWebFile({
+        file,
+        parent: parentUUID,
+        name: `${localDoc._id}.json`
       });
       
       // Update local PouchDB document with sync metadata

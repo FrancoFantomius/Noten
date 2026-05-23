@@ -50,6 +50,10 @@ const elements = {
   btnCreatorArchive: document.getElementById('btn-creator-archive'),
   btnCreatorClose: document.getElementById('btn-creator-close'),
   btnQuickTodo: document.getElementById('btn-quick-todo'),
+  btnQuickImage: document.getElementById('btn-quick-image'),
+  btnCreatorChecklistToggle: document.getElementById('btn-creator-checklist-toggle'),
+  btnCreatorTrash: document.getElementById('btn-creator-trash'),
+  creatorChecklistView: document.getElementById('creator-checklist-view'),
   btnCreatorImage: document.getElementById('btn-creator-image'),
   creatorImageInput: document.getElementById('creator-image-input'),
   creatorImagesPreview: document.getElementById('creator-images-preview'),
@@ -106,6 +110,7 @@ let isCreatorPinned = false;
 let isModalPinned = false;
 let editingNoteId = null;
 let isModalChecklistMode = false;
+let isCreatorChecklistMode = false;
 
 /**
  * Initialize UI event listeners
@@ -192,11 +197,16 @@ export function initUI(callbacks) {
     }
   });
 
-  // Switch from creator title to creator body on Enter
+  // Switch from creator title to creator body/checklist on Enter
   elements.creatorTitle.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();
-      elements.creatorBody.focus();
+      if (isCreatorChecklistMode) {
+        const firstInput = elements.creatorChecklistView.querySelector('.modal-checklist-input');
+        if (firstInput) firstInput.focus();
+      } else {
+        elements.creatorBody.focus();
+      }
     }
   });
   
@@ -225,8 +235,58 @@ export function initUI(callbacks) {
   elements.btnQuickTodo.addEventListener('click', (e) => {
     e.stopPropagation();
     expandNoteCreator();
+    isCreatorChecklistMode = true;
+    elements.btnCreatorChecklistToggle.classList.add('active');
     elements.creatorBody.value = '- [ ] ';
-    elements.creatorBody.focus();
+    renderCreatorChecklist('- [ ] ');
+    elements.creatorChecklistView.classList.remove('hidden');
+    elements.creatorBody.classList.add('hidden');
+    const firstInput = elements.creatorChecklistView.querySelector('.modal-checklist-input');
+    if (firstInput) setTimeout(() => firstInput.focus(), 100);
+  });
+
+  // Quick image helper
+  elements.btnQuickImage.addEventListener('click', (e) => {
+    e.stopPropagation();
+    expandNoteCreator();
+    elements.creatorImageInput.click();
+  });
+
+  // Creator Discard/Trash button
+  elements.btnCreatorTrash.addEventListener('click', (e) => {
+    e.stopPropagation();
+    discardNoteCreator();
+  });
+
+  // Creator Checklist Toggle
+  elements.btnCreatorChecklistToggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (isCreatorChecklistMode) {
+      // Switch to raw text mode: serialize checklist to textarea
+      let serialized = serializeCreatorChecklist();
+      serialized = convertChecklistToText(serialized);
+      elements.creatorBody.value = serialized;
+      elements.creatorChecklistView.classList.add('hidden');
+      elements.creatorChecklistView.innerHTML = '';
+      elements.creatorBody.classList.remove('hidden');
+      isCreatorChecklistMode = false;
+      elements.btnCreatorChecklistToggle.classList.remove('active');
+      elements.creatorBody.focus();
+    } else {
+      // Switch to checklist mode: parse textarea into checklist
+      let bodyText = elements.creatorBody.value;
+      if (!hasChecklistItems(bodyText)) {
+        bodyText = convertTextToChecklist(bodyText);
+        elements.creatorBody.value = bodyText;
+      }
+      renderCreatorChecklist(bodyText);
+      elements.creatorChecklistView.classList.remove('hidden');
+      elements.creatorBody.classList.add('hidden');
+      isCreatorChecklistMode = true;
+      elements.btnCreatorChecklistToggle.classList.add('active');
+      const firstInput = elements.creatorChecklistView.querySelector('.modal-checklist-input');
+      if (firstInput) firstInput.focus();
+    }
   });
 
   // Creator Image actions
@@ -328,6 +388,33 @@ export function initUI(callbacks) {
     }
   });
 
+  // Focus textarea/checklist when clicking empty area of creator expanded container
+  elements.creatorExpanded.addEventListener('click', (e) => {
+    // Avoid focusing if clicking on interactive elements like inputs, buttons, checkboxes, tag badges/remove buttons
+    if (
+      e.target.closest('input') ||
+      e.target.closest('button') ||
+      e.target.closest('label') ||
+      e.target.closest('.tag-badge') ||
+      e.target.closest('.tag-input-wrapper') ||
+      e.target.closest('.note-images-preview')
+    ) {
+      return;
+    }
+
+    if (isCreatorChecklistMode) {
+      const inputs = elements.creatorChecklistView.querySelectorAll('.modal-checklist-input');
+      if (inputs.length > 0) {
+        inputs[inputs.length - 1].focus();
+      } else {
+        const addBtn = elements.creatorChecklistView.querySelector('.modal-checklist-add');
+        if (addBtn) addBtn.focus();
+      }
+    } else {
+      elements.creatorBody.focus();
+    }
+  });
+
   // Modal Image actions
   elements.btnModalImage.addEventListener('click', (e) => {
     e.stopPropagation();
@@ -364,8 +451,9 @@ export function initUI(callbacks) {
   // Modal Checklist Toggle
   elements.btnModalChecklistToggle.addEventListener('click', () => {
     if (isModalChecklistMode) {
-      // Switch to raw text mode: serialize checklist to textarea
-      const serialized = serializeModalChecklist();
+      // Switch to raw text mode: serialize checklist to textarea and strip markers
+      let serialized = serializeModalChecklist();
+      serialized = convertChecklistToText(serialized);
       elements.modalBodyText.value = serialized;
       elements.modalChecklistView.classList.add('hidden');
       elements.modalChecklistView.innerHTML = '';
@@ -375,14 +463,18 @@ export function initUI(callbacks) {
       elements.modalBodyText.focus();
     } else {
       // Switch to checklist mode: parse textarea into checklist
-      const bodyText = elements.modalBodyText.value;
-      if (hasChecklistItems(bodyText)) {
-        renderModalChecklist(bodyText);
-        elements.modalChecklistView.classList.remove('hidden');
-        elements.modalBodyText.classList.add('hidden');
-        isModalChecklistMode = true;
-        elements.btnModalChecklistToggle.classList.add('active');
+      let bodyText = elements.modalBodyText.value;
+      if (!hasChecklistItems(bodyText)) {
+        bodyText = convertTextToChecklist(bodyText);
+        elements.modalBodyText.value = bodyText;
       }
+      renderModalChecklist(bodyText);
+      elements.modalChecklistView.classList.remove('hidden');
+      elements.modalBodyText.classList.add('hidden');
+      isModalChecklistMode = true;
+      elements.btnModalChecklistToggle.classList.add('active');
+      const firstInput = elements.modalChecklistView.querySelector('.modal-checklist-input');
+      if (firstInput) firstInput.focus();
     }
   });
 
@@ -465,6 +557,28 @@ export function initUI(callbacks) {
   // FAB Event Handler
   elements.btnFabCreate.addEventListener('click', () => {
     openNewNoteModal();
+  });
+
+  // Set up dragover for checklist containers to support reordering
+  [elements.modalChecklistView, elements.creatorChecklistView].forEach((container) => {
+    container.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      const draggingElement = container.querySelector('.modal-checklist-item.dragging');
+      if (!draggingElement) return;
+
+      const afterElement = getDragAfterElement(container, e.clientY);
+      const addButton = container.querySelector('.modal-checklist-add');
+
+      if (afterElement == null) {
+        if (addButton) {
+          container.insertBefore(draggingElement, addButton);
+        } else {
+          container.appendChild(draggingElement);
+        }
+      } else {
+        container.insertBefore(draggingElement, afterElement);
+      }
+    });
   });
 
   // Initial Lucide Icons rendering
@@ -551,6 +665,11 @@ function expandNoteCreator() {
   elements.noteCreator.className = 'note-creator-container color-default';
   noteCreatorTags = [];
   noteCreatorImages = [];
+  isCreatorChecklistMode = false;
+  elements.btnCreatorChecklistToggle.classList.remove('active');
+  elements.creatorChecklistView.innerHTML = '';
+  elements.creatorChecklistView.classList.add('hidden');
+  elements.creatorBody.classList.remove('hidden');
   renderCreatorTags();
   renderCreatorImages();
   
@@ -560,7 +679,9 @@ function expandNoteCreator() {
 
 async function closeNoteCreator() {
   const title = elements.creatorTitle.value.trim();
-  const body = elements.creatorBody.value.trim();
+  const body = isCreatorChecklistMode 
+    ? serializeCreatorChecklist() 
+    : elements.creatorBody.value.trim();
   
   // Auto save note if there is any content
   if (title || body || noteCreatorTags.length > 0 || noteCreatorImages.length > 0) {
@@ -587,8 +708,31 @@ async function closeNoteCreator() {
   // Reset inputs
   elements.creatorTitle.value = '';
   elements.creatorBody.value = '';
+  elements.creatorChecklistView.innerHTML = '';
+  elements.creatorChecklistView.classList.add('hidden');
+  elements.creatorBody.classList.remove('hidden');
   noteCreatorTags = [];
   noteCreatorImages = [];
+  isCreatorChecklistMode = false;
+  elements.btnCreatorChecklistToggle.classList.remove('active');
+  renderCreatorImages();
+  
+  // Collapse UI
+  elements.creatorCollapsed.classList.remove('hidden');
+  elements.creatorExpanded.classList.add('hidden');
+}
+
+function discardNoteCreator() {
+  // Reset inputs without saving
+  elements.creatorTitle.value = '';
+  elements.creatorBody.value = '';
+  elements.creatorChecklistView.innerHTML = '';
+  elements.creatorChecklistView.classList.add('hidden');
+  elements.creatorBody.classList.remove('hidden');
+  noteCreatorTags = [];
+  noteCreatorImages = [];
+  isCreatorChecklistMode = false;
+  elements.btnCreatorChecklistToggle.classList.remove('active');
   renderCreatorImages();
   
   // Collapse UI
@@ -952,16 +1096,15 @@ function openNoteModal(noteId) {
 
   // Checklist mode detection
   const noteHasChecklist = hasChecklistItems(note.body);
+  elements.btnModalChecklistToggle.classList.remove('hidden');
   if (noteHasChecklist) {
     isModalChecklistMode = true;
-    elements.btnModalChecklistToggle.classList.remove('hidden');
     elements.btnModalChecklistToggle.classList.add('active');
     renderModalChecklist(note.body);
     elements.modalChecklistView.classList.remove('hidden');
     elements.modalBodyText.classList.add('hidden');
   } else {
     isModalChecklistMode = false;
-    elements.btnModalChecklistToggle.classList.add('hidden');
     elements.btnModalChecklistToggle.classList.remove('active');
     elements.modalChecklistView.classList.add('hidden');
     elements.modalChecklistView.innerHTML = '';
@@ -1032,7 +1175,7 @@ function openNewNoteModal() {
   elements.btnModalTrash.className = 'btn-icon';
 
   isModalChecklistMode = false;
-  elements.btnModalChecklistToggle.classList.add('hidden');
+  elements.btnModalChecklistToggle.classList.remove('hidden');
   elements.btnModalChecklistToggle.classList.remove('active');
   elements.modalChecklistView.classList.add('hidden');
   elements.modalChecklistView.innerHTML = '';
@@ -1219,7 +1362,7 @@ function escapeHtml(text) {
 
 // --- Checklist Utility functions ---
 
-const CHECKLIST_REGEX = /^- \[([ xX])\] (.*)$/;
+const CHECKLIST_REGEX = /^(\s*)- \[([ xX])\] (.*)$/;
 
 /**
  * Returns true if the body text contains any checklist items (- [ ] or - [x]).
@@ -1227,6 +1370,33 @@ const CHECKLIST_REGEX = /^- \[([ xX])\] (.*)$/;
 function hasChecklistItems(body) {
   if (!body) return false;
   return body.split('\n').some(line => CHECKLIST_REGEX.test(line));
+}
+
+/**
+ * Converts plain text lines into checklist items using the markdown prefix `- [ ]`.
+ */
+function convertTextToChecklist(text) {
+  if (!text) return '- [ ] ';
+  return text.split('\n').map(line => {
+    if (CHECKLIST_REGEX.test(line)) {
+      return line;
+    }
+    return `- [ ] ${line}`;
+  }).join('\n');
+}
+
+/**
+ * Strips the checklist prefixes from the text to restore it to plain text.
+ */
+function convertChecklistToText(text) {
+  if (!text) return '';
+  return text.split('\n').map(line => {
+    const match = line.match(CHECKLIST_REGEX);
+    if (match) {
+      return match[3];
+    }
+    return line;
+  }).join('\n');
 }
 
 /**
@@ -1254,11 +1424,14 @@ function buildChecklistDOM(bodyText, noteId, isTruncated) {
     const match = line.match(CHECKLIST_REGEX);
     if (match) {
       flushTextLines();
-      const isChecked = match[1].toLowerCase() === 'x';
-      const labelText = match[2];
+      const indent = match[1] || '';
+      const isChecked = match[2].toLowerCase() === 'x';
+      const labelText = match[3];
 
       const item = document.createElement('div');
       item.className = `checklist-item ${isChecked ? 'checked' : ''}`;
+      // Set indentation spacing
+      item.style.paddingLeft = `${indent.length * 8}px`;
 
       item.innerHTML = `
         <label class="checklist-checkbox">
@@ -1312,9 +1485,10 @@ async function toggleChecklistItem(noteId, lineIndex, isChecked) {
   const match = lines[lineIndex].match(CHECKLIST_REGEX);
   if (!match) return;
 
-  // Replace the checkbox marker
+  // Replace the checkbox marker while preserving indentation
+  const indent = match[1] || '';
   const newMarker = isChecked ? 'x' : ' ';
-  lines[lineIndex] = `- [${newMarker}] ${match[2]}`;
+  lines[lineIndex] = `${indent}- [${newMarker}] ${match[3]}`;
   note.body = lines.join('\n');
   note.updatedAt = Date.now();
 
@@ -1360,66 +1534,11 @@ function renderModalChecklist(bodyText) {
     const match = line.match(CHECKLIST_REGEX);
     if (match) {
       flushTextLines();
-      const isChecked = match[1].toLowerCase() === 'x';
-      const labelText = match[2];
+      const indent = match[1] || '';
+      const isChecked = match[2].toLowerCase() === 'x';
+      const labelText = match[3];
 
-      const item = document.createElement('div');
-      item.className = `modal-checklist-item ${isChecked ? 'checked' : ''}`;
-
-      item.innerHTML = `
-        <label class="checklist-checkbox">
-          <input type="checkbox" ${isChecked ? 'checked' : ''} ${isTrashed ? 'disabled' : ''}>
-          <span class="checklist-checkmark">
-            <svg viewBox="0 0 14 14"><polyline points="2.5 7 5.5 10.5 11.5 3.5"></polyline></svg>
-          </span>
-        </label>
-        <input type="text" class="modal-checklist-input" value="" ${isTrashed ? 'readonly' : ''}>
-        <button class="modal-checklist-delete btn-icon" title="${t('checklist_remove_item_title')}">
-          <i data-lucide="x"></i>
-        </button>
-      `;
-
-      // Set value via property to avoid XSS from innerHTML
-      item.querySelector('.modal-checklist-input').value = labelText;
-
-      // Checkbox toggle
-      const checkbox = item.querySelector('input[type="checkbox"]');
-      if (!isTrashed) {
-        checkbox.addEventListener('change', () => {
-          item.classList.toggle('checked', checkbox.checked);
-        });
-      }
-
-      // Delete item
-      if (isTrashed) {
-        item.querySelector('.modal-checklist-delete').classList.add('hidden');
-      } else {
-        item.querySelector('.modal-checklist-delete').addEventListener('click', (e) => {
-          e.stopPropagation();
-          item.remove();
-        });
-      }
-
-      // Enter key = add new item below
-      if (!isTrashed) {
-        const textInput = item.querySelector('.modal-checklist-input');
-        textInput.addEventListener('keydown', (e) => {
-          if (e.key === 'Enter') {
-            e.preventDefault();
-            addModalChecklistItem(item);
-          } else if (e.key === 'Backspace' && textInput.value === '') {
-            e.preventDefault();
-            // Focus previous item's input
-            const prevItem = item.previousElementSibling;
-            if (prevItem && prevItem.classList.contains('modal-checklist-item')) {
-              const prevInput = prevItem.querySelector('.modal-checklist-input');
-              if (prevInput) prevInput.focus();
-            }
-            item.remove();
-          }
-        });
-      }
-
+      const item = createChecklistItemElement(labelText, isChecked, indent, true, isTrashed);
       elements.modalChecklistView.appendChild(item);
     } else {
       consecutiveText.push(line);
@@ -1434,7 +1553,8 @@ function renderModalChecklist(bodyText) {
     addBtn.className = 'modal-checklist-add';
     addBtn.innerHTML = '<i data-lucide="plus"></i> <span>' + t('checklist_add_item') + '</span>';
     addBtn.addEventListener('click', () => {
-      addModalChecklistItem(null);
+      const newItem = addChecklistItemAfter(null, true);
+      newItem.querySelector('.modal-checklist-input').focus();
     });
     elements.modalChecklistView.appendChild(addBtn);
   }
@@ -1443,64 +1563,234 @@ function renderModalChecklist(bodyText) {
 }
 
 /**
- * Adds a new empty checklist item to the modal checklist view.
- * @param {HTMLElement|null} afterItem - Insert after this item, or at the end if null.
+ * Saves the current modal checklist view state to the database and syncs.
  */
-function addModalChecklistItem(afterItem) {
+async function saveModalChecklistChanges() {
+  if (!editingNoteId) return;
+  const note = decryptedNotes.find(n => n.id === editingNoteId);
+  if (note && !note.isTrashed) {
+    const bodyVal = serializeModalChecklist();
+    note.body = bodyVal;
+    note.updatedAt = Date.now();
+    elements.modalBodyText.value = bodyVal;
+    if (onSaveNoteCallback) {
+      await onSaveNoteCallback(note.id, note);
+    }
+  }
+}
+
+/**
+ * Helper to determine which element the dragged item is over.
+ */
+function getDragAfterElement(container, y) {
+  const draggableElements = [...container.querySelectorAll('.modal-checklist-item:not(.dragging)')];
+  return draggableElements.reduce((closest, child) => {
+    const box = child.getBoundingClientRect();
+    const offset = y - box.top - box.height / 2;
+    if (offset < 0 && offset > closest.offset) {
+      return { offset: offset, element: child };
+    } else {
+      return closest;
+    }
+  }, { offset: Number.NEGATIVE_INFINITY }).element;
+}
+
+/**
+ * Indent a checklist item (add 2 spaces).
+ */
+function indentChecklistItem(item, isModal) {
+  const currentIndent = item.dataset.indent || '';
+  const newIndent = currentIndent + '  ';
+  item.dataset.indent = newIndent;
+  item.style.marginLeft = `${newIndent.length * 8}px`;
+  if (isModal) {
+    saveModalChecklistChanges();
+  }
+}
+
+/**
+ * Outdent a checklist item (remove 2 spaces).
+ */
+function outdentChecklistItem(item, isModal) {
+  const currentIndent = item.dataset.indent || '';
+  if (currentIndent.length >= 2) {
+    const newIndent = currentIndent.substring(2);
+    item.dataset.indent = newIndent;
+    item.style.marginLeft = `${newIndent.length * 8}px`;
+    if (isModal) {
+      saveModalChecklistChanges();
+    }
+  }
+}
+
+/**
+ * Create a checklist item element with checkboxes, drag handles, text input, and indentation actions.
+ */
+function createChecklistItemElement(text, isChecked, indent, isModal, isTrashed) {
   const item = document.createElement('div');
-  item.className = 'modal-checklist-item';
+  item.className = `modal-checklist-item ${isChecked ? 'checked' : ''}`;
+  item.dataset.indent = indent || '';
+  item.style.marginLeft = `${(indent || '').length * 8}px`;
+
+  if (!isTrashed) {
+    item.setAttribute('draggable', 'true');
+  }
+
+  const dragHandleHtml = isTrashed ? '' : `
+    <div class="checklist-drag-handle" title="${t('checklist_drag_title')}">
+      <i data-lucide="grip-vertical"></i>
+    </div>
+  `;
+
+  const actionsHtml = isTrashed ? '' : `
+    <div class="checklist-actions">
+      <button class="btn-icon checklist-outdent" title="${t('checklist_outdent_title')}">
+        <i data-lucide="chevron-left"></i>
+      </button>
+      <button class="btn-icon checklist-indent" title="${t('checklist_indent_title')}">
+        <i data-lucide="chevron-right"></i>
+      </button>
+      <button class="modal-checklist-delete btn-icon" title="${t('checklist_remove_item_title')}">
+        <i data-lucide="x"></i>
+      </button>
+    </div>
+  `;
 
   item.innerHTML = `
+    ${dragHandleHtml}
     <label class="checklist-checkbox">
-      <input type="checkbox">
+      <input type="checkbox" ${isChecked ? 'checked' : ''} ${isTrashed ? 'disabled' : ''}>
       <span class="checklist-checkmark">
         <svg viewBox="0 0 14 14"><polyline points="2.5 7 5.5 10.5 11.5 3.5"></polyline></svg>
       </span>
     </label>
-    <input type="text" class="modal-checklist-input" value="">
-    <button class="modal-checklist-delete btn-icon" title="${t('checklist_remove_item_title')}">
-      <i data-lucide="x"></i>
-    </button>
+    <input type="text" class="modal-checklist-input" value="" ${isTrashed ? 'readonly' : ''}>
+    ${actionsHtml}
   `;
 
-  const checkbox = item.querySelector('input[type="checkbox"]');
-  checkbox.addEventListener('change', () => {
-    item.classList.toggle('checked', checkbox.checked);
-  });
-
-  item.querySelector('.modal-checklist-delete').addEventListener('click', (e) => {
-    e.stopPropagation();
-    item.remove();
-  });
-
   const textInput = item.querySelector('.modal-checklist-input');
-  textInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      addModalChecklistItem(item);
-    } else if (e.key === 'Backspace' && textInput.value === '') {
-      e.preventDefault();
-      const prevItem = item.previousElementSibling;
-      if (prevItem && prevItem.classList.contains('modal-checklist-item')) {
-        const prevInput = prevItem.querySelector('.modal-checklist-input');
-        if (prevInput) prevInput.focus();
-      }
-      item.remove();
-    }
-  });
+  textInput.value = text;
 
-  // Insert after the specified item, or before the add button
-  const addButton = elements.modalChecklistView.querySelector('.modal-checklist-add');
-  if (afterItem && afterItem.nextSibling) {
-    elements.modalChecklistView.insertBefore(item, afterItem.nextSibling);
-  } else if (addButton) {
-    elements.modalChecklistView.insertBefore(item, addButton);
-  } else {
-    elements.modalChecklistView.appendChild(item);
+  if (!isTrashed) {
+    const checkbox = item.querySelector('input[type="checkbox"]');
+    checkbox.addEventListener('change', () => {
+      item.classList.toggle('checked', checkbox.checked);
+      if (isModal) {
+        saveModalChecklistChanges();
+      }
+    });
+
+    const deleteBtn = item.querySelector('.modal-checklist-delete');
+    deleteBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      item.remove();
+      if (isModal) {
+        saveModalChecklistChanges();
+      }
+    });
+
+    const indentBtn = item.querySelector('.checklist-indent');
+    indentBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      indentChecklistItem(item, isModal);
+    });
+
+    const outdentBtn = item.querySelector('.checklist-outdent');
+    outdentBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      outdentChecklistItem(item, isModal);
+    });
+
+    // Keyboard navigation and actions
+    textInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const newItem = addChecklistItemAfter(item, isModal);
+        newItem.querySelector('.modal-checklist-input').focus();
+      } else if (e.key === 'Backspace' && textInput.value === '') {
+        e.preventDefault();
+        const prevItem = item.previousElementSibling;
+        if (prevItem && prevItem.classList.contains('modal-checklist-item')) {
+          const prevInput = prevItem.querySelector('.modal-checklist-input');
+          if (prevInput) prevInput.focus();
+        }
+        item.remove();
+        if (isModal) {
+          saveModalChecklistChanges();
+        }
+      } else if (e.key === 'Tab') {
+        e.preventDefault();
+        if (e.shiftKey) {
+          outdentChecklistItem(item, isModal);
+        } else {
+          indentChecklistItem(item, isModal);
+        }
+      } else if (e.key === 'ArrowUp' && e.altKey) {
+        e.preventDefault();
+        const prev = item.previousElementSibling;
+        if (prev && prev.classList.contains('modal-checklist-item')) {
+          item.parentNode.insertBefore(item, prev);
+          textInput.focus();
+          if (isModal) {
+            saveModalChecklistChanges();
+          }
+        }
+      } else if (e.key === 'ArrowDown' && e.altKey) {
+        e.preventDefault();
+        const next = item.nextElementSibling;
+        if (next && next.classList.contains('modal-checklist-item')) {
+          item.parentNode.insertBefore(item, next.nextSibling);
+          textInput.focus();
+          if (isModal) {
+            saveModalChecklistChanges();
+          }
+        }
+      }
+    });
+
+    // Drag events
+    item.addEventListener('dragstart', (e) => {
+      item.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    });
+
+    item.addEventListener('dragend', () => {
+      item.classList.remove('dragging');
+      if (isModal) {
+        saveModalChecklistChanges();
+      }
+    });
   }
 
-  lucide.createIcons();
-  textInput.focus();
+  // Create Lucide Icons for this item
+  if (window.lucide) {
+    window.lucide.createIcons({
+      nameAttr: 'data-lucide',
+      root: item
+    });
+  }
+
+  return item;
+}
+
+/**
+ * Adds a new checklist item below the current one, inheriting its indentation level.
+ */
+function addChecklistItemAfter(afterItem, isModal) {
+  const indent = afterItem ? (afterItem.dataset.indent || '') : '';
+  const newItem = createChecklistItemElement('', false, indent, isModal, false);
+  const container = isModal ? elements.modalChecklistView : elements.creatorChecklistView;
+  const addButton = container.querySelector('.modal-checklist-add');
+
+  if (afterItem && afterItem.nextSibling) {
+    container.insertBefore(newItem, afterItem.nextSibling);
+  } else if (addButton) {
+    container.insertBefore(newItem, addButton);
+  } else {
+    container.appendChild(newItem);
+  }
+
+  return newItem;
 }
 
 /**
@@ -1515,11 +1805,85 @@ function serializeModalChecklist() {
       const checkbox = child.querySelector('input[type="checkbox"]');
       const textInput = child.querySelector('.modal-checklist-input');
       const marker = checkbox.checked ? 'x' : ' ';
-      lines.push(`- [${marker}] ${textInput.value}`);
+      const indent = child.dataset.indent || '';
+      lines.push(`${indent}- [${marker}] ${textInput.value}`);
     } else if (child.classList.contains('modal-checklist-text')) {
       lines.push(child.value);
     }
-    // Skip the add button
+  }
+
+  return lines.join('\n').trim();
+}
+
+/**
+ * Renders an editable checklist view inside the note creator.
+ */
+function renderCreatorChecklist(bodyText) {
+  elements.creatorChecklistView.innerHTML = '';
+  const lines = bodyText.split('\n');
+  let consecutiveText = [];
+
+  const flushTextLines = () => {
+    if (consecutiveText.length > 0) {
+      const textEl = document.createElement('textarea');
+      textEl.className = 'modal-checklist-text';
+      textEl.value = consecutiveText.join('\n');
+      textEl.rows = consecutiveText.length;
+      textEl.placeholder = t('checklist_text_placeholder');
+      autoResizeTextarea(textEl);
+      textEl.addEventListener('input', () => autoResizeTextarea(textEl));
+      elements.creatorChecklistView.appendChild(textEl);
+      consecutiveText = [];
+    }
+  };
+
+  lines.forEach((line) => {
+    const match = line.match(CHECKLIST_REGEX);
+    if (match) {
+      flushTextLines();
+      const indent = match[1] || '';
+      const isChecked = match[2].toLowerCase() === 'x';
+      const labelText = match[3];
+
+      const item = createChecklistItemElement(labelText, isChecked, indent, false, false);
+      elements.creatorChecklistView.appendChild(item);
+    } else {
+      consecutiveText.push(line);
+    }
+  });
+
+  flushTextLines();
+
+  // Add "new item" button
+  const addBtn = document.createElement('button');
+  addBtn.className = 'modal-checklist-add';
+  addBtn.innerHTML = '<i data-lucide="plus"></i> <span>' + t('checklist_add_item') + '</span>';
+  addBtn.addEventListener('click', () => {
+    const newItem = addChecklistItemAfter(null, false);
+    newItem.querySelector('.modal-checklist-input').focus();
+  });
+  elements.creatorChecklistView.appendChild(addBtn);
+
+  lucide.createIcons();
+}
+
+/**
+ * Serializes the creator checklist view back to plain text.
+ */
+function serializeCreatorChecklist() {
+  const children = elements.creatorChecklistView.children;
+  const lines = [];
+
+  for (const child of children) {
+    if (child.classList.contains('modal-checklist-item')) {
+      const checkbox = child.querySelector('input[type="checkbox"]');
+      const textInput = child.querySelector('.modal-checklist-input');
+      const marker = checkbox.checked ? 'x' : ' ';
+      const indent = child.dataset.indent || '';
+      lines.push(`${indent}- [${marker}] ${textInput.value}`);
+    } else if (child.classList.contains('modal-checklist-text')) {
+      lines.push(child.value);
+    }
   }
 
   return lines.join('\n').trim();
