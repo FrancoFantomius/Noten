@@ -71,7 +71,7 @@ export async function getSyncSettings() {
     return await db.get('_local/sync_settings');
   } catch (err) {
     if (err.status === 404) {
-      return { email: '', password: '', twoFactorCode: '', enabled: false };
+      return { email: '', password: '', twoFactorCode: '', username: '', avatarURL: '', enabled: false };
     }
     throw err;
   }
@@ -227,7 +227,10 @@ export async function deleteNoteFromDB(id) {
 export function startSync(settings) {
   stopSync();
 
-  if (!settings.enabled || !settings.email || !settings.password) {
+  const hasCredentials = settings.email && settings.password;
+  const hasSession = settings.apiKey && settings.masterKeys;
+
+  if (!settings.enabled || (!hasCredentials && !hasSession)) {
     if (onSyncStatusCallback) onSyncStatusCallback('offline');
     return;
   }
@@ -323,11 +326,81 @@ async function initFilenAndSync(settings) {
       metadataCache: true
     });
     
-    await filenClient.login({
-      email: settings.email,
-      password: settings.password,
-      twoFactorCode: settings.twoFactorCode || undefined
-    });
+    if (settings.apiKey && settings.masterKeys) {
+      // Initialize with existing session keys
+      filenClient.init({
+        apiKey: settings.apiKey,
+        masterKeys: settings.masterKeys,
+        publicKey: settings.publicKey,
+        privateKey: settings.privateKey,
+        baseFolderUUID: settings.baseFolderUUID,
+        userId: settings.userId,
+        authVersion: settings.authVersion,
+        metadataCache: true
+      });
+
+      // Fetch and update profile info in background if needed
+      try {
+        const accountInfo = await filenClient.user().account();
+        if (accountInfo) {
+          const nickname = accountInfo.nickName || accountInfo.displayName;
+          const avatarURL = accountInfo.avatarURL || '';
+          let changed = false;
+          if (nickname && nickname !== settings.username) {
+            settings.username = nickname;
+            changed = true;
+          }
+          if (avatarURL !== settings.avatarURL) {
+            settings.avatarURL = avatarURL;
+            changed = true;
+          }
+          if (changed) {
+            await saveSyncSettings(settings);
+          }
+        }
+      } catch (e) {
+        console.warn("[Sync] Failed to update profile info in background:", e);
+      }
+    } else if (settings.email && settings.password) {
+      // Perform initial login
+      await filenClient.login({
+        email: settings.email,
+        password: settings.password,
+        twoFactorCode: settings.twoFactorCode || undefined
+      });
+      
+      // Fetch nickname and avatar from Filen
+      let nickname = settings.email.split('@')[0];
+      let avatarURL = '';
+      try {
+        const accountInfo = await filenClient.user().account();
+        if (accountInfo) {
+          if (accountInfo.nickName) nickname = accountInfo.nickName;
+          else if (accountInfo.displayName) nickname = accountInfo.displayName;
+          if (accountInfo.avatarURL) avatarURL = accountInfo.avatarURL;
+        }
+      } catch (e) {
+        console.warn("[Sync] Failed to fetch profile info during login:", e);
+      }
+
+      const sessionSettings = {
+        enabled: true,
+        username: nickname,
+        avatarURL: avatarURL,
+        apiKey: filenClient.config.apiKey,
+        masterKeys: filenClient.config.masterKeys,
+        publicKey: filenClient.config.publicKey,
+        privateKey: filenClient.config.privateKey,
+        baseFolderUUID: filenClient.config.baseFolderUUID,
+        userId: filenClient.config.userId,
+        authVersion: filenClient.config.authVersion
+      };
+      
+      // Save session settings and discard plaintext email/password
+      await saveSyncSettings(sessionSettings);
+    } else {
+      throw new Error("No credentials or active session keys available");
+    }
     
     // Ensure Directory structure exists
     try {
@@ -354,7 +427,7 @@ async function initFilenAndSync(settings) {
 async function runSync() {
   if (!filenClient) return;
   const settings = await getSyncSettings();
-  if (!settings.enabled || !settings.email || !settings.password) return;
+  if (!settings.enabled || !filenClient.isLoggedIn()) return;
   
   if (onSyncStatusCallback) onSyncStatusCallback('syncing');
 

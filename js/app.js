@@ -17,7 +17,12 @@ const dom = {
   settingsTwofactor: document.getElementById('sync-twofactor'),
   btnSaveSync: document.getElementById('btn-save-sync'),
   btnDisableSync: document.getElementById('btn-disable-sync'),
+  btnPurgeSync: document.getElementById('btn-purge-sync'),
   syncSettingsStatus: document.getElementById('sync-settings-status'),
+  syncActiveProfile: document.getElementById('sync-active-profile'),
+  syncProfileUsername: document.getElementById('sync-profile-username'),
+  syncProfileAvatar: document.getElementById('sync-profile-avatar'),
+  syncCredentialsContainer: document.getElementById('sync-credentials-container'),
   
   // Import/Export
   btnExportBackup: document.getElementById('btn-export-backup'),
@@ -161,14 +166,42 @@ async function handleDeleteNote(id) {
 async function handleOpenSettings() {
   const syncSettings = await db.getSyncSettings();
   
-  dom.settingsEmail.value = syncSettings.email || '';
-  dom.settingsPassword.value = syncSettings.password || '';
-  dom.settingsTwofactor.value = syncSettings.twoFactorCode || '';
+  dom.settingsEmail.value = '';
+  dom.settingsPassword.value = '';
+  dom.settingsTwofactor.value = '';
 
-  if (syncSettings.enabled && syncSettings.email && syncSettings.password) {
+  const isSyncActive = syncSettings.enabled && syncSettings.apiKey;
+  const profileIcon = document.getElementById('sync-profile-icon');
+
+  if (isSyncActive) {
+    dom.syncActiveProfile.classList.remove('hidden');
+    dom.syncProfileUsername.textContent = syncSettings.username || 'Connected';
+    if (syncSettings.avatarURL) {
+      dom.syncProfileAvatar.src = syncSettings.avatarURL;
+      dom.syncProfileAvatar.classList.remove('hidden');
+      if (profileIcon) profileIcon.classList.add('hidden');
+      dom.syncProfileAvatar.onerror = () => {
+        dom.syncProfileAvatar.classList.add('hidden');
+        if (profileIcon) profileIcon.classList.remove('hidden');
+      };
+    } else {
+      dom.syncProfileAvatar.src = '';
+      dom.syncProfileAvatar.classList.add('hidden');
+      if (profileIcon) profileIcon.classList.remove('hidden');
+    }
+    dom.syncCredentialsContainer.classList.add('hidden');
+    dom.btnSaveSync.classList.add('hidden');
     dom.btnDisableSync.classList.remove('hidden');
+    dom.btnPurgeSync.classList.remove('hidden');
   } else {
+    dom.syncActiveProfile.classList.add('hidden');
+    dom.syncProfileAvatar.src = '';
+    dom.syncProfileAvatar.classList.add('hidden');
+    if (profileIcon) profileIcon.classList.remove('hidden');
+    dom.syncCredentialsContainer.classList.remove('hidden');
+    dom.btnSaveSync.classList.remove('hidden');
     dom.btnDisableSync.classList.add('hidden');
+    dom.btnPurgeSync.classList.add('hidden');
   }
 
   ui.showSettings();
@@ -178,6 +211,7 @@ async function handleOpenSettings() {
 function setupSettingsListeners() {
   dom.btnSaveSync.addEventListener('click', handleSaveSyncSettings);
   dom.btnDisableSync.addEventListener('click', handleDisableSync);
+  dom.btnPurgeSync.addEventListener('click', handlePurgeLocalData);
   
   // Backup triggers
   dom.btnExportBackup.addEventListener('click', handleExportBackup);
@@ -206,7 +240,7 @@ async function handleSaveSyncSettings() {
     return;
   }
 
-  const syncSettings = {
+  const tempSettings = {
     email: email,
     password: password,
     twoFactorCode: twoFactorCode,
@@ -216,9 +250,7 @@ async function handleSaveSyncSettings() {
   try {
     showSyncStatus(t('status_connecting'), "info");
     
-    // Save settings and start sync
-    await db.saveSyncSettings(syncSettings);
-    db.startSync(syncSettings);
+    db.startSync(tempSettings);
     
     dom.btnDisableSync.classList.remove('hidden');
     showSyncStatus(t('status_sync_enabled'), "success");
@@ -234,11 +266,44 @@ async function handleDisableSync() {
   const settings = await db.getSyncSettings();
   settings.enabled = false;
   
+  // Clear the session keys
+  delete settings.username;
+  delete settings.avatarURL;
+  delete settings.apiKey;
+  delete settings.masterKeys;
+  delete settings.publicKey;
+  delete settings.privateKey;
+  delete settings.baseFolderUUID;
+  delete settings.userId;
+  delete settings.authVersion;
+
+  // Clear legacy credentials if present
+  delete settings.email;
+  delete settings.password;
+  delete settings.twoFactorCode;
+
   await db.saveSyncSettings(settings);
   db.stopSync();
   
+  dom.syncActiveProfile.classList.add('hidden');
+  dom.syncCredentialsContainer.classList.remove('hidden');
+  dom.btnSaveSync.classList.remove('hidden');
   dom.btnDisableSync.classList.add('hidden');
+  dom.btnPurgeSync.classList.add('hidden');
+  
   showSyncStatus(t('status_sync_disabled'), "success");
+}
+
+async function handlePurgeLocalData() {
+  if (confirm(t('confirm_purge_local_data'))) {
+    try {
+      showSyncStatus(t('status_purging'), "info");
+      await db.destroyDatabase();
+    } catch (err) {
+      console.error("Purging database failed:", err);
+      showSyncStatus("Purging failed. Try again.", "error");
+    }
+  }
 }
 
 function showSyncStatus(text, type) {

@@ -4,6 +4,7 @@ const ASSETS_TO_CACHE = [
   './index.html',
   './manifest.json',
   './icon.svg',
+  './icon-maskable.svg',
   './css/style.css',
   './js/app.js',
   'https://cdn.jsdelivr.net/npm/pouchdb@8.0.1/dist/pouchdb.min.js',

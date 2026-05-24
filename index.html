@@ -349,28 +349,41 @@
             account. All notes synced will be
             fully encrypted client-side; Filen will never see your password or plaintext notes.</p>
 
-          <div class="input-group">
-            <label for="sync-email" data-i18n="settings_sync_email">Filen Email</label>
-            <input type="email" id="sync-email" data-i18n-placeholder="settings_sync_email_placeholder"
-              placeholder="your-email@example.com">
+          <div id="sync-active-profile" class="hidden">
+            <div class="active-profile-info">
+              <img id="sync-profile-avatar" class="profile-avatar hidden" src="" alt="User Avatar">
+              <i id="sync-profile-icon" data-lucide="user" class="profile-icon"></i>
+              <div>
+                <span class="profile-label">Logged in as</span>
+                <span id="sync-profile-username" class="profile-username">username</span>
+              </div>
+            </div>
           </div>
 
-          <div class="input-group">
-            <label for="sync-password" data-i18n="settings_sync_password">Filen Password</label>
-            <input type="password" id="sync-password" data-i18n-placeholder="settings_sync_password_placeholder"
-              placeholder="Enter your Filen password...">
-          </div>
+          <div id="sync-credentials-container">
+            <div class="input-group">
+              <label for="sync-email" data-i18n="settings_sync_email">Filen Email</label>
+              <input type="email" id="sync-email" data-i18n-placeholder="settings_sync_email_placeholder"
+                placeholder="your-email@example.com">
+            </div>
 
-          <div class="input-group">
-            <label for="sync-twofactor" data-i18n="settings_sync_twofactor">Two-Factor Auth Code (Optional)</label>
-            <input type="text" id="sync-twofactor" data-i18n-placeholder="settings_sync_twofactor_placeholder"
-              placeholder="6-digit code if enabled...">
+            <div class="input-group">
+              <label for="sync-password" data-i18n="settings_sync_password">Filen Password</label>
+              <input type="password" id="sync-password" data-i18n-placeholder="settings_sync_password_placeholder"
+                placeholder="Enter your Filen password...">
+            </div>
+
+            <div class="input-group">
+              <label for="sync-twofactor" data-i18n="settings_sync_twofactor">Two-Factor Auth Code (Optional)</label>
+              <input type="text" id="sync-twofactor" data-i18n-placeholder="settings_sync_twofactor_placeholder"
+                placeholder="6-digit code if enabled...">
+            </div>
           </div>
 
           <div class="settings-actions">
             <button id="btn-save-sync" class="btn btn-primary" data-i18n="btn_save_sync">Save & Enable Sync</button>
-            <button id="btn-disable-sync" class="btn btn-danger hidden" data-i18n="btn_disable_sync">Disable
-              Sync</button>
+            <button id="btn-disable-sync" class="btn btn-danger hidden" data-i18n="btn_disable_sync">Disable Sync</button>
+            <button id="btn-purge-sync" class="btn btn-danger hidden" data-i18n="btn_purge_sync">Disable Sync & Delete Local Data</button>
           </div>
           <span id="sync-settings-status" class="status-message"></span>
         </section>
