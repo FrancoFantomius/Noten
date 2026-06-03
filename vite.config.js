@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
+  base: './',
   resolve: {
     alias: {
       'fs-extra': path.resolve(__dirname, 'js/mocks/fs-extra.js'),
