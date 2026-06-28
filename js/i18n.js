@@ -63,7 +63,7 @@ const translations = {
     modal_last_edited: "Edited {time}",
     btn_modal_close: "Close",
     settings_filen_thanks: "Special thanks to Filen for their {sdk}.",
-    settings_license_notice: "This project is licensed under the GNU Affero General Public License v3 (AGPL-3.0).",
+    settings_license_notice: "Check us out on GitHub {repo}.",
     settings_header: "Settings & Secure Sync",
     btn_settings_close_aria: "Close settings",
     settings_section_appearance: "Appearance",
@@ -173,7 +173,7 @@ const translations = {
     modal_last_edited: "Modificato {time}",
     btn_modal_close: "Chiudi",
     settings_filen_thanks: "Un ringraziamento speciale a Filen per il loro {sdk}.",
-    settings_license_notice: "Questo progetto è rilasciato sotto licenza GNU Affero General Public License v3 (AGPL-3.0).",
+    settings_license_notice: "Vieni a trovarci su GitHub {repo}.",
     settings_header: "Impostazioni e Sincronizzazione Sicura",
     btn_settings_close_aria: "Chiudi impostazioni",
     settings_section_appearance: "Aspetto",
@@ -283,7 +283,7 @@ const translations = {
     modal_last_edited: "Bearbeitet {time}",
     btn_modal_close: "Schließen",
     settings_filen_thanks: "Besonderer Dank geht an Filen für ihr {sdk}.",
-    settings_license_notice: "Dieses Projekt steht unter der GNU Affero General Public License v3 (AGPL-3.0).",
+    settings_license_notice: "Besuche uns auf GitHub {repo}.",
     settings_header: "Einstellungen & Sichere Synchronisation",
     btn_settings_close_aria: "Einstellungen schließen",
     settings_section_appearance: "Erscheinungsbild",
@@ -393,7 +393,7 @@ const translations = {
     modal_last_edited: "Editada {time}",
     btn_modal_close: "Cerrar",
     settings_filen_thanks: "Un agradecimiento especial a Filen por su {sdk}.",
-    settings_license_notice: "Este proyecto está bajo la Licencia Pública General de GNU Affero v3 (AGPL-3.0).",
+    settings_license_notice: "Visítanos en GitHub {repo}.",
     settings_header: "Configuración y Sincronización Segura",
     btn_settings_close_aria: "Cerrar configuración",
     settings_section_appearance: "Apariencia",
@@ -503,7 +503,7 @@ const translations = {
     modal_last_edited: "Modifié {time}",
     btn_modal_close: "Fermer",
     settings_filen_thanks: "Un merci spécial à Filen pour leur {sdk}.",
-    settings_license_notice: "Ce projet est sous licence GNU Affero General Public License v3 (AGPL-3.0).",
+    settings_license_notice: "Retrouvez-nous sur GitHub {repo}.",
     settings_header: "Paramètres & Synchronisation Sécurisée",
     btn_settings_close_aria: "Fermer les paramètres",
     settings_section_appearance: "Apparence",
@@ -626,7 +626,8 @@ export function applyTranslations(root = document) {
   root.querySelectorAll('[data-i18n-html]').forEach(el => {
     const key = el.getAttribute('data-i18n-html');
     const text = t(key, {
-      sdk: '<a href="https://github.com/FilenCloudDienste/filen-sdk-ts" target="_blank">SDK</a>'
+      sdk: '<a href="https://github.com/FilenCloudDienste/filen-sdk-ts" target="_blank">SDK</a>',
+      repo: '<a href="https://github.com/francofantomius/noten" target="_blank">Noten</a>'
     });
     if (text) {
       el.innerHTML = text;
