@@ -1,0 +1,195 @@
+/* ==========================================================================
+   Security Lockscreen Overlay
+   ========================================================================== */
+
+.lockscreen-overlay {
+   position: fixed;
+   inset: 0;
+   background-color: rgba(14, 17, 23, 0.95);
+   backdrop-filter: blur(12px);
+   z-index: 10000;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   opacity: 0;
+   pointer-events: none;
+   transition: opacity 0.3s ease;
+}
+
+.lockscreen-overlay.active {
+   opacity: 1;
+   pointer-events: all;
+}
+
+.lockscreen-card {
+   background-color: var(--bg-secondary);
+   border: 1px solid var(--border-color);
+   border-radius: var(--radius-lg);
+   padding: 40px;
+   width: 90%;
+   max-width: 480px;
+   box-shadow: var(--shadow-modal);
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+   text-align: center;
+   transform: translateY(20px);
+   transition: transform 0.4s var(--transition-bounce);
+}
+
+.lockscreen-overlay.active .lockscreen-card {
+   transform: translateY(0);
+}
+
+.lock-header {
+   margin-bottom: 30px;
+}
+
+.lock-logo {
+   margin-bottom: 20px;
+   filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.3));
+   animation: pulseLogo 3s infinite ease-in-out;
+}
+
+@keyframes pulseLogo {
+   0%,
+   100% {
+      transform: scale(1);
+      filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.3));
+   }
+   50% {
+      transform: scale(1.05);
+      filter: drop-shadow(0 0 20px rgba(245, 158, 11, 0.5));
+   }
+}
+
+.lock-header h1 {
+   font-size: 2rem;
+   font-weight: 700;
+   color: var(--text-primary);
+   margin-bottom: 8px;
+   letter-spacing: -0.5px;
+}
+
+.lock-header p {
+   color: var(--text-secondary);
+   font-size: 0.9rem;
+   line-height: 1.4;
+}
+
+.auth-form {
+   width: 100%;
+   margin-bottom: 20px;
+}
+
+.warning-box {
+   background-color: rgba(239, 68, 110, 0.1);
+   border: 1px solid rgba(239, 68, 110, 0.2);
+   border-radius: var(--radius-md);
+   padding: 12px 16px;
+   font-size: 0.82rem;
+   color: #f87171;
+   display: flex;
+   align-items: flex-start;
+   gap: 12px;
+   text-align: left;
+   margin-bottom: 20px;
+   line-height: 1.4;
+}
+
+.warning-box i {
+   flex-shrink: 0;
+   margin-top: 2px;
+}
+
+.input-group {
+   display: flex;
+   flex-direction: column;
+   text-align: left;
+   gap: 8px;
+   margin-bottom: 16px;
+   width: 100%;
+}
+
+.input-group-row {
+   display: flex;
+   gap: 12px;
+   width: 100%;
+}
+
+.input-group label {
+   font-size: 0.85rem;
+   font-weight: 600;
+   color: var(--text-secondary);
+}
+
+.input-group input {
+   background-color: var(--bg-tertiary);
+   border: 1px solid var(--border-color);
+   border-radius: var(--radius-md);
+   padding: 12px 16px;
+   font-size: 0.95rem;
+   transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
+}
+
+.input-group input:focus {
+   border-color: var(--accent);
+   box-shadow: 0 0 0 2px var(--accent-bg-glow);
+}
+
+.password-input-wrapper {
+   position: relative;
+   display: flex;
+   width: 100%;
+}
+
+.password-input-wrapper input {
+   width: 100%;
+}
+
+.error-text {
+   color: var(--danger);
+   font-size: 0.8rem;
+   margin-top: 4px;
+}
+
+.lockscreen-card .btn-primary {
+   width: 100%;
+   padding: 14px;
+   font-size: 1rem;
+}
+
+.lock-footer {
+   margin-top: 10px;
+}
+
+.secure-badge {
+   display: inline-flex;
+   align-items: center;
+   gap: 6px;
+   font-size: 0.78rem;
+   color: var(--text-secondary);
+   background-color: var(--bg-tertiary);
+   padding: 4px 10px;
+   border-radius: var(--radius-full);
+}
+
+.secure-badge i {
+   width: 12px;
+   height: 12px;
+}
+
+/* ==========================================================================
+   Responsive Queries for Lockscreen
+   ========================================================================== */
+
+@media (max-width: 480px) {
+   .lockscreen-card {
+      padding: 24px 16px;
+   }
+
+   .input-group-row {
+      flex-direction: column;
+      gap: 0;
+   }
+}

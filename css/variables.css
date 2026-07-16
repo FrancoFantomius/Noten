@@ -1,0 +1,107 @@
+/* ==========================================================================
+   Notes CSS Design System - Variables & Themes
+   ========================================================================== */
+
+:root {
+   /* Fonts */
+   --font-main: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+
+   /* Layout Dimensions */
+   --header-height: 64px;
+   --sidebar-width: 280px;
+   --sidebar-collapsed-width: 72px;
+
+   /* Transition timings */
+   --transition-speed: 0.2s;
+   --transition-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+   /* Rounded Corners */
+   --radius-sm: 6px;
+   --radius-md: 12px;
+   --radius-lg: 24px;
+   --radius-full: 9999px;
+
+   /* Theme: Dark Mode (Default) */
+   --bg-primary: #0e1117;
+   --bg-secondary: #161b22;
+   --bg-tertiary: #21262d;
+   --bg-modal: rgba(22, 27, 34, 0.95);
+   --text-primary: #c9d1d9;
+   --text-secondary: #8b949e;
+   --border-color: rgba(240, 246, 252, 0.1);
+   --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.4);
+   --shadow-modal: 0 16px 40px rgba(0, 0, 0, 0.6);
+   --shadow-glow: 0 0 15px rgba(245, 158, 11, 0.2);
+
+   --accent: #f59e0b;
+   --accent-hover: #d97706;
+   --accent-bg-glow: rgba(245, 158, 11, 0.1);
+   --danger: #ef4444;
+   --danger-hover: #dc2626;
+
+   /* Dark Note Card Colors */
+   --note-default: #161b22;
+   --note-red: #442726;
+   --note-orange: #4c3520;
+   --note-yellow: #4c441c;
+   --note-green: #263e2a;
+   --note-teal: #193f3c;
+   --note-blue: #1d354b;
+   --note-purple: #392849;
+   --note-pink: #472337;
+   --note-border-intensity: 0.15;
+
+   /* Refactored variables for theme-agnostic components */
+   --tag-badge-bg: rgba(255, 255, 255, 0.08);
+   --tag-badge-border: rgba(255, 255, 255, 0.05);
+   --shadow-card-hover: 0 4px 15px rgba(0, 0, 0, 0.15);
+   --border-card-hover: rgba(255, 255, 255, 0.25);
+   --bg-hover-item: rgba(255, 255, 255, 0.04);
+   --bg-hover-btn: rgba(255, 255, 255, 0.08);
+   --card-tag-bg: rgba(0, 0, 0, 0.15);
+   --card-tag-border: rgba(255, 255, 255, 0.05);
+   --select-arrow-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238b949e' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+}
+
+/* Theme: Light Mode Override */
+.light-theme {
+   --bg-primary: #f6f8fa;
+   --bg-secondary: #ffffff;
+   --bg-tertiary: #eff2f5;
+   --bg-modal: rgba(255, 255, 255, 0.98);
+   --text-primary: #1f2328;
+   --text-secondary: #57606a;
+   --border-color: rgba(31, 35, 40, 0.12);
+   --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.08);
+   --shadow-modal: 0 12px 32px rgba(0, 0, 0, 0.15);
+   --shadow-glow: 0 0 12px rgba(217, 119, 6, 0.15);
+
+   --accent: #d97706;
+   --accent-hover: #b45309;
+   --accent-bg-glow: rgba(217, 119, 6, 0.08);
+   --danger: #ef4444;
+   --danger-hover: #dc2626;
+
+   /* Light Note Card Colors */
+   --note-default: #ffffff;
+   --note-red: #f8d7da;
+   --note-orange: #ffe8d6;
+   --note-yellow: #fff3cd;
+   --note-green: #d4edda;
+   --note-teal: #d1ecf1;
+   --note-blue: #cce5ff;
+   --note-purple: #e2d9f3;
+   --note-pink: #f8d7f1;
+   --note-border-intensity: 0.25;
+
+   /* Refactored variables for theme-agnostic components */
+   --tag-badge-bg: rgba(0, 0, 0, 0.05);
+   --tag-badge-border: rgba(0, 0, 0, 0.03);
+   --shadow-card-hover: 0 4px 12px rgba(0, 0, 0, 0.08);
+   --border-card-hover: rgba(0, 0, 0, 0.2);
+   --bg-hover-item: rgba(0, 0, 0, 0.03);
+   --bg-hover-btn: rgba(0, 0, 0, 0.05);
+   --card-tag-bg: rgba(255, 255, 255, 0.5);
+   --card-tag-border: rgba(0, 0, 0, 0.05);
+   --select-arrow-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2357606a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+}

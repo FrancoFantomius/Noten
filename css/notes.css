@@ -1,0 +1,780 @@
+/* ==========================================================================
+   Note Creator Component
+   ========================================================================== */
+
+.note-creator-container {
+   width: 100%;
+   max-width: 600px;
+   background-color: var(--bg-secondary);
+   border: 1px solid var(--border-color);
+   border-radius: var(--radius-md);
+   margin-bottom: 32px;
+   box-shadow: var(--shadow-card);
+   transition: box-shadow var(--transition-speed), border-color var(--transition-speed);
+}
+
+.note-creator-container:focus-within {
+   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+   border-color: var(--border-color);
+}
+
+.creator-collapsed {
+   display: flex;
+   align-items: center;
+   justify-content: space-between;
+   padding: 12px 18px;
+   cursor: text;
+   color: var(--text-secondary);
+   font-weight: 500;
+   height: 48px;
+}
+
+.creator-actions-collapsed {
+   display: flex;
+   gap: 4px;
+}
+
+.creator-expanded {
+   padding: 16px 20px;
+   display: flex;
+   flex-direction: column;
+   gap: 12px;
+}
+
+.creator-title-row {
+   display: flex;
+   align-items: center;
+   justify-content: space-between;
+   gap: 12px;
+}
+
+.creator-title-row input {
+   font-size: 1.1rem;
+   font-weight: 600;
+   width: 100%;
+   color: var(--text-primary);
+}
+
+.creator-expanded textarea {
+   resize: none;
+   font-size: 0.95rem;
+   line-height: 1.5;
+   width: 100%;
+   color: var(--text-primary);
+}
+
+/* Tags in note card creator */
+.note-tags-container {
+   display: flex;
+   flex-wrap: wrap;
+   gap: 6px;
+   margin-top: 4px;
+}
+
+.tag-badge {
+   display: inline-flex;
+   align-items: center;
+   gap: 6px;
+   font-size: 0.75rem;
+   font-weight: 600;
+   padding: 4px 10px;
+   background-color: var(--tag-badge-bg);
+   border-radius: var(--radius-full);
+   color: var(--text-primary);
+   border: 1px solid var(--tag-badge-border);
+}
+
+.tag-badge button {
+   display: inline-flex;
+   align-items: center;
+   justify-content: center;
+   cursor: pointer;
+   color: var(--text-secondary);
+}
+
+.tag-badge button:hover {
+   color: var(--danger);
+}
+
+.tag-badge button i {
+   width: 10px;
+   height: 10px;
+}
+
+.tag-input-wrapper input {
+   font-size: 0.78rem;
+   color: var(--text-secondary);
+   border-bottom: 1px dashed var(--border-color);
+   padding: 4px 0;
+   width: 140px;
+   transition: width 0.2s ease, border-color var(--transition-speed);
+}
+
+.tag-input-wrapper input:focus {
+   width: 200px;
+   color: var(--text-primary);
+   border-color: var(--accent);
+}
+
+/* Toolbars */
+.creator-footer {
+   display: flex;
+   align-items: center;
+   justify-content: space-between;
+   margin-top: 8px;
+   padding-top: 8px;
+   border-top: 1px solid var(--border-color);
+}
+
+.creator-toolbar {
+   display: flex;
+   align-items: center;
+   gap: 4px;
+}
+
+/* Color Palette Popup */
+.color-picker-wrapper {
+   position: relative;
+}
+
+.color-palette-popup {
+   position: absolute;
+   bottom: 48px;
+   left: 0;
+   background-color: var(--bg-secondary);
+   border: 1px solid var(--border-color);
+   border-radius: var(--radius-md);
+   padding: 8px;
+   display: flex;
+   gap: 6px;
+   box-shadow: var(--shadow-modal);
+   opacity: 0;
+   pointer-events: none;
+   transform: translateY(8px);
+   transition: opacity 0.2s ease, transform 0.2s ease;
+   z-index: 500;
+}
+
+.color-picker-wrapper:hover .color-palette-popup,
+.color-picker-wrapper:focus-within .color-palette-popup {
+   opacity: 1;
+   pointer-events: all;
+   transform: translateY(0);
+}
+
+.color-option {
+   width: 24px;
+   height: 24px;
+   border-radius: var(--radius-full);
+   cursor: pointer;
+   border: 2px solid transparent;
+   transition: border-color 0.1s ease;
+}
+
+.color-option:hover,
+.color-option.active {
+   border-color: var(--text-primary);
+}
+
+.color-option.default {
+   background-color: var(--note-default);
+   border-color: var(--border-color);
+}
+
+.color-option.red {
+   background-color: var(--note-red);
+}
+
+.color-option.orange {
+   background-color: var(--note-orange);
+}
+
+.color-option.yellow {
+   background-color: var(--note-yellow);
+}
+
+.color-option.green {
+   background-color: var(--note-green);
+}
+
+.color-option.teal {
+   background-color: var(--note-teal);
+}
+
+.color-option.blue {
+   background-color: var(--note-blue);
+}
+
+.color-option.purple {
+   background-color: var(--note-purple);
+}
+
+.color-option.pink {
+   background-color: var(--note-pink);
+}
+
+/* ==========================================================================
+   Notes Columns/Grid (Masonry Layout)
+   ========================================================================== */
+
+.notes-view-content {
+   width: 100%;
+}
+
+.notes-section {
+   margin-bottom: 40px;
+   width: 100%;
+}
+
+.section-header {
+   font-size: 0.78rem;
+   font-weight: 700;
+   color: var(--text-secondary);
+   text-transform: uppercase;
+   letter-spacing: 1px;
+   margin-bottom: 12px;
+   padding-left: 8px;
+}
+
+/* Native Masonry Column Grid */
+.notes-grid {
+   column-count: auto;
+   column-width: 250px;
+   column-gap: 16px;
+   width: 100%;
+}
+
+/* Note Card */
+.note-card {
+   break-inside: avoid;
+   margin-bottom: 16px;
+   border-radius: var(--radius-md);
+   border: 1px solid var(--border-color);
+   padding: 16px;
+   display: flex;
+   flex-direction: column;
+   gap: 10px;
+   cursor: pointer;
+   position: relative;
+   transition: box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.note-card:hover {
+   box-shadow: var(--shadow-card-hover);
+   border-color: var(--border-card-hover);
+   transform: translateY(-2px);
+}
+
+.note-card-title {
+   font-size: 1rem;
+   font-weight: 600;
+   line-height: 1.3;
+   margin-right: 24px;
+   word-break: break-word;
+}
+
+.note-card-body {
+   font-size: 0.88rem;
+   line-height: 1.45;
+   color: var(--text-primary);
+   white-space: pre-wrap;
+   word-break: break-word;
+   max-height: 240px;
+   overflow: hidden;
+   position: relative;
+}
+
+/* Fade out for long cards */
+.note-card-body.truncated::after {
+   content: '';
+   position: absolute;
+   bottom: 0;
+   left: 0;
+   right: 0;
+   height: 40px;
+   background: linear-gradient(transparent, var(--card-bg));
+   pointer-events: none;
+}
+
+/* Checklist Task Items */
+.checklist-items {
+   display: flex;
+   flex-direction: column;
+   gap: 2px;
+   white-space: normal;
+}
+
+.checklist-item {
+   display: flex;
+   align-items: flex-start;
+   gap: 10px;
+   padding: 4px 0;
+   cursor: pointer;
+   border-radius: var(--radius-sm);
+   transition: background-color 0.15s ease, padding-left 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.checklist-item:hover {
+   background-color: var(--bg-hover-item);
+}
+
+.checklist-checkbox {
+   position: relative;
+   display: block;
+   width: 20px;
+   height: 20px;
+   min-width: 20px;
+   min-height: 20px;
+   flex-shrink: 0;
+   margin-top: 1px;
+   cursor: pointer;
+}
+
+.checklist-checkbox input[type="checkbox"] {
+   position: absolute;
+   opacity: 0;
+   width: 0;
+   height: 0;
+}
+
+.checklist-checkmark {
+   position: absolute;
+   inset: 0;
+   border: 2px solid var(--text-secondary);
+   border-radius: 6px;
+   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+   background-color: transparent;
+}
+
+.checklist-checkbox input[type="checkbox"]:checked+.checklist-checkmark {
+   background-color: var(--accent);
+   border-color: var(--accent);
+}
+
+/* Animated SVG checkmark */
+.checklist-checkmark svg {
+   position: absolute;
+   top: 2px;
+   left: 2px;
+   width: 12px;
+   height: 12px;
+   fill: none;
+   stroke: #0f172a;
+   stroke-width: 2.5;
+   stroke-linecap: round;
+   stroke-linejoin: round;
+   stroke-dasharray: 20;
+   stroke-dashoffset: 20;
+   transition: stroke-dashoffset 0.3s cubic-bezier(0.4, 0, 0.2, 1) 0.05s;
+}
+
+.checklist-checkbox input[type="checkbox"]:checked+.checklist-checkmark svg {
+   stroke-dashoffset: 0;
+}
+
+/* Bounce effect on check */
+.checklist-checkbox input[type="checkbox"]:checked+.checklist-checkmark {
+   animation: checkBounce 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes checkBounce {
+   0% {
+      transform: scale(1);
+   }
+   40% {
+      transform: scale(0.85);
+   }
+   70% {
+      transform: scale(1.1);
+   }
+   100% {
+      transform: scale(1);
+   }
+}
+
+.checklist-label {
+   font-size: 0.88rem;
+   line-height: 1.45;
+   color: var(--text-primary);
+   transition: color 0.2s ease, opacity 0.2s ease;
+   word-break: break-word;
+   padding-top: 1px;
+}
+
+.checklist-item.checked .checklist-label {
+   text-decoration: line-through;
+   text-decoration-color: var(--text-secondary);
+   color: var(--text-secondary);
+   opacity: 0.65;
+}
+
+/* Plain text lines between checklist items */
+.checklist-text-line {
+   font-size: 0.88rem;
+   line-height: 1.45;
+   color: var(--text-primary);
+   white-space: pre-wrap;
+   word-break: break-word;
+}
+
+.note-card-pin {
+   position: absolute;
+   top: 12px;
+   right: 12px;
+   color: var(--text-secondary);
+   opacity: 0;
+   transition: opacity 0.2s ease, color 0.2s ease;
+}
+
+.note-card:hover .note-card-pin,
+.note-card-pin.active {
+   opacity: 1;
+}
+
+.note-card-pin.active {
+   color: var(--accent);
+}
+
+.note-card-footer {
+   display: flex;
+   align-items: center;
+   justify-content: space-between;
+   margin-top: 8px;
+   font-size: 0.72rem;
+   color: var(--text-secondary);
+   opacity: 0;
+   transition: opacity 0.2s ease;
+}
+
+.note-card:hover .note-card-footer {
+   opacity: 1;
+}
+
+.card-tags {
+   display: flex;
+   flex-wrap: wrap;
+   gap: 4px;
+}
+
+.card-tag {
+   font-size: 0.7rem;
+   font-weight: 600;
+   padding: 2px 8px;
+   background-color: var(--card-tag-bg);
+   border-radius: var(--radius-full);
+   border: 1px solid var(--card-tag-border);
+}
+
+/* Color assignments */
+.color-default {
+   --card-bg: var(--note-default);
+   background-color: var(--card-bg);
+   border-color: var(--border-color);
+}
+
+.color-red {
+   --card-bg: var(--note-red);
+   background-color: var(--card-bg);
+   border-color: rgba(239, 68, 68, var(--note-border-intensity));
+}
+
+.color-orange {
+   --card-bg: var(--note-orange);
+   background-color: var(--card-bg);
+   border-color: rgba(245, 158, 11, var(--note-border-intensity));
+}
+
+.color-yellow {
+   --card-bg: var(--note-yellow);
+   background-color: var(--card-bg);
+   border-color: rgba(251, 191, 36, var(--note-border-intensity));
+}
+
+.color-green {
+   --card-bg: var(--note-green);
+   background-color: var(--card-bg);
+   border-color: rgba(34, 197, 94, var(--note-border-intensity));
+}
+
+.color-teal {
+   --card-bg: var(--note-teal);
+   background-color: var(--card-bg);
+   border-color: rgba(20, 184, 166, var(--note-border-intensity));
+}
+
+.color-blue {
+   --card-bg: var(--note-blue);
+   background-color: var(--card-bg);
+   border-color: rgba(59, 130, 246, var(--note-border-intensity));
+}
+
+.color-purple {
+   --card-bg: var(--note-purple);
+   background-color: var(--card-bg);
+   border-color: rgba(168, 85, 247, var(--note-border-intensity));
+}
+
+.color-pink {
+   --card-bg: var(--note-pink);
+   background-color: var(--card-bg);
+   border-color: rgba(236, 72, 153, var(--note-border-intensity));
+}
+
+/* Empty States */
+.empty-state-container {
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+   justify-content: center;
+   text-align: center;
+   padding: 80px 20px;
+   color: var(--text-secondary);
+}
+
+.empty-state-icon {
+   margin-bottom: 16px;
+   animation: float 4s ease-in-out infinite;
+}
+
+@keyframes float {
+   0%,
+   100% {
+      transform: translateY(0);
+   }
+   50% {
+      transform: translateY(-10px);
+   }
+}
+
+.empty-state-container h3 {
+   font-size: 1.15rem;
+   font-weight: 600;
+   color: var(--text-primary);
+   margin-bottom: 4px;
+}
+
+.empty-state-container p {
+   font-size: 0.88rem;
+}
+
+/* Floating Action Button (FAB) */
+.btn-fab {
+   display: none;
+}
+
+/* ==========================================================================
+   Responsive Queries for Notes Grid and Creator
+   ========================================================================== */
+
+@media (max-width: 768px) {
+   .notes-grid {
+      column-count: 2;
+   }
+
+   /* Show FAB and hide creator */
+   .btn-fab {
+      display: flex;
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      width: 56px;
+      height: 56px;
+      border-radius: var(--radius-full);
+      background-color: var(--accent);
+      color: #0f172a;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 80;
+      transition: transform var(--transition-speed), background-color var(--transition-speed), box-shadow var(--transition-speed);
+   }
+
+   .btn-fab:hover {
+      background-color: var(--accent-hover);
+      transform: scale(1.05);
+   }
+
+   .btn-fab:active {
+      transform: scale(0.95);
+   }
+
+   .btn-fab i {
+      width: 24px;
+      height: 24px;
+   }
+
+   #note-creator {
+      display: none !important;
+   }
+}
+
+@media (max-width: 480px) {
+   .notes-grid {
+      column-count: 1;
+   }
+}
+
+/* ==========================================================================
+   Note Image Attachments Grid
+   ========================================================================== */
+
+/* Card Cover Image Header */
+.note-card-image {
+   margin: -16px -16px 8px -16px;
+   overflow: hidden;
+   border-radius: var(--radius-md) var(--radius-md) 0 0;
+   max-height: 220px;
+   border-bottom: 1px solid var(--border-color);
+}
+
+/* Flex responsive image grid layout */
+.image-grid-row {
+   display: flex;
+   padding: 0;
+   gap: 4px;
+   width: 100%;
+}
+
+.image-grid-column {
+   flex: 1 1 0px;
+   display: flex;
+   flex-direction: column;
+   gap: 4px;
+}
+
+.grid-image-wrapper {
+   position: relative;
+   width: 100%;
+   overflow: hidden;
+}
+
+.grid-image-wrapper img {
+   width: 100%;
+   height: 100%;
+   object-fit: cover;
+   display: block;
+   transition: transform 0.3s var(--transition-bounce);
+}
+
+.note-card:hover .grid-image-wrapper img {
+   transform: scale(1.04);
+}
+
+/* Creator and Modal Preview image grid specific styling */
+#modal-images-preview,
+#creator-images-preview {
+   width: 100%;
+   max-height: 380px;
+   overflow-y: auto;
+   padding: 0;
+   border-bottom: 1px solid var(--border-color);
+}
+
+#modal-images-preview .image-grid-row,
+#creator-images-preview .image-grid-row {
+   padding: 12px;
+   gap: 8px;
+}
+
+#modal-images-preview .image-grid-column,
+#creator-images-preview .image-grid-column {
+   gap: 8px;
+}
+
+#modal-images-preview .grid-image-wrapper,
+#creator-images-preview .grid-image-wrapper {
+   border-radius: var(--radius-md);
+   border: 1px solid var(--border-color);
+   box-shadow: var(--shadow-card);
+   max-height: 240px;
+}
+
+/* Image remove button inside interactive grid */
+.grid-image-wrapper .btn-remove-image {
+   position: absolute;
+   top: 8px;
+   right: 8px;
+   background-color: rgba(14, 17, 23, 0.85);
+   backdrop-filter: blur(4px);
+   color: #f87171;
+   border-radius: var(--radius-full);
+   width: 24px;
+   height: 24px;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   cursor: pointer;
+   border: 1px solid var(--border-color);
+   font-size: 11px;
+   opacity: 0;
+   transition: background-color var(--transition-speed), transform var(--transition-speed), opacity var(--transition-speed);
+   z-index: 10;
+}
+
+.grid-image-wrapper:hover .btn-remove-image {
+   opacity: 1;
+}
+
+.grid-image-wrapper .btn-remove-image:hover {
+   background-color: var(--danger);
+   color: white;
+   transform: scale(1.1);
+}
+
+.grid-image-wrapper .btn-remove-image i {
+   width: 12px;
+   height: 12px;
+   pointer-events: none;
+}
+
+/* Responsive queries for image grids */
+@media (max-width: 600px) {
+   #modal-images-preview .image-grid-row,
+   #creator-images-preview .image-grid-row {
+      flex-direction: column;
+   }
+}
+
+/* Trash and Restore Elements styles */
+.text-green {
+   color: #10b981 !important;
+}
+
+.text-green:hover {
+   background-color: rgba(16, 185, 129, 0.1) !important;
+}
+
+.note-card-trash-actions {
+   display: inline-flex;
+   gap: 6px;
+   align-items: center;
+}
+
+.note-card-trash-actions .btn-icon {
+   width: 32px;
+   height: 32px;
+}
+
+.note-card-trash-actions .btn-icon i {
+   width: 16px;
+   height: 16px;
+}
+
+.note-card-trash-actions .btn-card-restore:hover {
+   color: #10b981;
+   background-color: rgba(16, 185, 129, 0.1);
+}
+
+.note-card-trash-actions .btn-card-delete-forever:hover {
+   color: var(--danger);
+   background-color: rgba(239, 68, 68, 0.1);
+}
+
+/* Multi-page styling overrides */
+body.archive-page #note-creator,
+body.trash-page #note-creator,
+body.archive-page #btn-fab-create,
+body.trash-page #btn-fab-create {
+   display: none !important;
+}

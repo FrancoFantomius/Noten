@@ -1,0 +1,83 @@
+/* ==========================================================================
+   Static Pages Layout (Privacy Policy / Terms of Service)
+   ========================================================================== */
+
+.static-layout {
+   min-height: 100vh;
+   display: flex;
+   flex-direction: column;
+}
+
+.static-container {
+   flex: 1;
+   max-width: 800px;
+   margin: 40px auto;
+   padding: 0 24px;
+   width: 100%;
+}
+
+.static-card {
+   background-color: var(--bg-secondary);
+   border: 1px solid var(--border-color);
+   border-radius: var(--radius-lg);
+   padding: 40px;
+   box-shadow: var(--shadow-card);
+}
+
+.static-header {
+   border-bottom: 1px solid var(--border-color);
+   padding-bottom: 24px;
+   margin-bottom: 32px;
+   text-align: center;
+}
+
+.static-title {
+   font-size: 2.25rem;
+   font-weight: 800;
+   color: var(--text-primary);
+   margin-bottom: 8px;
+}
+
+.static-subtitle {
+   font-size: 0.95rem;
+   color: var(--text-secondary);
+}
+
+.static-content {
+   line-height: 1.7;
+   color: var(--text-primary);
+}
+
+.static-content h2 {
+   font-size: 1.35rem;
+   font-weight: 700;
+   margin-top: 32px;
+   margin-bottom: 16px;
+   color: var(--text-primary);
+   border-bottom: 1px solid var(--border-color);
+   padding-bottom: 6px;
+}
+
+.static-content p {
+   margin-bottom: 16px;
+   font-size: 0.98rem;
+}
+
+.static-content ul {
+   margin-bottom: 24px;
+   padding-left: 20px;
+}
+
+.static-content li {
+   margin-bottom: 8px;
+   font-size: 0.98rem;
+}
+
+.static-footer {
+   margin-top: 40px;
+   text-align: center;
+}
+
+.static-footer .btn {
+   font-size: 0.95rem;
+}
