@@ -16,6 +16,14 @@ export function initCardsUI() {
     elements.btnSidebarToggle.addEventListener('click', toggleSidebar);
   }
 
+  if (elements.btnSidebarCloseMobile) {
+    elements.btnSidebarCloseMobile.addEventListener('click', toggleSidebar);
+  }
+
+  if (elements.sidebarOverlay) {
+    elements.sidebarOverlay.addEventListener('click', toggleSidebar);
+  }
+
   // Sidebar Category Navigation
   elements.navItems.forEach(item => {
     item.addEventListener('click', (e) => {
@@ -91,7 +99,6 @@ export function initCardsUI() {
  */
 export function toggleSidebar() {
   if (!elements.sidebar) return;
-  elements.sidebar.classList.toggle('collapsed');
 
   // On mobile, use separate class to display slide-in overlay
   if (window.innerWidth <= 768) {
@@ -99,6 +106,8 @@ export function toggleSidebar() {
     if (elements.sidebarOverlay) {
       elements.sidebarOverlay.classList.toggle('active', isMobileOpen);
     }
+  } else {
+    elements.sidebar.classList.toggle('collapsed');
   }
 }
 
