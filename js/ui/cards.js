@@ -375,6 +375,7 @@ export async function restoreNote(noteId) {
   const note = state.decryptedNotes.find(n => n.id === noteId);
   if (note) {
     note.isTrashed = false;
+    note.trashedAt = null;
     note.updatedAt = Date.now();
     if (state.onSaveNoteCallback) {
       await state.onSaveNoteCallback(note.id, note);

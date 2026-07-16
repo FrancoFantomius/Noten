@@ -178,11 +178,13 @@ export function initModalUI() {
       if (note) {
         if (note.isTrashed) {
           note.isTrashed = false;
+          note.trashedAt = null;
           note.updatedAt = Date.now();
           await state.onSaveNoteCallback(note.id, note);
           closeModal();
         } else {
           note.isTrashed = true;
+          note.trashedAt = Date.now();
           note.isPinned = false;
           note.updatedAt = Date.now();
           await state.onSaveNoteCallback(note.id, note);
@@ -378,6 +380,7 @@ export async function saveAndCloseModal() {
         isPinned: state.isModalPinned,
         isArchived: false,
         isTrashed: false,
+        trashedAt: null,
         images: [...state.noteModalImages],
         createdAt: Date.now(),
         updatedAt: Date.now()

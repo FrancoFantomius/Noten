@@ -39,7 +39,7 @@
   "empty_state_archive_title": "L'archivio è vuoto",
   "empty_state_archive_desc": "Le note archiviate sono conservate al sicuro qui.",
   "empty_state_trash_title": "Il cestino è vuoto",
-  "empty_state_trash_desc": "Le note nel cestino sono conservate qui.",
+  "empty_state_trash_desc": "Le note nel cestino vengono eliminate definitivamente dopo 60 giorni.",
   "empty_state_tags_title": "Nessuna nota con #{tag}",
   "empty_state_tags_desc": "Aggiungi questo tag alle tue note per visualizzarle qui.",
   "empty_state_search_title": "Nessun risultato trovato",

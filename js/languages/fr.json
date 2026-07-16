@@ -39,7 +39,7 @@
   "empty_state_archive_title": "L'archive est vide",
   "empty_state_archive_desc": "Les notes archivées sont conservées en toute sécurité ici.",
   "empty_state_trash_title": "La corbeille est vide",
-  "empty_state_trash_desc": "Les notes dans la corbeille sont stockées ici.",
+  "empty_state_trash_desc": "Les notes dans la corbeille sont supprimées définitivement après 60 jours.",
   "empty_state_tags_title": "Aucune note avec #{tag}",
   "empty_state_tags_desc": "Ajoutez ce tag à vos notes pour les afficher ici.",
   "empty_state_search_title": "Aucun résultat trouvé",

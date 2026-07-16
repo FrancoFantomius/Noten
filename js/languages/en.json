@@ -39,7 +39,7 @@
   "empty_state_archive_title": "Archive is empty",
   "empty_state_archive_desc": "Archived notes are kept safe here.",
   "empty_state_trash_title": "Trash is empty",
-  "empty_state_trash_desc": "Notes in trash are stored here.",
+  "empty_state_trash_desc": "Notes in the trash are permanently deleted after 60 days.",
   "empty_state_tags_title": "No notes with #{tag}",
   "empty_state_tags_desc": "Add this tag to your notes to view them here.",
   "empty_state_search_title": "No results found",

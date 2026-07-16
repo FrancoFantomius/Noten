@@ -39,7 +39,7 @@
   "empty_state_archive_title": "El archivo está vacío",
   "empty_state_archive_desc": "Las notas archivadas se guardan de forma segura aquí.",
   "empty_state_trash_title": "La papelera está vacía",
-  "empty_state_trash_desc": "Las notas en la papelera se guardan aquí.",
+  "empty_state_trash_desc": "Las notas en la papelera se eliminan permanentemente después de 60 días.",
   "empty_state_tags_title": "No hay notas con #{tag}",
   "empty_state_tags_desc": "Añade esta etiqueta a tus notas para verlas aquí.",
   "empty_state_search_title": "No se encontraron resultados",

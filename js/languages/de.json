@@ -39,7 +39,7 @@
   "empty_state_archive_title": "Das Archiv ist leer",
   "empty_state_archive_desc": "Archivierte Notizen werden hier sicher aufbewahrt.",
   "empty_state_trash_title": "Der Papierkorb ist leer",
-  "empty_state_trash_desc": "Notizen im Papierkorb werden hier aufbewahrt.",
+  "empty_state_trash_desc": "Notizen im Papierkorb werden nach 60 Tagen dauerhaft gelöscht.",
   "empty_state_tags_title": "Keine Notizen mit #{tag}",
   "empty_state_tags_desc": "Füge diesen Tag zu deinen Notizen hinzu, um sie hier anzuzeigen.",
   "empty_state_search_title": "Keine Ergebnisse gefunden",

@@ -221,6 +221,7 @@ export async function closeNoteCreator() {
       isPinned: state.isCreatorPinned,
       isArchived: false,
       isTrashed: false,
+      trashedAt: null,
       images: [...state.noteCreatorImages],
       createdAt: Date.now(),
       updatedAt: Date.now()

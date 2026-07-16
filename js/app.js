@@ -90,6 +90,7 @@ function registerServiceWorker() {
 async function initializeWorkspace() {
   try {
     cachedNotes = await db.loadAllNotes();
+    await purgeExpiredTrashedNotes();
     ui.updateNotesData(cachedNotes);
 
     const syncSettings = await db.getSyncSettings();
@@ -101,6 +102,32 @@ async function initializeWorkspace() {
     }
   } catch (err) {
     console.error('[App] Initialization failed:', err);
+  }
+}
+
+/**
+ * Permanently delete notes in the trash for longer than 60 days.
+ */
+async function purgeExpiredTrashedNotes() {
+  const sixtyDaysInMs = 60 * 24 * 60 * 60 * 1000;
+  const now = Date.now();
+  const expiredNotes = cachedNotes.filter(note => {
+    if (!note.isTrashed) return false;
+    const trashedTime = note.trashedAt || note.updatedAt || note.createdAt;
+    return (now - trashedTime) > sixtyDaysInMs;
+  });
+
+  if (expiredNotes.length > 0) {
+    console.log(`[Trash] Purging ${expiredNotes.length} expired trashed notes`);
+    for (const note of expiredNotes) {
+      try {
+        await db.deleteNoteFromDB(note.id);
+      } catch (err) {
+        console.error(`[Trash] Failed to permanently delete expired note ${note.id}:`, err);
+      }
+    }
+    const expiredIds = expiredNotes.map(n => n.id);
+    cachedNotes = cachedNotes.filter(n => !expiredIds.includes(n.id));
   }
 }
 
@@ -313,6 +340,7 @@ function handleExportBackup() {
         isPinned: n.isPinned,
         isArchived: n.isArchived,
         isTrashed: n.isTrashed,
+        trashedAt: n.trashedAt || null,
         createdAt: n.createdAt,
         updatedAt: n.updatedAt
       }))
@@ -346,6 +374,7 @@ function handleImportBackupFile(e) {
           for (const note of data.notes) {
             const noteId = 'note_' + crypto.randomUUID();
             note.updatedAt = Date.now();
+            note.trashedAt = note.trashedAt !== undefined ? note.trashedAt : (note.isTrashed ? Date.now() : null);
             await db.saveNote(noteId, note);
             cachedNotes.push({ id: noteId, ...note });
           }
