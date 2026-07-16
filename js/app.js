@@ -9,21 +9,15 @@ import { t, getLanguage, setLanguage, applyTranslations } from './i18n.js';
 // Global In-Memory State
 let cachedNotes = [];
 
-// DOM references (Simplified to remove lockscreen and master password references)
 const dom = {
   // Settings modal fields
   settingsEmail: document.getElementById('sync-email'),
   settingsPassword: document.getElementById('sync-password'),
   settingsTwofactor: document.getElementById('sync-twofactor'),
   btnSaveSync: document.getElementById('btn-save-sync'),
-  btnDisableSync: document.getElementById('btn-disable-sync'),
-  btnPurgeSync: document.getElementById('btn-purge-sync'),
   syncSettingsStatus: document.getElementById('sync-settings-status'),
-  syncActiveProfile: document.getElementById('sync-active-profile'),
-  syncProfileUsername: document.getElementById('sync-profile-username'),
-  syncProfileAvatar: document.getElementById('sync-profile-avatar'),
   syncCredentialsContainer: document.getElementById('sync-credentials-container'),
-  
+
   // Import/Export
   btnExportBackup: document.getElementById('btn-export-backup'),
   importFileInput: document.getElementById('import-file-input'),
@@ -43,7 +37,9 @@ window.addEventListener('DOMContentLoaded', async () => {
   ui.initUI({
     onSaveNote: handleSaveNote,
     onDeleteNote: handleDeleteNote,
-    onOpenSettings: handleOpenSettings
+    onOpenSettings: handleOpenSettings,
+    onSignout: handleDisableSync,
+    onPurgeLocalData: handlePurgeLocalData
   });
 
   // 3. Register DB updates listener
@@ -91,8 +87,11 @@ async function initializeWorkspace() {
     ui.updateNotesData(cachedNotes);
 
     const syncSettings = await db.getSyncSettings();
+    ui.updateProfileUI(syncSettings);
     if (syncSettings && syncSettings.enabled) {
-      db.startSync(syncSettings);
+      db.startSync(syncSettings).catch(err => {
+        console.warn("[Sync] Initial sync connection failed:", err);
+      });
     }
   } catch (err) {
     console.error('[App] Initialization failed:', err);
@@ -103,7 +102,7 @@ async function initializeWorkspace() {
 
 async function handleDBChange(change) {
   const noteId = change.id;
-  
+
   if (change.deleted) {
     // Note deleted remotely
     cachedNotes = cachedNotes.filter(n => n.id !== noteId);
@@ -112,7 +111,7 @@ async function handleDBChange(change) {
     try {
       const doc = await db.getNote(noteId);
       const existingIdx = cachedNotes.findIndex(n => n.id === noteId);
-      
+
       if (existingIdx !== -1) {
         // Resolve conflict: check timestamps
         const existingNote = cachedNotes[existingIdx];
@@ -126,12 +125,18 @@ async function handleDBChange(change) {
       console.error("Failed to process changed note:", noteId, err);
     }
   }
-  
+
   ui.updateNotesData(cachedNotes);
 }
 
-function handleSyncStatusChange(status) {
+async function handleSyncStatusChange(status) {
   ui.updateSyncStatusUI(status);
+  try {
+    const syncSettings = await db.getSyncSettings();
+    ui.updateProfileUI(syncSettings);
+  } catch (err) {
+    console.error("Failed to load settings on status change:", err);
+  }
 }
 
 // --- UI callback handlers ---
@@ -164,55 +169,13 @@ async function handleDeleteNote(id) {
 // --- Settings & Sync Actions ---
 
 async function handleOpenSettings() {
-  const syncSettings = await db.getSyncSettings();
-  
-  dom.settingsEmail.value = '';
-  dom.settingsPassword.value = '';
-  dom.settingsTwofactor.value = '';
-
-  const isSyncActive = syncSettings.enabled && syncSettings.apiKey;
-  const profileIcon = document.getElementById('sync-profile-icon');
-
-  if (isSyncActive) {
-    dom.syncActiveProfile.classList.remove('hidden');
-    dom.syncProfileUsername.textContent = syncSettings.username || 'Connected';
-    if (syncSettings.avatarURL) {
-      dom.syncProfileAvatar.src = syncSettings.avatarURL;
-      dom.syncProfileAvatar.classList.remove('hidden');
-      if (profileIcon) profileIcon.classList.add('hidden');
-      dom.syncProfileAvatar.onerror = () => {
-        dom.syncProfileAvatar.classList.add('hidden');
-        if (profileIcon) profileIcon.classList.remove('hidden');
-      };
-    } else {
-      dom.syncProfileAvatar.src = '';
-      dom.syncProfileAvatar.classList.add('hidden');
-      if (profileIcon) profileIcon.classList.remove('hidden');
-    }
-    dom.syncCredentialsContainer.classList.add('hidden');
-    dom.btnSaveSync.classList.add('hidden');
-    dom.btnDisableSync.classList.remove('hidden');
-    dom.btnPurgeSync.classList.remove('hidden');
-  } else {
-    dom.syncActiveProfile.classList.add('hidden');
-    dom.syncProfileAvatar.src = '';
-    dom.syncProfileAvatar.classList.add('hidden');
-    if (profileIcon) profileIcon.classList.remove('hidden');
-    dom.syncCredentialsContainer.classList.remove('hidden');
-    dom.btnSaveSync.classList.remove('hidden');
-    dom.btnDisableSync.classList.add('hidden');
-    dom.btnPurgeSync.classList.add('hidden');
-  }
-
   ui.showSettings();
 }
 
 // Setup Settings listeners
 function setupSettingsListeners() {
   dom.btnSaveSync.addEventListener('click', handleSaveSyncSettings);
-  dom.btnDisableSync.addEventListener('click', handleDisableSync);
-  dom.btnPurgeSync.addEventListener('click', handlePurgeLocalData);
-  
+
   // Backup triggers
   dom.btnExportBackup.addEventListener('click', handleExportBackup);
   dom.importFileInput.addEventListener('change', handleImportBackupFile);
@@ -249,13 +212,12 @@ async function handleSaveSyncSettings() {
 
   try {
     showSyncStatus(t('status_connecting'), "info");
-    
-    db.startSync(tempSettings);
-    
-    dom.btnDisableSync.classList.remove('hidden');
+
+    await db.startSync(tempSettings);
+
     showSyncStatus(t('status_sync_enabled'), "success");
-    
-    setTimeout(ui.hideSettings, 1000);
+
+    setTimeout(ui.hideLoginModal, 1000);
   } catch (err) {
     console.error("Failed to enable sync:", err);
     showSyncStatus(t('status_sync_failed'), "error");
@@ -265,7 +227,7 @@ async function handleSaveSyncSettings() {
 async function handleDisableSync() {
   const settings = await db.getSyncSettings();
   settings.enabled = false;
-  
+
   // Clear the session keys
   delete settings.username;
   delete settings.avatarURL;
@@ -284,13 +246,8 @@ async function handleDisableSync() {
 
   await db.saveSyncSettings(settings);
   db.stopSync();
-  
-  dom.syncActiveProfile.classList.add('hidden');
-  dom.syncCredentialsContainer.classList.remove('hidden');
-  dom.btnSaveSync.classList.remove('hidden');
-  dom.btnDisableSync.classList.add('hidden');
-  dom.btnPurgeSync.classList.add('hidden');
-  
+
+  ui.updateProfileUI(settings);
   showSyncStatus(t('status_sync_disabled'), "success");
 }
 
@@ -369,20 +326,20 @@ function handleImportBackupFile(e) {
   reader.onload = async (event) => {
     try {
       const data = JSON.parse(event.target.result);
-      
+
       // Support both old decrypted notes exports and new backup exports
       if (data.type === 'decrypted_notes' || data.notes) {
         if (confirm(t('confirm_import_notes', { count: data.notes.length }))) {
           dom.importStatusText.textContent = t('status_importing');
           dom.importStatusText.className = "status-message info";
-          
+
           for (const note of data.notes) {
             const noteId = 'note_' + crypto.randomUUID();
             note.updatedAt = Date.now();
             await db.saveNote(noteId, note);
             cachedNotes.push({ id: noteId, ...note });
           }
-          
+
           dom.importStatusText.textContent = t('status_import_success', { count: data.notes.length });
           dom.importStatusText.className = "status-message success";
           ui.updateNotesData(cachedNotes);

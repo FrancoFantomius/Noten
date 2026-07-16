@@ -2,6 +2,8 @@ const CACHE_NAME = 'noten-v1';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
+  './archive.html',
+  './trash.html',
   './manifest.json',
   './icon.svg',
   './icon-maskable.svg',
@@ -80,9 +82,9 @@ self.addEventListener('fetch', (event) => {
 
         return networkResponse;
       }).catch(() => {
-        // If offline and request is HTML, return index.html
+        // If offline and request is HTML, return the cached page or index.html fallback
         if (event.request.headers.get('accept').includes('text/html')) {
-          return caches.match('./index.html');
+          return caches.match(event.request).then(response => response || caches.match('./index.html'));
         }
       });
     })

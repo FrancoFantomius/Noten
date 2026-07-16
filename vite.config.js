@@ -54,9 +54,16 @@ export default defineConfig({
     outDir: 'dist',
     emptyOutDir: true,
     rollupOptions: {
+      input: {
+        main: path.resolve(__dirname, 'index.html'),
+        archive: path.resolve(__dirname, 'archive.html'),
+        trash: path.resolve(__dirname, 'trash.html'),
+        privacy: path.resolve(__dirname, 'privacy.html'),
+        terms: path.resolve(__dirname, 'terms.html')
+      },
       output: {
         entryFileNames: (chunkInfo) => {
-          if (chunkInfo.name === 'app' || chunkInfo.name === 'index') {
+          if (chunkInfo.name === 'app' || chunkInfo.name === 'index' || chunkInfo.name === 'main' || chunkInfo.name === 'archive' || chunkInfo.name === 'trash' || chunkInfo.name === 'privacy' || chunkInfo.name === 'terms') {
             return 'js/app.js';
           }
           return 'js/[name].js';

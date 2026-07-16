@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Noten - Terms of Service</title>
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- CSS Stylesheet -->
+  <link rel="stylesheet" href="css/style.css">
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body class="dark-theme static-layout">
+  <div class="static-container">
+    <div class="static-card">
+      <header class="static-header">
+        <h1 class="static-title">Terms of Service</h1>
+        <p class="static-subtitle">Last updated: July 2026</p>
+      </header>
+
+      <section class="static-content">
+        <p>Welcome to Noten! By using this application, you agree to comply with and be bound by the following Terms of Service.</p>
+
+        <h2>1. License & Open Source</h2>
+        <p>Noten is open-source software licensed under the GNU Affero General Public License version 3 (AGPL-3.0). You are free to inspect, modify, and distribute the application under the terms of this license.</p>
+
+        <h2>2. Disclaimer of Warranties</h2>
+        <p>The application is provided "as is" and "as available", without warranty of any kind, express or implied. In no event shall the authors or copyright holders be liable for any claim, damages, or other liability arising from, out of, or in connection with the software or the use of the software.</p>
+
+        <h2>3. Local Data & Backups</h2>
+        <p>Since your notes are stored locally in your browser's IndexedDB, clearing your browser's data, cache, or using private browsing mode may delete your notes. It is your sole responsibility to perform regular local backups (via the Export feature) or enable Filen Cloud Sync to safeguard your data.</p>
+
+        <h2>4. Cloud Sync Integration</h2>
+        <p>By enabling Filen Cloud Sync, you agree to comply with Filen's own Terms of Service and Privacy Policy. We do not control Filen's servers, storage systems, or availability, and are not responsible for any sync failures, service interruptions, or data losses associated with your Filen account.</p>
+      </section>
+
+      <footer class="static-footer">
+        <a href="index.html" class="btn btn-secondary">
+          <i data-lucide="arrow-left"></i> Back to App
+        </a>
+      </footer>
+    </div>
+  </div>
+
+  <script>
+    // Initialize Lucide icons on static page
+    lucide.createIcons();
+
+    // Set theme based on local storage
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    if (savedTheme === 'light') {
+      document.body.classList.remove('dark-theme');
+      document.body.classList.add('light-theme');
+    }
+  </script>
+</body>
+
+</html>

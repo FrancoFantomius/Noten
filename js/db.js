@@ -12,9 +12,9 @@ if (Readable) {
     const opt = Object.assign({ objectMode: true }, options);
     const readable = new Readable({
       ...opt,
-      read() {}
+      read() { }
     });
-    
+
     (async () => {
       try {
         for await (const chunk of iterable) {
@@ -25,7 +25,7 @@ if (Readable) {
         readable.destroy(err);
       }
     })();
-    
+
     return readable;
   };
 }
@@ -88,7 +88,7 @@ export async function saveSyncSettings(settings) {
     } catch (e) {
       existing = null;
     }
-    
+
     const doc = {
       _id: '_local/sync_settings',
       ...settings
@@ -116,7 +116,7 @@ export async function saveNote(id, noteObj) {
     } catch (err) {
       // Note is new
     }
-    
+
     const doc = {
       _id: id,
       type: 'note',
@@ -131,7 +131,7 @@ export async function saveNote(id, noteObj) {
       images: noteObj.images || [],
       createdAt: noteObj.createdAt || Date.now()
     };
-    
+
     if (existingDoc) {
       doc._rev = existingDoc._rev;
       // Preserve sync-related metadata to prevent regression
@@ -139,12 +139,12 @@ export async function saveNote(id, noteObj) {
       if (existingDoc.remoteLastModified) doc.remoteLastModified = existingDoc.remoteLastModified;
       if (existingDoc.synced) doc.synced = existingDoc.synced;
     }
-    
+
     const response = await db.put(doc);
-    
+
     // Trigger sync replication
     triggerSyncReconciliation();
-    
+
     return response;
   } catch (err) {
     console.error("Failed to save note:", err);
@@ -172,7 +172,7 @@ export async function loadAllNotes() {
       startkey: 'note_',
       endkey: 'note_\ufff0'
     });
-    
+
     return result.rows.map(row => {
       const doc = row.doc;
       return {
@@ -207,7 +207,7 @@ export async function deleteNoteFromDB(id) {
   try {
     const doc = await db.get(id);
     await db.remove(doc);
-    
+
     // Add to deleted queue to sync deletion to remote
     const settings = await getSyncSettings();
     if (settings && settings.enabled) {
@@ -224,7 +224,7 @@ export async function deleteNoteFromDB(id) {
  * Configure and start subscription and synchronization with Filen.
  * @param {Object} settings - Sync settings ({email, password, twoFactorCode, enabled})
  */
-export function startSync(settings) {
+export async function startSync(settings) {
   stopSync();
 
   const hasCredentials = settings.email && settings.password;
@@ -237,7 +237,7 @@ export function startSync(settings) {
 
   if (onSyncStatusCallback) onSyncStatusCallback('syncing');
 
-  initFilenAndSync(settings);
+  await initFilenAndSync(settings);
 }
 
 /**
@@ -325,7 +325,7 @@ async function initFilenAndSync(settings) {
     filenClient = new FilenSDK({
       metadataCache: true
     });
-    
+
     if (settings.apiKey && settings.masterKeys) {
       // Initialize with existing session keys
       filenClient.init({
@@ -368,7 +368,7 @@ async function initFilenAndSync(settings) {
         password: settings.password,
         twoFactorCode: settings.twoFactorCode || undefined
       });
-      
+
       // Fetch nickname and avatar from Filen
       let nickname = settings.email.split('@')[0];
       let avatarURL = '';
@@ -387,6 +387,7 @@ async function initFilenAndSync(settings) {
         enabled: true,
         username: nickname,
         avatarURL: avatarURL,
+        email: settings.email,
         apiKey: filenClient.config.apiKey,
         masterKeys: filenClient.config.masterKeys,
         publicKey: filenClient.config.publicKey,
@@ -395,20 +396,20 @@ async function initFilenAndSync(settings) {
         userId: filenClient.config.userId,
         authVersion: filenClient.config.authVersion
       };
-      
+
       // Save session settings and discard plaintext email/password
       await saveSyncSettings(sessionSettings);
     } else {
       throw new Error("No credentials or active session keys available");
     }
-    
+
     // Ensure Directory structure exists
     try {
       await filenClient.fs().mkdir({ path: '/Noten' });
-    } catch (e) {}
+    } catch (e) { }
     try {
       await filenClient.fs().mkdir({ path: '/Noten/notes' });
-    } catch (e) {}
+    } catch (e) { }
 
     // Trigger initial sync reconciliation
     queueSync();
@@ -421,6 +422,7 @@ async function initFilenAndSync(settings) {
   } catch (err) {
     console.error("[Sync] Failed to initialize Filen SDK client:", err);
     if (onSyncStatusCallback) onSyncStatusCallback('error');
+    throw err;
   }
 }
 
@@ -428,7 +430,7 @@ async function runSync() {
   if (!filenClient) return;
   const settings = await getSyncSettings();
   if (!settings.enabled || !filenClient.isLoggedIn()) return;
-  
+
   if (onSyncStatusCallback) onSyncStatusCallback('syncing');
 
   try {
@@ -520,9 +522,9 @@ async function runSync() {
       // Convert payload to File object for browser-compatible upload
       const jsonStr = JSON.stringify(payload);
       const blob = new Blob([jsonStr], { type: 'application/json' });
-      const file = new File([blob], `${localDoc._id}.json`, { 
+      const file = new File([blob], `${localDoc._id}.json`, {
         type: 'application/json',
-        lastModified: localDoc.updatedAt 
+        lastModified: localDoc.updatedAt
       });
 
       const item = await filenClient.cloud().uploadWebFile({
@@ -530,7 +532,7 @@ async function runSync() {
         parent: parentUUID,
         name: `${localDoc._id}.json`
       });
-      
+
       // Update local PouchDB document with sync metadata
       const currentDoc = await db.get(localDoc._id);
       currentDoc.lastSynced = Date.now();
@@ -542,7 +544,7 @@ async function runSync() {
     const downloadNoteFromFilen = async (filePath, mtimeMs) => {
       const content = await filenClient.fs().readFile({ path: filePath });
       const payload = JSON.parse(content.toString('utf-8'));
-      
+
       const noteId = payload._id;
       let existingDoc = null;
       try {
@@ -550,7 +552,7 @@ async function runSync() {
       } catch (err) {
         // Note is new locally
       }
-      
+
       const doc = {
         _id: noteId,
         type: 'note',
@@ -568,13 +570,13 @@ async function runSync() {
         lastSynced: Date.now(),
         remoteLastModified: mtimeMs
       };
-      
+
       if (existingDoc) {
         doc._rev = existingDoc._rev;
       }
-      
+
       await db.put(doc);
-      
+
       if (onChangeCallback) {
         onChangeCallback({ id: noteId, doc });
       }
@@ -583,7 +585,7 @@ async function runSync() {
     // 4. Process local docs
     for (const localDoc of localDocs) {
       const remoteItem = remoteMap.get(localDoc._id);
-      
+
       if (localDoc.remoteLastModified && !remoteItem) {
         // Local note was synced before but is missing from remote, meaning it was deleted remotely.
         // Delete it locally!

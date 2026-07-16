@@ -5,6 +5,17 @@
 import { t, getLanguage } from './i18n.js';
 
 let activeCategory = 'notes'; // 'notes', 'archive', 'trash', or 'tag:TagName'
+const path = window.location.pathname;
+if (path.endsWith('archive.html')) {
+  activeCategory = 'archive';
+} else if (path.endsWith('trash.html')) {
+  activeCategory = 'trash';
+} else {
+  const hash = window.location.hash;
+  if (hash.startsWith('#tag-')) {
+    activeCategory = `tag:${decodeURIComponent(hash.substring(5))}`;
+  }
+}
 let decryptedNotes = [];       // Cache of all decrypted notes in memory
 let noteCreatorTags = [];      // Current tags in the note creator
 let noteModalTags = [];        // Current tags in the edit modal
@@ -14,16 +25,17 @@ let activeColor = 'default';   // Color chosen in creator
 let modalActiveColor = 'default';
 let currentSyncStatus = 'offline';
 
-// Callbacks to communicate with app.js controller
 let onSaveNoteCallback = null;
 let onDeleteNoteCallback = null;
 let onLockAppCallback = null;
 let onOpenSettingsCallback = null;
+let onSignoutCallback = null;
+let onPurgeCallback = null;
 
 // DOM Elements
 const elements = {
   appContainer: document.getElementById('app-container'),
-  
+
   // Header
   btnSidebarToggle: document.getElementById('btn-sidebar-toggle'),
   sidebar: document.getElementById('app-sidebar'),
@@ -33,11 +45,11 @@ const elements = {
   btnSearchClear: document.getElementById('btn-search-clear'),
   syncStatus: document.getElementById('sync-status'),
   btnSettingsOpen: document.getElementById('btn-settings-open'),
-  
+
   // Navigation items
   navItems: document.querySelectorAll('.nav-item'),
   sidebarTagsList: document.getElementById('sidebar-tags-list'),
-  
+
   // Note Creator
   noteCreator: document.getElementById('note-creator'),
   creatorCollapsed: document.getElementById('creator-collapsed'),
@@ -57,7 +69,7 @@ const elements = {
   btnCreatorImage: document.getElementById('btn-creator-image'),
   creatorImageInput: document.getElementById('creator-image-input'),
   creatorImagesPreview: document.getElementById('creator-images-preview'),
-  
+
   // Feeds
   notesViewContent: document.getElementById('notes-view-content'),
   pinnedSection: document.getElementById('pinned-section'),
@@ -68,7 +80,7 @@ const elements = {
   emptyState: document.getElementById('empty-state'),
   emptyStateTitle: document.getElementById('empty-state-title'),
   emptyStateDesc: document.getElementById('empty-state-desc'),
-  
+
   // Note Editor Modal
   noteModal: document.getElementById('note-modal'),
   modalCard: document.getElementById('modal-card-element'),
@@ -90,7 +102,7 @@ const elements = {
   modalChecklistView: document.getElementById('modal-checklist-view'),
   modalBody: document.querySelector('#note-modal .modal-body'),
   btnModalChecklistToggle: document.getElementById('btn-modal-checklist-toggle'),
-  
+
   // Settings Modal
   settingsModal: document.getElementById('settings-modal'),
   btnSettingsClose: document.getElementById('btn-settings-close'),
@@ -102,7 +114,30 @@ const elements = {
   btnLightboxClose: document.getElementById('btn-lightbox-close'),
 
   // Floating Action Button
-  btnFabCreate: document.getElementById('btn-fab-create')
+  btnFabCreate: document.getElementById('btn-fab-create'),
+
+  // Account Dropdown Elements
+  btnSyncLogin: document.getElementById('btn-sync-login'),
+  btnSyncProfile: document.getElementById('btn-sync-profile'),
+  headerProfileAvatar: document.getElementById('header-profile-avatar'),
+  headerProfileLetter: document.getElementById('header-profile-letter'),
+  headerProfileIcon: document.getElementById('header-profile-icon'),
+
+  accountDropdown: document.getElementById('account-dropdown'),
+  dropdownEmail: document.getElementById('account-dropdown-email'),
+  dropdownAvatar: document.getElementById('dropdown-profile-avatar'),
+  dropdownLetter: document.getElementById('dropdown-profile-letter'),
+  dropdownIcon: document.getElementById('dropdown-profile-icon'),
+  dropdownUsername: document.getElementById('dropdown-profile-username'),
+
+  btnDropdownSettings: document.getElementById('btn-dropdown-settings'),
+  btnDropdownSignout: document.getElementById('btn-dropdown-signout'),
+  btnDropdownPurge: document.getElementById('btn-dropdown-purge'),
+
+  // Dedicated Login Modal
+  loginModal: document.getElementById('login-modal'),
+  btnLoginClose: document.getElementById('btn-login-close'),
+  btnLoginCancel: document.getElementById('btn-login-cancel')
 };
 
 // State Variables for Creator/Modal
@@ -119,7 +154,9 @@ export function initUI(callbacks) {
   onSaveNoteCallback = callbacks.onSaveNote;
   onDeleteNoteCallback = callbacks.onDeleteNote;
   onOpenSettingsCallback = callbacks.onOpenSettings;
-  
+  onSignoutCallback = callbacks.onSignout;
+  onPurgeCallback = callbacks.onPurgeLocalData;
+
   // Header Actions
   elements.btnSidebarToggle.addEventListener('click', toggleSidebar);
   elements.sidebarOverlay.addEventListener('click', () => {
@@ -133,7 +170,80 @@ export function initUI(callbacks) {
   elements.btnSettingsOpen.addEventListener('click', () => {
     if (onOpenSettingsCallback) onOpenSettingsCallback();
   });
-  
+
+  // Account Dropdown & Profile Actions
+  if (elements.btnDropdownSettings) {
+    elements.btnDropdownSettings.addEventListener('click', () => {
+      elements.accountDropdown.style.display = 'none';
+      if (onOpenSettingsCallback) onOpenSettingsCallback();
+    });
+  }
+
+  if (elements.btnSyncLogin) {
+    elements.btnSyncLogin.addEventListener('click', () => {
+      showLoginModal();
+    });
+  }
+
+  if (elements.syncStatus) {
+    elements.syncStatus.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (elements.btnSyncProfile && elements.btnSyncProfile.style.display !== 'none') {
+        const isVisible = elements.accountDropdown.style.display === 'flex';
+        elements.accountDropdown.style.display = isVisible ? 'none' : 'flex';
+      } else {
+        showLoginModal();
+      }
+    });
+  }
+
+  // Bind close/cancel listeners for the dedicated login modal
+  if (elements.btnLoginClose) {
+    elements.btnLoginClose.addEventListener('click', hideLoginModal);
+  }
+  if (elements.btnLoginCancel) {
+    elements.btnLoginCancel.addEventListener('click', hideLoginModal);
+  }
+  if (elements.loginModal) {
+    elements.loginModal.addEventListener('click', (e) => {
+      if (e.target === elements.loginModal) {
+        hideLoginModal();
+      }
+    });
+  }
+
+  if (elements.btnSyncProfile) {
+    elements.btnSyncProfile.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isVisible = elements.accountDropdown.style.display === 'flex';
+      elements.accountDropdown.style.display = isVisible ? 'none' : 'flex';
+    });
+  }
+
+  if (elements.btnDropdownSignout) {
+    elements.btnDropdownSignout.addEventListener('click', () => {
+      elements.accountDropdown.style.display = 'none';
+      if (onSignoutCallback) onSignoutCallback();
+    });
+  }
+
+  if (elements.btnDropdownPurge) {
+    elements.btnDropdownPurge.addEventListener('click', () => {
+      elements.accountDropdown.style.display = 'none';
+      if (onPurgeCallback) onPurgeCallback();
+    });
+  }
+
+  document.addEventListener('click', (e) => {
+    if (elements.accountDropdown && elements.accountDropdown.style.display === 'flex') {
+      if (!elements.accountDropdown.contains(e.target) &&
+        (!elements.btnSyncProfile || !elements.btnSyncProfile.contains(e.target)) &&
+        (!elements.syncStatus || !elements.syncStatus.contains(e.target))) {
+        elements.accountDropdown.style.display = 'none';
+      }
+    }
+  });
+
   // Theme Toggle
   elements.themeToggle.addEventListener('change', (e) => {
     if (e.target.checked) {
@@ -164,26 +274,48 @@ export function initUI(callbacks) {
   // Sidebar Category Navigation
   elements.navItems.forEach(item => {
     item.addEventListener('click', (e) => {
-      elements.navItems.forEach(i => i.classList.remove('active'));
       const btn = e.currentTarget;
-      btn.classList.add('active');
-      
       const category = btn.getAttribute('data-category');
-      setCategory(category);
+      const currentPath = window.location.pathname;
+
+      const isNotesPage = !currentPath.endsWith('archive.html') && !currentPath.endsWith('trash.html');
+      const isArchivePage = currentPath.endsWith('archive.html');
+      const isTrashPage = currentPath.endsWith('trash.html');
+
+      let shouldPreventDefault = false;
+      if (category === 'notes' && isNotesPage) {
+        shouldPreventDefault = true;
+      } else if (category === 'archive' && isArchivePage) {
+        shouldPreventDefault = true;
+      } else if (category === 'trash' && isTrashPage) {
+        shouldPreventDefault = true;
+      }
+
+      if (shouldPreventDefault) {
+        e.preventDefault();
+        elements.navItems.forEach(i => i.classList.remove('active'));
+        btn.classList.add('active');
+
+        // Clear hash and tag highlight when switching to a main category in-memory
+        if (window.location.hash) {
+          history.pushState("", document.title, window.location.pathname);
+        }
+        setCategory(category);
+      }
     });
   });
-  
+
   // Note Creator Focus / Expand Actions
   elements.creatorCollapsed.addEventListener('click', expandNoteCreator);
   elements.btnCreatorClose.addEventListener('click', closeNoteCreator);
-  
+
   // Auto-Save Note Creator on Clicking Outside
   document.addEventListener('click', (e) => {
     if (!elements.noteCreator.contains(e.target) && !elements.creatorExpanded.classList.contains('hidden')) {
       closeNoteCreator();
     }
   });
-  
+
   // Note Creator Tag adding
   elements.creatorTagInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
@@ -209,7 +341,7 @@ export function initUI(callbacks) {
       }
     }
   });
-  
+
   // Creator Pin Toggle
   elements.btnCreatorPin.addEventListener('click', () => {
     isCreatorPinned = !isCreatorPinned;
@@ -222,10 +354,10 @@ export function initUI(callbacks) {
     opt.addEventListener('click', (e) => {
       creatorColors.forEach(o => o.classList.remove('active'));
       e.target.classList.add('active');
-      
+
       const color = e.target.getAttribute('data-color');
       activeColor = color;
-      
+
       // Update creator container background color classes
       elements.noteCreator.className = `note-creator-container color-${color}`;
     });
@@ -308,11 +440,11 @@ export function initUI(callbacks) {
     e.target.value = '';
     renderCreatorImages();
   });
-  
+
   // Edit Modal Event Handlers
   elements.btnModalClose.addEventListener('click', saveAndCloseModal);
   elements.btnModalBack.addEventListener('click', saveAndCloseModal);
-  
+
   // Closing Modal on background click
   elements.noteModal.addEventListener('click', (e) => {
     if (e.target === elements.noteModal) {
@@ -342,7 +474,7 @@ export function initUI(callbacks) {
     opt.addEventListener('click', (e) => {
       modalColors.forEach(o => o.classList.remove('active'));
       e.target.classList.add('active');
-      
+
       const color = e.target.getAttribute('data-color');
       modalActiveColor = color;
       elements.modalCard.className = `modal-card color-${color}`;
@@ -581,6 +713,22 @@ export function initUI(callbacks) {
     });
   });
 
+  // Window hashchange listener for browser history navigation
+  window.addEventListener('hashchange', () => {
+    const hash = window.location.hash;
+    const currentPath = window.location.pathname;
+    const isNotesPage = !currentPath.endsWith('archive.html') && !currentPath.endsWith('trash.html');
+
+    if (isNotesPage) {
+      if (hash.startsWith('#tag-')) {
+        const tag = decodeURIComponent(hash.substring(5));
+        setCategory(`tag:${tag}`);
+      } else if (activeCategory.startsWith('tag:')) {
+        setCategory('notes');
+      }
+    }
+  });
+
   // Initial Lucide Icons rendering
   lucide.createIcons();
 }
@@ -591,7 +739,7 @@ export function initUI(callbacks) {
  */
 function toggleSidebar() {
   elements.sidebar.classList.toggle('collapsed');
-  
+
   // On mobile, use separate class to display slide-in overlay
   if (window.innerWidth <= 768) {
     const isMobileOpen = elements.sidebar.classList.toggle('mobile-open');
@@ -601,11 +749,11 @@ function toggleSidebar() {
 
 export function setCategory(category) {
   activeCategory = category;
-  
+
   // Close mobile sidebar on select
   elements.sidebar.classList.remove('mobile-open');
   elements.sidebarOverlay.classList.remove('active');
-  
+
   // Highlight sidebar item if it's main category
   elements.navItems.forEach(i => {
     const dataCat = i.getAttribute('data-category');
@@ -657,7 +805,7 @@ function updateEmptyStateDetails() {
 function expandNoteCreator() {
   elements.creatorCollapsed.classList.add('hidden');
   elements.creatorExpanded.classList.remove('hidden');
-  
+
   // Set default state
   isCreatorPinned = false;
   elements.btnCreatorPin.classList.remove('active');
@@ -672,17 +820,17 @@ function expandNoteCreator() {
   elements.creatorBody.classList.remove('hidden');
   renderCreatorTags();
   renderCreatorImages();
-  
+
   // Focus content body
   elements.creatorBody.focus();
 }
 
 async function closeNoteCreator() {
   const title = elements.creatorTitle.value.trim();
-  const body = isCreatorChecklistMode 
-    ? serializeCreatorChecklist() 
+  const body = isCreatorChecklistMode
+    ? serializeCreatorChecklist()
     : elements.creatorBody.value.trim();
-  
+
   // Auto save note if there is any content
   if (title || body || noteCreatorTags.length > 0 || noteCreatorImages.length > 0) {
     const noteId = 'note_' + crypto.randomUUID();
@@ -698,13 +846,13 @@ async function closeNoteCreator() {
       createdAt: Date.now(),
       updatedAt: Date.now()
     };
-    
+
     // Call controller save callback
     if (onSaveNoteCallback) {
       await onSaveNoteCallback(noteId, noteObj);
     }
   }
-  
+
   // Reset inputs
   elements.creatorTitle.value = '';
   elements.creatorBody.value = '';
@@ -716,7 +864,7 @@ async function closeNoteCreator() {
   isCreatorChecklistMode = false;
   elements.btnCreatorChecklistToggle.classList.remove('active');
   renderCreatorImages();
-  
+
   // Collapse UI
   elements.creatorCollapsed.classList.remove('hidden');
   elements.creatorExpanded.classList.add('hidden');
@@ -734,7 +882,7 @@ function discardNoteCreator() {
   isCreatorChecklistMode = false;
   elements.btnCreatorChecklistToggle.classList.remove('active');
   renderCreatorImages();
-  
+
   // Collapse UI
   elements.creatorCollapsed.classList.remove('hidden');
   elements.creatorExpanded.classList.add('hidden');
@@ -773,7 +921,7 @@ export function updateNotesData(notes) {
 
 export function renderNotesFeed() {
   const searchQuery = elements.searchInput.value.trim().toLowerCase();
-  
+
   // Filter notes by category, tags, and search
   const filtered = decryptedNotes.filter(note => {
     // 1. Category/Search Filter
@@ -797,7 +945,7 @@ export function renderNotesFeed() {
         if (note.isTrashed || !note.tags.includes(targetTag)) return false;
       }
     }
-    
+
     // 2. Search Query Matching
     if (searchQuery) {
       const matchTitle = note.title.toLowerCase().includes(searchQuery);
@@ -805,7 +953,7 @@ export function renderNotesFeed() {
       const matchTags = note.tags.some(tag => tag.toLowerCase().includes(searchQuery));
       return matchTitle || matchBody || matchTags;
     }
-    
+
     return true;
   });
 
@@ -863,16 +1011,16 @@ export function renderNotesFeed() {
 
 function renderCardsToGrid(notes, gridElement) {
   gridElement.innerHTML = '';
-  
+
   notes.forEach(note => {
     const card = document.createElement('div');
     card.className = `note-card color-${note.color || 'default'}`;
     card.setAttribute('data-id', note.id);
-    
+
     // Truncate check
     const isTruncated = note.body.length > 300;
     const bodyText = isTruncated ? note.body.substring(0, 300) : note.body;
-    
+
     let tagsHtml = '';
     if (note.tags && note.tags.length > 0) {
       tagsHtml = `
@@ -999,7 +1147,7 @@ async function deleteNoteForever(noteId) {
  */
 function renderSidebarTags() {
   elements.sidebarTagsList.innerHTML = '';
-  
+
   // Extract all distinct tags from non-trashed notes
   const tagsSet = new Set();
   decryptedNotes.forEach(n => {
@@ -1009,7 +1157,7 @@ function renderSidebarTags() {
   });
 
   const tags = Array.from(tagsSet).sort();
-  
+
   if (tags.length === 0) {
     elements.sidebarTagsList.innerHTML = `<li class="sidebar-help-text" style="padding: 8px 12px; font-size: 0.8rem; color: var(--text-secondary);">${t('sidebar_no_tags')}</li>`;
     return;
@@ -1018,7 +1166,7 @@ function renderSidebarTags() {
   tags.forEach(tag => {
     const li = document.createElement('li');
     const isActive = activeCategory === `tag:${tag}` ? 'active' : '';
-    
+
     li.innerHTML = `
       <button class="tag-btn ${isActive}" data-tag="${tag}">
         <div style="display: flex; align-items: center; gap: 12px;">
@@ -1027,9 +1175,17 @@ function renderSidebarTags() {
         </div>
       </button>
     `;
-    
-    li.querySelector('button').addEventListener('click', () => {
-      setCategory(`tag:${tag}`);
+
+    li.querySelector('button').addEventListener('click', (e) => {
+      const currentPath = window.location.pathname;
+      const isNotesPage = !currentPath.endsWith('archive.html') && !currentPath.endsWith('trash.html');
+
+      if (isNotesPage) {
+        window.location.hash = `tag-${encodeURIComponent(tag)}`;
+        setCategory(`tag:${tag}`);
+      } else {
+        window.location.href = `index.html#tag-${encodeURIComponent(tag)}`;
+      }
     });
     elements.sidebarTagsList.appendChild(li);
   });
@@ -1050,27 +1206,27 @@ function openNoteModal(noteId) {
   elements.btnModalPin.classList.toggle('active', isModalPinned);
   modalActiveColor = note.color || 'default';
   elements.modalCard.className = `modal-card color-${modalActiveColor}`;
-  
+
   // Set color popup selection
   const modalColors = elements.noteModal.querySelectorAll('.color-option');
   modalColors.forEach(opt => {
     const c = opt.getAttribute('data-color');
     opt.classList.toggle('active', c === modalActiveColor);
   });
-  
+
   noteModalTags = [...note.tags];
   renderModalTags();
 
   noteModalImages = note.images ? [...note.images] : [];
   renderModalImages();
-  
+
   // Setup footer labels
   elements.modalLastEdited.textContent = t('modal_last_edited', { time: formatDate(note.updatedAt) });
-  
+
   // Trash/Archive labels depending on state
   elements.btnModalArchive.innerHTML = note.isArchived ? '<i data-lucide="folder-up"></i>' : '<i data-lucide="archive"></i>';
   elements.btnModalArchive.title = note.isArchived ? t('btn_modal_archive_unarchive_title') : t('btn_modal_archive_title');
-  
+
   elements.btnModalTrash.innerHTML = note.isTrashed ? '<i data-lucide="rotate-ccw"></i>' : '<i data-lucide="trash-2"></i>';
   elements.btnModalTrash.title = note.isTrashed ? t('btn_modal_trash_restore_title') : t('btn_modal_trash_delete_title');
   elements.btnModalTrash.className = note.isTrashed ? 'btn-icon text-green' : 'btn-icon';
@@ -1117,7 +1273,7 @@ function openNoteModal(noteId) {
 
   elements.noteModal.classList.add('active');
   lucide.createIcons();
-  
+
   // Focus appropriate element
   if (!isTrashed) {
     if (isModalChecklistMode) {
@@ -1151,25 +1307,25 @@ function openNewNoteModal() {
   elements.btnModalArchive.classList.remove('hidden');
   elements.btnModalPin.classList.remove('hidden');
   elements.btnModalDeleteForever.classList.add('hidden');
-  
+
   // Set color popup selection
   const modalColors = elements.noteModal.querySelectorAll('.color-option');
   modalColors.forEach(opt => {
     const c = opt.getAttribute('data-color');
     opt.classList.toggle('active', c === 'default');
   });
-  
+
   noteModalTags = [];
   renderModalTags();
 
   noteModalImages = [];
   renderModalImages();
-  
+
   elements.modalLastEdited.textContent = '';
-  
+
   elements.btnModalArchive.innerHTML = '<i data-lucide="archive"></i>';
   elements.btnModalArchive.title = t('btn_modal_archive_title');
-  
+
   elements.btnModalTrash.innerHTML = '<i data-lucide="trash-2"></i>';
   elements.btnModalTrash.title = t('btn_modal_trash_delete_title');
   elements.btnModalTrash.className = 'btn-icon';
@@ -1183,7 +1339,7 @@ function openNewNoteModal() {
 
   elements.noteModal.classList.add('active');
   lucide.createIcons();
-  
+
   setTimeout(() => elements.modalBodyText.focus(), 100);
 }
 
@@ -1224,13 +1380,13 @@ async function saveAndCloseModal() {
     }
   } else {
     // Existing note
-    const hasChanged = note.title !== titleVal || 
-                       note.body !== bodyVal || 
-                       note.color !== modalActiveColor || 
-                       note.isPinned !== isModalPinned ||
-                       JSON.stringify(note.tags) !== JSON.stringify(noteModalTags) ||
-                       JSON.stringify(note.images || []) !== JSON.stringify(noteModalImages);
-    
+    const hasChanged = note.title !== titleVal ||
+      note.body !== bodyVal ||
+      note.color !== modalActiveColor ||
+      note.isPinned !== isModalPinned ||
+      JSON.stringify(note.tags) !== JSON.stringify(noteModalTags) ||
+      JSON.stringify(note.images || []) !== JSON.stringify(noteModalImages);
+
     if (hasChanged) {
       note.title = titleVal;
       note.body = bodyVal;
@@ -1239,7 +1395,7 @@ async function saveAndCloseModal() {
       note.tags = [...noteModalTags];
       note.images = [...noteModalImages];
       note.updatedAt = Date.now();
-      
+
       await onSaveNoteCallback(note.id, note);
     }
   }
@@ -1315,10 +1471,10 @@ export function updateSyncStatusUI(status) {
   currentSyncStatus = status;
   const badge = elements.syncStatus;
   badge.className = `sync-badge ${status}`;
-  
+
   let icon = 'cloud-off';
   let text = t('sync_offline');
-  
+
   if (status === 'syncing') {
     icon = 'refresh-cw';
     text = t('sync_syncing');
@@ -1329,7 +1485,7 @@ export function updateSyncStatusUI(status) {
     icon = 'cloud-alert';
     text = t('sync_error');
   }
-  
+
   badge.innerHTML = `
     <i data-lucide="${icon}"></i>
     <span class="sync-text">${text}</span>
@@ -1347,6 +1503,109 @@ export function retranslateDynamicUI() {
   updateSyncStatusUI(currentSyncStatus);
 }
 
+/**
+ * Update the profile UI elements based on sync settings state
+ */
+export function updateProfileUI(syncSettings) {
+  if (!elements.btnSyncLogin || !elements.btnSyncProfile) return;
+
+  const isSyncActive = syncSettings && syncSettings.enabled && (syncSettings.apiKey || syncSettings.email);
+
+  if (isSyncActive) {
+    elements.btnSyncLogin.style.display = 'none';
+    elements.btnSyncProfile.style.display = 'inline-flex';
+
+    const email = syncSettings.email || '';
+    const username = syncSettings.username || email.split('@')[0] || 'Connected';
+
+    if (elements.dropdownEmail) elements.dropdownEmail.textContent = email;
+    if (elements.dropdownUsername) elements.dropdownUsername.textContent = username;
+
+    const letter = (username || email || '?').charAt(0).toUpperCase();
+
+    if (syncSettings.avatarURL) {
+      if (elements.headerProfileAvatar) {
+        elements.headerProfileAvatar.src = syncSettings.avatarURL;
+        elements.headerProfileAvatar.style.display = 'block';
+      }
+      if (elements.headerProfileLetter) elements.headerProfileLetter.style.display = 'none';
+      if (elements.headerProfileIcon) elements.headerProfileIcon.style.display = 'none';
+
+      if (elements.headerProfileAvatar) {
+        elements.headerProfileAvatar.onerror = () => {
+          elements.headerProfileAvatar.style.display = 'none';
+          if (elements.headerProfileLetter) {
+            elements.headerProfileLetter.textContent = letter;
+            elements.headerProfileLetter.style.display = 'flex';
+          }
+        };
+      }
+    } else {
+      if (elements.headerProfileAvatar) elements.headerProfileAvatar.style.display = 'none';
+      if (elements.headerProfileLetter) {
+        elements.headerProfileLetter.textContent = letter;
+        elements.headerProfileLetter.style.display = 'flex';
+      }
+      if (elements.headerProfileIcon) elements.headerProfileIcon.style.display = 'none';
+    }
+
+    if (syncSettings.avatarURL) {
+      if (elements.dropdownAvatar) {
+        elements.dropdownAvatar.src = syncSettings.avatarURL;
+        elements.dropdownAvatar.style.display = 'block';
+      }
+      if (elements.dropdownLetter) elements.dropdownLetter.style.display = 'none';
+      if (elements.dropdownIcon) elements.dropdownIcon.style.display = 'none';
+
+      if (elements.dropdownAvatar) {
+        elements.dropdownAvatar.onerror = () => {
+          elements.dropdownAvatar.style.display = 'none';
+          if (elements.dropdownLetter) {
+            elements.dropdownLetter.textContent = letter;
+            elements.dropdownLetter.style.display = 'flex';
+          }
+        };
+      }
+    } else {
+      if (elements.dropdownAvatar) elements.dropdownAvatar.style.display = 'none';
+      if (elements.dropdownLetter) {
+        elements.dropdownLetter.textContent = letter;
+        elements.dropdownLetter.style.display = 'flex';
+      }
+      if (elements.dropdownIcon) elements.dropdownIcon.style.display = 'none';
+    }
+  } else {
+    elements.btnSyncLogin.style.display = 'inline-flex';
+    elements.btnSyncProfile.style.display = 'none';
+    if (elements.accountDropdown) elements.accountDropdown.style.display = 'none';
+  }
+
+  // Re-run lucide icons to ensure any new dynamically rendered icons in the dropdown or button are initialized
+  if (window.lucide) {
+    window.lucide.createIcons();
+  }
+}
+
+/**
+ * Open the dedicated login/sync modal
+ */
+export function showLoginModal() {
+  if (elements.loginModal) {
+    elements.loginModal.classList.add('active');
+  }
+}
+
+/**
+ * Close the dedicated login/sync modal and reset status
+ */
+export function hideLoginModal() {
+  if (elements.loginModal) {
+    elements.loginModal.classList.remove('active');
+    const syncStatusMsg = document.getElementById('sync-settings-status');
+    if (syncStatusMsg) syncStatusMsg.textContent = '';
+  }
+}
+
 // --- Text Utility functions ---
 
 function escapeHtml(text) {
@@ -1357,7 +1616,7 @@ function escapeHtml(text) {
     '"': '&quot;',
     "'": '&#039;'
   };
-  return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+  return text.replace(/[&<>"']/g, function (m) { return map[m]; });
 }
 
 // --- Checklist Utility functions ---
@@ -1511,7 +1770,7 @@ function renderModalChecklist(bodyText) {
   elements.modalChecklistView.innerHTML = '';
   const lines = bodyText.split('\n');
   let consecutiveText = [];
-  
+
   const note = decryptedNotes.find(n => n.id === editingNoteId);
   const isTrashed = note && note.isTrashed;
 
@@ -1901,19 +2160,19 @@ function formatDate(timestamp) {
   const date = new Date(timestamp);
   const now = new Date();
   const lang = getLanguage();
-  
+
   const isToday = date.toDateString() === now.toDateString();
-  
+
   if (isToday) {
     return date.toLocaleTimeString(lang, { hour: '2-digit', minute: '2-digit' });
   }
-  
+
   // check if this year
   const isThisYear = date.getFullYear() === now.getFullYear();
   if (isThisYear) {
     return date.toLocaleDateString(lang, { month: 'short', day: 'numeric' });
   }
-  
+
   return date.toLocaleDateString(lang, { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
@@ -1931,7 +2190,7 @@ function compressImage(file) {
         const canvas = document.createElement('canvas');
         let width = img.width;
         let height = img.height;
-        
+
         const maxDim = 1024;
         if (width > maxDim || height > maxDim) {
           if (width > height) {
@@ -1942,12 +2201,12 @@ function compressImage(file) {
             height = maxDim;
           }
         }
-        
+
         canvas.width = width;
         canvas.height = height;
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, width, height);
-        
+
         // Compress as JPEG at 75% quality
         const dataUrl = canvas.toDataURL('image/jpeg', 0.75);
         resolve(dataUrl);
@@ -1970,7 +2229,7 @@ function renderModalImages() {
   const container = elements.modalImagesPreview;
   const note = decryptedNotes.find(n => n.id === editingNoteId);
   const isTrashed = note && note.isTrashed;
-  
+
   renderImageGrid(container, noteModalImages, !isTrashed, (index) => {
     noteModalImages.splice(index, 1);
     renderModalImages();
@@ -2009,13 +2268,13 @@ function generateImageGridHtml(images) {
  */
 function renderImageGrid(container, images, isEditable, onRemove) {
   if (!container) return;
-  
+
   container.innerHTML = '';
   if (!images || images.length === 0) {
     container.classList.add('hidden');
     return;
   }
-  
+
   container.classList.remove('hidden');
 
   const row = document.createElement('div');

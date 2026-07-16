@@ -64,7 +64,7 @@ const translations = {
     btn_modal_close: "Close",
     settings_filen_thanks: "Special thanks to Filen for their {sdk}.",
     settings_license_notice: "Check us out on GitHub {repo}.",
-    settings_header: "Settings & Secure Sync",
+    settings_header: "Settings",
     btn_settings_close_aria: "Close settings",
     settings_section_appearance: "Appearance",
     settings_theme_label: "Dark Theme",
@@ -111,7 +111,11 @@ const translations = {
     status_export_failed: "Export failed.",
     btn_pin_note_title: "Pin note",
     btn_unpin_note_title: "Unpin note",
-    sync_status_title: "Sync Status: {status}"
+    sync_status_title: "Sync Status: {status}",
+    btn_login: "Sign in",
+    btn_signout: "Sign out",
+    privacy_policy: "Privacy Policy",
+    terms_of_service: "Terms of Service"
   },
   it: {
     app_title: "Noten",
@@ -174,7 +178,7 @@ const translations = {
     btn_modal_close: "Chiudi",
     settings_filen_thanks: "Un ringraziamento speciale a Filen per il loro {sdk}.",
     settings_license_notice: "Vieni a trovarci su GitHub {repo}.",
-    settings_header: "Impostazioni e Sincronizzazione Sicura",
+    settings_header: "Impostazioni",
     btn_settings_close_aria: "Chiudi impostazioni",
     settings_section_appearance: "Aspetto",
     settings_theme_label: "Tema scuro",
@@ -221,7 +225,11 @@ const translations = {
     status_export_failed: "Esportazione non riuscita.",
     btn_pin_note_title: "Fissa nota",
     btn_unpin_note_title: "Sblocca nota",
-    sync_status_title: "Stato sincronizzazione: {status}"
+    sync_status_title: "Stato sincronizzazione: {status}",
+    btn_login: "Accedi",
+    btn_signout: "Esci",
+    privacy_policy: "Informativa sulla privacy",
+    terms_of_service: "Termini di servizio"
   },
   de: {
     app_title: "Noten",
@@ -284,7 +292,7 @@ const translations = {
     btn_modal_close: "Schließen",
     settings_filen_thanks: "Besonderer Dank geht an Filen für ihr {sdk}.",
     settings_license_notice: "Besuche uns auf GitHub {repo}.",
-    settings_header: "Einstellungen & Sichere Synchronisation",
+    settings_header: "Einstellungen",
     btn_settings_close_aria: "Einstellungen schließen",
     settings_section_appearance: "Erscheinungsbild",
     settings_theme_label: "Dunkles Design",
@@ -331,7 +339,11 @@ const translations = {
     status_export_failed: "Export fehlgeschlagen.",
     btn_pin_note_title: "Notiz anpinnen",
     btn_unpin_note_title: "Notiz lösen",
-    sync_status_title: "Synchronisationsstatus: {status}"
+    sync_status_title: "Synchronisationsstatus: {status}",
+    btn_login: "Einloggen",
+    btn_signout: "Abmelden",
+    privacy_policy: "Datenschutzerklärung",
+    terms_of_service: "Nutzungsbedingungen"
   },
   es: {
     app_title: "Noten",
@@ -394,7 +406,7 @@ const translations = {
     btn_modal_close: "Cerrar",
     settings_filen_thanks: "Un agradecimiento especial a Filen por su {sdk}.",
     settings_license_notice: "Visítanos en GitHub {repo}.",
-    settings_header: "Configuración y Sincronización Segura",
+    settings_header: "Configuración",
     btn_settings_close_aria: "Cerrar configuración",
     settings_section_appearance: "Apariencia",
     settings_theme_label: "Tema oscuro",
@@ -441,7 +453,11 @@ const translations = {
     status_export_failed: "Error al exportar.",
     btn_pin_note_title: "Fijar nota",
     btn_unpin_note_title: "Desfijar nota",
-    sync_status_title: "Estado de la sincronización: {status}"
+    sync_status_title: "Estado de la sincronización: {status}",
+    btn_login: "Iniciar sesión",
+    btn_signout: "Cerrar sesión",
+    privacy_policy: "Política de privacidad",
+    terms_of_service: "Términos de servicio"
   },
   fr: {
     app_title: "Noten",
@@ -504,7 +520,7 @@ const translations = {
     btn_modal_close: "Fermer",
     settings_filen_thanks: "Un merci spécial à Filen pour leur {sdk}.",
     settings_license_notice: "Retrouvez-nous sur GitHub {repo}.",
-    settings_header: "Paramètres & Synchronisation Sécurisée",
+    settings_header: "Paramètres",
     btn_settings_close_aria: "Fermer les paramètres",
     settings_section_appearance: "Apparence",
     settings_theme_label: "Thème sombre",
@@ -551,7 +567,11 @@ const translations = {
     status_export_failed: "Échec de l'exportation.",
     btn_pin_note_title: "Épingler la note",
     btn_unpin_note_title: "Désépingler la note",
-    sync_status_title: "État de la synchronisation : {status}"
+    sync_status_title: "État de la synchronisation : {status}",
+    btn_login: "Se connecter",
+    btn_signout: "Se déconnecter",
+    privacy_policy: "Politique de confidentialité",
+    terms_of_service: "Conditions d'utilisation"
   }
 };
 
