@@ -108,6 +108,44 @@ You can synchronize your notes across multiple devices (desktops, phones, tablet
 2. Go to **Settings** and log in using your **Filen Email**, **Password**, and **Two-Factor Code**.
 3. The background sync process will automatically fetch the encrypted notes from `/Noten/notes/`, decrypt them locally using the SDK, and populate your local PouchDB instance.
 
+## Project Structure
+
+```text
+├── archive.html         # Archive page view
+├── index.html           # Main dashboard and notes feed view
+├── trash.html           # Trash bin view
+├── terms.html           # Terms of Service static page
+├── privacy.html         # Privacy Policy static page
+├── vite.config.js       # Vite configuration
+├── package.json         # Node dependencies and scripts
+├── sw.js                # Service Worker for offline PWA support
+├── manifest.json        # PWA manifest configurations
+├── css/                 # Application styles
+│   ├── variables.css    # CSS Variables (colors, fonts, sizes)
+│   ├── reset.css        # Basic reset stylesheet
+│   ├── layout.css       # Layout grids, sidebar, and container styles
+│   ├── notes.css        # Note grids and specific note card layouts
+│   ├── components.css   # Reusable UI elements (FAB, buttons, notifications)
+│   ├── lockscreen.css   # Lockscreen and pin entry UI styles
+│   ├── account.css      # User profile and account manager styling
+│   ├── static.css       # Static pages styling (terms, privacy)
+│   └── style.css        # Entrypoint importing all CSS modules
+└── js/                  # Application logic and scripts
+    ├── app.js           # Core application flow and routing initialization
+    ├── db.js            # PouchDB local database adapter and Filen E2E sync integration
+    ├── ui.js            # General DOM manipulations, event listeners, and routing logic
+    ├── i18n.js          # Internationalization module
+    ├── languages/       # Translation JSON dictionaries (de, en, es, fr, it)
+    └── ui/              # Component-specific UI scripts
+        ├── state.js     # Shared application state
+        ├── cards.js     # Note card generation, rendering, and interactions
+        ├── creator.js   # Note creation, editing modal trigger, and checklist handling
+        ├── checklist.js # Checklist drag-and-drop & indentation logic
+        ├── modal.js     # Settings modal, import/export controls, and modals
+        ├── theme.js     # Light/dark mode switching and sync logic
+        └── utils.js     # Shared helper utilities (date formatting, debouncers, etc.)
+```
+
 ---
 
 ## Tech Stack
