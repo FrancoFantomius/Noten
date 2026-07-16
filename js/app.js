@@ -4,7 +4,7 @@
 
 import * as db from './db.js';
 import * as ui from './ui.js';
-import { t, getLanguage, setLanguage, applyTranslations } from './i18n.js';
+import { t, getLanguage, setLanguage, applyTranslations, initTranslations } from './i18n.js';
 
 // Global In-Memory State
 let cachedNotes = [];
@@ -27,6 +27,12 @@ const dom = {
 // --- Bootstrapping ---
 
 window.addEventListener('DOMContentLoaded', async () => {
+  // Initialize translations before applying them
+  try {
+    await initTranslations();
+  } catch (err) {
+    console.error('Failed to load translations:', err);
+  }
   // Translate static layout components initially
   applyTranslations();
 
@@ -184,9 +190,13 @@ function setupSettingsListeners() {
   const languageSelect = document.getElementById('language-select');
   if (languageSelect) {
     languageSelect.value = getLanguage();
-    languageSelect.addEventListener('change', (e) => {
+    languageSelect.addEventListener('change', async (e) => {
       const newLang = e.target.value;
-      setLanguage(newLang);
+      try {
+        await setLanguage(newLang);
+      } catch (err) {
+        console.error('Failed to change language:', err);
+      }
       applyTranslations();
       ui.retranslateDynamicUI();
     });
