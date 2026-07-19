@@ -43,6 +43,23 @@ export default defineConfig({
         } catch (err) {
           console.error('Failed to copy icon-maskable.svg:', err);
         }
+        try {
+          const srcDir = path.resolve(__dirname, 'img/icons');
+          const destDir = path.resolve(__dirname, 'dist/img/icons');
+          if (fs.existsSync(srcDir)) {
+            fs.mkdirSync(destDir, { recursive: true });
+            const files = fs.readdirSync(srcDir);
+            for (const file of files) {
+              fs.copyFileSync(
+                path.resolve(srcDir, file),
+                path.resolve(destDir, file)
+              );
+            }
+            console.log('Successfully copied icons to dist/img/icons/');
+          }
+        } catch (err) {
+          console.error('Failed to copy icons:', err);
+        }
       }
     }
   ],

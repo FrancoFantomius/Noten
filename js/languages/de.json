@@ -1,5 +1,6 @@
 {
   "app_title": "Noten",
+  "app_description": "Deine Notizen privat und sicher auf allen Geräten",
   "search_placeholder": "Notizen, Tags, ... suchen",
   "sync_offline": "Offline",
   "sync_online": "Synchronisiert",

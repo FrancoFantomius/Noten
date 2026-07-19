@@ -135,4 +135,17 @@ export function applyTranslations(root = document) {
       el.setAttribute('aria-label', text);
     }
   });
+
+  // Dynamically translate SEO description in head meta tags
+  const description = t('app_description');
+  if (description) {
+    const descMeta = root.querySelector('meta[name="description"]');
+    if (descMeta) descMeta.setAttribute('content', description);
+
+    const ogDescMeta = root.querySelector('meta[property="og:description"]');
+    if (ogDescMeta) ogDescMeta.setAttribute('content', description);
+
+    const twitterDescMeta = root.querySelector('meta[property="twitter:description"]');
+    if (twitterDescMeta) twitterDescMeta.setAttribute('content', description);
+  }
 }

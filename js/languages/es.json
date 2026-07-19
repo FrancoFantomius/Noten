@@ -1,5 +1,6 @@
 {
   "app_title": "Noten",
+  "app_description": "Tus notas privadas y seguras en todos los dispositivos",
   "search_placeholder": "Buscar notas, etiquetas, ...",
   "sync_offline": "Sin conexión",
   "sync_online": "Sincronizado",
