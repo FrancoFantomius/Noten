@@ -35,15 +35,6 @@ export default defineConfig({
           console.error('Failed to copy sw.js:', err);
         }
         try {
-          fs.copyFileSync(
-            path.resolve(__dirname, 'icon-maskable.svg'),
-            path.resolve(__dirname, 'dist/icon-maskable.svg')
-          );
-          console.log('Successfully copied icon-maskable.svg to dist/icon-maskable.svg');
-        } catch (err) {
-          console.error('Failed to copy icon-maskable.svg:', err);
-        }
-        try {
           const srcDir = path.resolve(__dirname, 'img/icons');
           const destDir = path.resolve(__dirname, 'dist/img/icons');
           if (fs.existsSync(srcDir)) {
