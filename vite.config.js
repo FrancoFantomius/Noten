@@ -37,14 +37,67 @@ export default defineConfig({
       protocolImports: true,
     }),
     {
-      name: 'copy-sw',
+      name: 'sync-and-copy-sw',
+      buildStart() {
+        try {
+          const pkgPath = path.resolve(__dirname, 'package.json');
+          const swPath = path.resolve(__dirname, 'sw.js');
+          if (fs.existsSync(pkgPath) && fs.existsSync(swPath)) {
+            const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
+            let swContent = fs.readFileSync(swPath, 'utf-8');
+            const targetCacheName = `const CACHE_NAME = 'noten-v${pkg.version}';`;
+            if (!swContent.startsWith(targetCacheName)) {
+              swContent = swContent.replace(/^const CACHE_NAME = .*;$/m, targetCacheName);
+              fs.writeFileSync(swPath, swContent, 'utf-8');
+              console.log(`Successfully synced sw.js CACHE_NAME to noten-v${pkg.version}`);
+            }
+          }
+        } catch (err) {
+          console.error('Failed to sync sw.js version with package.json:', err);
+        }
+      },
       closeBundle() {
         try {
-          fs.copyFileSync(
-            path.resolve(__dirname, 'sw.js'),
-            path.resolve(__dirname, 'dist/sw.js')
-          );
-          console.log('Successfully copied sw.js to dist/sw.js');
+          const pkgPath = path.resolve(__dirname, 'package.json');
+          const swPath = path.resolve(__dirname, 'sw.js');
+          const distSwPath = path.resolve(__dirname, 'dist/sw.js');
+          const distJsDir = path.resolve(__dirname, 'dist/js');
+
+          let swContent = fs.readFileSync(swPath, 'utf-8');
+          if (fs.existsSync(pkgPath)) {
+            const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
+            swContent = swContent.replace(/^const CACHE_NAME = .*;$/m, `const CACHE_NAME = 'noten-v${pkg.version}';`);
+          }
+
+          // Include core JS chunks and default English ('en.js') in pre-cache.
+          // Other languages will be fetched and cached dynamically on-demand when the user selects or uses them.
+          if (fs.existsSync(distJsDir)) {
+            const jsFiles = fs.readdirSync(distJsDir).filter(f => {
+              if (!f.endsWith('.js')) return false;
+              const nameWithoutExt = f.replace(/\.js$/, '');
+              // Filter out non-English language chunk files from initial pre-cache
+              const isLangFile = /^[a-z]{2,3}(-[a-z]+)?$/i.test(nameWithoutExt);
+              if (isLangFile && nameWithoutExt !== 'en') {
+                return false;
+              }
+              return true;
+            }).map(f => `./js/${f}`);
+
+            const assetsMatch = swContent.match(/const ASSETS_TO_CACHE = \[([\s\S]*?)\];/);
+            if (assetsMatch) {
+              const currentAssets = assetsMatch[1]
+                .split('\n')
+                .map(line => line.trim().replace(/^['"]|['"],?$/g, ''))
+                .filter(Boolean);
+
+              const combinedAssets = Array.from(new Set([...currentAssets, ...jsFiles]));
+              const formattedAssets = `const ASSETS_TO_CACHE = [\n  '${combinedAssets.join("',\n  '")}'\n];`;
+              swContent = swContent.replace(/const ASSETS_TO_CACHE = \[[\s\S]*?\];/, formattedAssets);
+            }
+          }
+
+          fs.writeFileSync(distSwPath, swContent, 'utf-8');
+          console.log('Successfully updated dist/sw.js with all JS chunk assets');
         } catch (err) {
           console.error('Failed to copy sw.js:', err);
         }

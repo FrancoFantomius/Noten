@@ -55,14 +55,32 @@ window.addEventListener('DOMContentLoaded', async () => {
 
   // 5. Setup Action Event Listeners for Settings and backups
   setupSettingsListeners();
+
+  // 6. Setup Network Online/Offline status listeners
+  setupNetworkListeners();
 });
+
+/**
+ * Handle network connectivity changes
+ */
+function setupNetworkListeners() {
+  window.addEventListener('online', () => {
+    console.log('[App] Connection online');
+    db.handleNetworkStateChange(true);
+  });
+
+  window.addEventListener('offline', () => {
+    console.log('[App] Connection offline');
+    db.handleNetworkStateChange(false);
+  });
+}
 
 /**
  * Register Service Worker for PWA / offline support
  */
 function registerServiceWorker() {
   if ('serviceWorker' in navigator) {
-    // During local development, unregister any active service workers to prevent caching/HMR issues
+    // Unregister active service worker during local dev mode to prevent caching/HMR/font issues
     if (import.meta.env.DEV) {
       navigator.serviceWorker.getRegistrations().then((registrations) => {
         for (const registration of registrations) {

@@ -237,9 +237,35 @@ export async function startSync(settings) {
     return;
   }
 
+  if (typeof navigator !== 'undefined' && !navigator.onLine) {
+    if (onSyncStatusCallback) onSyncStatusCallback('offline');
+    return;
+  }
+
   if (onSyncStatusCallback) onSyncStatusCallback('syncing');
 
   await initFilenAndSync(settings);
+}
+
+/**
+ * Handle browser online/offline status changes dynamically.
+ */
+export function handleNetworkStateChange(isOnline) {
+  if (!isOnline) {
+    if (onSyncStatusCallback) onSyncStatusCallback('offline');
+  } else {
+    getSyncSettings().then(settings => {
+      if (settings && settings.enabled) {
+        if (!filenClient) {
+          startSync(settings).catch(() => {});
+        } else {
+          triggerSyncReconciliation();
+        }
+      }
+    }).catch(err => {
+      console.error("[Sync] Error retrieving sync settings on reconnection:", err);
+    });
+  }
 }
 
 /**
@@ -456,8 +482,18 @@ async function initFilenAndSync(settings) {
     }, 30000);
 
   } catch (err) {
-    console.error("[Sync] Failed to initialize Filen SDK client:", err);
-    if (onSyncStatusCallback) onSyncStatusCallback('error');
+    const isOfflineErr = (typeof navigator !== 'undefined' && !navigator.onLine) ||
+      err?.name === 'TypeError' ||
+      err?.message?.includes('fetch') ||
+      err?.message?.includes('NetworkError');
+
+    if (isOfflineErr) {
+      console.warn("[Sync] Network offline during Filen SDK initialization.");
+      if (onSyncStatusCallback) onSyncStatusCallback('offline');
+    } else {
+      console.error("[Sync] Failed to initialize Filen SDK client:", err);
+      if (onSyncStatusCallback) onSyncStatusCallback('error');
+    }
     throw err;
   }
 }
@@ -466,6 +502,11 @@ async function runSync() {
   if (!filenClient) return;
   const settings = await getSyncSettings();
   if (!settings.enabled || !filenClient.isLoggedIn()) return;
+
+  if (typeof navigator !== 'undefined' && !navigator.onLine) {
+    if (onSyncStatusCallback) onSyncStatusCallback('offline');
+    return;
+  }
 
   if (onSyncStatusCallback) onSyncStatusCallback('syncing');
 
@@ -672,7 +713,17 @@ async function runSync() {
 
     if (onSyncStatusCallback) onSyncStatusCallback('online');
   } catch (err) {
-    console.error("[Sync] Error during sync reconciliation:", err);
-    if (onSyncStatusCallback) onSyncStatusCallback('error');
+    const isOfflineErr = (typeof navigator !== 'undefined' && !navigator.onLine) ||
+      err?.name === 'TypeError' ||
+      err?.message?.includes('fetch') ||
+      err?.message?.includes('NetworkError');
+
+    if (isOfflineErr) {
+      console.warn("[Sync] Sync paused: device is offline or network request failed.");
+      if (onSyncStatusCallback) onSyncStatusCallback('offline');
+    } else {
+      console.error("[Sync] Error during sync reconciliation:", err);
+      if (onSyncStatusCallback) onSyncStatusCallback('error');
+    }
   }
 }
