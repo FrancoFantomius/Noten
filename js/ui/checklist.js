@@ -188,7 +188,7 @@ export function renderModalChecklist(bodyText) {
   if (!isTrashed) {
     const addBtn = document.createElement('button');
     addBtn.className = 'modal-checklist-add';
-    addBtn.innerHTML = `<i data-lucide="plus"></i> <span>${t('checklist_add_item')}</span>`;
+    addBtn.innerHTML = `<span class="material-symbols-outlined">add</span> <span>${t('checklist_add_item')}</span>`;
     addBtn.addEventListener('click', () => {
       const newItem = addChecklistItemAfter(null, true);
       newItem.querySelector('.modal-checklist-input').focus();
@@ -196,9 +196,7 @@ export function renderModalChecklist(bodyText) {
     elements.modalChecklistView.appendChild(addBtn);
   }
 
-  if (window.lucide) {
-    window.lucide.createIcons();
-  }
+
 }
 
 /**
@@ -277,20 +275,20 @@ export function createChecklistItemElement(text, isChecked, indent, isModal, isT
 
   const dragHandleHtml = isTrashed ? '' : `
     <div class="checklist-drag-handle" title="${t('checklist_drag_title')}">
-      <i data-lucide="grip-vertical"></i>
+      <span class="material-symbols-outlined">drag_indicator</span>
     </div>
   `;
 
   const actionsHtml = isTrashed ? '' : `
     <div class="checklist-actions">
       <button class="btn-icon checklist-outdent" title="${t('checklist_outdent_title')}">
-        <i data-lucide="chevron-left"></i>
+        <span class="material-symbols-outlined">chevron_left</span>
       </button>
       <button class="btn-icon checklist-indent" title="${t('checklist_indent_title')}">
-        <i data-lucide="chevron-right"></i>
+        <span class="material-symbols-outlined">chevron_right</span>
       </button>
       <button class="modal-checklist-delete btn-icon" title="${t('checklist_remove_item_title')}">
-        <i data-lucide="x"></i>
+        <span class="material-symbols-outlined">close</span>
       </button>
     </div>
   `;
@@ -401,13 +399,6 @@ export function createChecklistItemElement(text, isChecked, indent, isModal, isT
     });
   }
 
-  if (window.lucide) {
-    window.lucide.createIcons({
-      nameAttr: 'data-lucide',
-      root: item
-    });
-  }
-
   return item;
 }
 
@@ -494,16 +485,14 @@ export function renderCreatorChecklist(bodyText) {
 
   const addBtn = document.createElement('button');
   addBtn.className = 'modal-checklist-add';
-  addBtn.innerHTML = `<i data-lucide="plus"></i> <span>${t('checklist_add_item')}</span>`;
+  addBtn.innerHTML = `<span class="material-symbols-outlined">add</span> <span>${t('checklist_add_item')}</span>`;
   addBtn.addEventListener('click', () => {
     const newItem = addChecklistItemAfter(null, false);
     newItem.querySelector('.modal-checklist-input').focus();
   });
   elements.creatorChecklistView.appendChild(addBtn);
 
-  if (window.lucide) {
-    window.lucide.createIcons();
-  }
+
 }
 
 /**

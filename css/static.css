@@ -75,9 +75,40 @@
 
 .static-footer {
    margin-top: 40px;
-   text-align: center;
+   padding-top: 24px;
+   border-top: 1px solid var(--border-color);
+   display: flex;
+   justify-content: center;
 }
 
 .static-footer .btn {
+   display: inline-flex;
+   align-items: center;
+   justify-content: center;
+   padding: 12px 24px;
+   border-radius: var(--radius-full);
    font-size: 0.95rem;
+   font-weight: 600;
+   gap: 10px;
+   box-shadow: var(--shadow-sm);
+   background-color: var(--bg-tertiary);
+   border: 1px solid var(--border-color);
+   color: var(--text-primary);
+   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.static-footer .btn:hover {
+   background-color: var(--accent-bg-glow);
+   border-color: var(--accent);
+   color: var(--accent);
+   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+}
+
+.static-footer .btn .material-symbols-outlined {
+   font-size: 20px;
+   transition: transform 0.2s ease;
+}
+
+.static-footer .btn:hover .material-symbols-outlined {
+   transform: translateX(-4px);
 }

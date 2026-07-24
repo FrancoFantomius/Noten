@@ -70,7 +70,7 @@
   "settings_section_sync": "Encrypted Sync (Filen)",
   "settings_sync_help": "Configure synchronization with your personal Filen account. All notes synced will be fully encrypted client-side; Filen will never see your notes.",
   "settings_sync_email": "Filen Email",
-  "settings_sync_email_placeholder": "your-email@example.com",
+  "settings_sync_email_placeholder": "email@example.com",
   "settings_sync_password": "Filen Password",
   "settings_sync_password_placeholder": "Enter your Filen password...",
   "settings_sync_twofactor": "Two-Factor Auth Code (Optional)",

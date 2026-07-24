@@ -155,7 +155,7 @@ You can synchronize your notes across multiple devices (desktops, phones, tablet
 - **Local Storage**: IndexedDB (managed via PouchDB)
 - **Replication & E2E Encryption**: Filen SDK Integration (`@filen/sdk`)
 - **Bundler**: Vite & Vite Node Polyfills Plugin
-- **Icons**: Lucide Icons CDN
+- **Icons**: Google Material Symbols Outlined
 
 ---
 

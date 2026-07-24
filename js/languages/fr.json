@@ -70,7 +70,7 @@
   "settings_section_sync": "Synchronisation Chiffrée (Filen)",
   "settings_sync_help": "Configurez la synchronisation avec votre compte Filen personnel. Toutes les notes synchronisées seront entièrement chiffrées côté client ; Filen ne verra jamais vos notes.",
   "settings_sync_email": "E-mail Filen",
-  "settings_sync_email_placeholder": "votre-email@exemple.com",
+  "settings_sync_email_placeholder": "email@example.com",
   "settings_sync_password": "Mot de passe Filen",
   "settings_sync_password_placeholder": "Saisissez votre mot de passe Filen...",
   "settings_sync_twofactor": "Code d'authentification à deux facteurs (Facultatif)",

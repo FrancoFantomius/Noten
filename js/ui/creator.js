@@ -276,7 +276,7 @@ export function renderCreatorTags() {
     span.innerHTML = `
       #${tag}
       <button class="btn-remove-tag" data-tag="${tag}">
-        <i data-lucide="x"></i>
+        <span class="material-symbols-outlined">close</span>
       </button>
     `;
     span.querySelector('button').addEventListener('click', (e) => {
@@ -288,9 +288,7 @@ export function renderCreatorTags() {
     elements.creatorTagsList.appendChild(span);
   });
   
-  if (window.lucide) {
-    window.lucide.createIcons();
-  }
+
 }
 
 export function renderCreatorImages() {

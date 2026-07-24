@@ -148,7 +148,7 @@ export function renderImageGrid(container, images, isEditable, onRemove) {
       btn.className = 'btn-remove-image';
       btn.setAttribute('data-index', index);
       btn.title = t('btn_remove_image_title');
-      btn.innerHTML = '<i data-lucide="x"></i>';
+      btn.innerHTML = '<span class="material-symbols-outlined">close</span>';
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
         onRemove(index);
@@ -162,7 +162,5 @@ export function renderImageGrid(container, images, isEditable, onRemove) {
   cols.forEach(col => row.appendChild(col));
   container.appendChild(row);
 
-  if (window.lucide) {
-    window.lucide.createIcons();
-  }
+
 }

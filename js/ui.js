@@ -118,10 +118,7 @@ export function initUI(callbacks) {
     });
   }
 
-  // Initial Lucide Icons rendering
-  if (window.lucide) {
-    window.lucide.createIcons();
-  }
+
 }
 
 /**

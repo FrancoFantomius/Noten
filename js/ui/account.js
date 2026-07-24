@@ -227,9 +227,7 @@ export function updateProfileUI(syncSettings) {
     if (elements.accountDropdown) elements.accountDropdown.style.display = 'none';
   }
 
-  if (window.lucide) {
-    window.lucide.createIcons();
-  }
+
 }
 
 /**

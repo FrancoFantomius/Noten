@@ -70,7 +70,7 @@
   "settings_section_sync": "Verschlüsselte Synchronisation (Filen)",
   "settings_sync_help": "Konfiguriere die Synchronisation mit deinem persönlichen Filen-Konto. Alle synchronisierten Notizen werden clientseitig vollständig verschlüsselt; Filen kann deine Notizen niemals einsehen.",
   "settings_sync_email": "Filen E-Mail",
-  "settings_sync_email_placeholder": "deine-email@beispiel.com",
+  "settings_sync_email_placeholder": "email@example.com",
   "settings_sync_password": "Filen Passwort",
   "settings_sync_password_placeholder": "Gib dein Filen-Passwort ein...",
   "settings_sync_twofactor": "Zwei-Faktor-Auth-Code (Optional)",
