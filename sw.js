@@ -18,9 +18,7 @@ const ASSETS_TO_CACHE = [
   './img/icons/noten_x512.png',
   './css/style.css',
   './js/app.js',
-  'https://cdn.jsdelivr.net/npm/pouchdb@8.0.1/dist/pouchdb.min.js',
-  'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap',
-  'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200'
+  'https://cdn.jsdelivr.net/npm/pouchdb@8.0.1/dist/pouchdb.min.js'
 ];
 
 // Install Event (Pre-cache static assets safely)
