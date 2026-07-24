@@ -45,7 +45,6 @@ export function initUI(callbacks) {
   state.onDeleteNoteCallback = callbacks.onDeleteNote;
   state.onOpenSettingsCallback = callbacks.onOpenSettings;
   state.onSignoutCallback = callbacks.onSignout;
-  state.onPurgeCallback = callbacks.onPurgeLocalData;
 
   // Resolve initial active category based on path and hash
   const path = window.location.pathname;

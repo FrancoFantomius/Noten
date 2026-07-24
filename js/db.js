@@ -255,6 +255,39 @@ export function stopSync() {
 }
 
 /**
+ * Clear all local notes and sync queues from the database on logout.
+ */
+export async function clearAllNotes() {
+  try {
+    const result = await db.allDocs({
+      include_docs: true,
+      startkey: 'note_',
+      endkey: 'note_\ufff0'
+    });
+
+    const docsToDelete = result.rows.map(row => ({
+      _id: row.doc._id,
+      _rev: row.doc._rev,
+      _deleted: true
+    }));
+
+    if (docsToDelete.length > 0) {
+      await db.bulkDocs(docsToDelete);
+    }
+
+    try {
+      const deletedQueueDoc = await db.get('_local/deleted_notes');
+      await db.remove(deletedQueueDoc);
+    } catch (e) {
+      // Ignore if deleted notes queue doc does not exist
+    }
+  } catch (err) {
+    console.error("Failed to clear all notes from DB:", err);
+    throw err;
+  }
+}
+
+/**
  * Clear all local data. Used for logging out / purging.
  */
 export async function destroyDatabase() {
@@ -263,6 +296,7 @@ export async function destroyDatabase() {
   // Re-instantiate database
   window.location.reload();
 }
+
 
 // --- Custom Local-First Sync Reconciliation Logic for Filen ---
 

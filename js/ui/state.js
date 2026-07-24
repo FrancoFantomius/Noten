@@ -23,8 +23,7 @@ export const state = {
   onSaveNoteCallback: null,
   onDeleteNoteCallback: null,
   onOpenSettingsCallback: null,
-  onSignoutCallback: null,
-  onPurgeCallback: null
+  onSignoutCallback: null
 };
 
 // DOM Elements references (initially null, resolved during initElements)
@@ -127,7 +126,6 @@ export const elements = {
 
   btnDropdownSettings: null,
   btnDropdownSignout: null,
-  btnDropdownPurge: null,
 
   // Dedicated Login Modal
   loginModal: null,
@@ -237,7 +235,6 @@ export function initElements() {
 
   elements.btnDropdownSettings = document.getElementById('btn-dropdown-settings');
   elements.btnDropdownSignout = document.getElementById('btn-dropdown-signout');
-  elements.btnDropdownPurge = document.getElementById('btn-dropdown-purge');
 
   // Dedicated Login Modal
   elements.loginModal = document.getElementById('login-modal');

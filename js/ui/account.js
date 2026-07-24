@@ -84,13 +84,6 @@ export function initAccountUI() {
     });
   }
 
-  if (elements.btnDropdownPurge) {
-    elements.btnDropdownPurge.addEventListener('click', () => {
-      elements.accountDropdown.style.display = 'none';
-      if (state.onPurgeCallback) state.onPurgeCallback();
-    });
-  }
-
   document.addEventListener('click', (e) => {
     if (elements.accountDropdown && elements.accountDropdown.style.display === 'flex') {
       if (!elements.accountDropdown.contains(e.target) &&

@@ -485,6 +485,7 @@
    font-size: 0.8rem;
    font-weight: 600;
    margin-top: 4px;
+   text-align: center;
 }
 
 .status-message.success {
@@ -495,11 +496,12 @@
    color: var(--danger);
 }
 
-.backup-actions,
-.import-actions {
+.backup-actions {
    display: flex;
-   gap: 12px;
+   justify-content: center;
    align-items: center;
+   gap: 16px;
+   flex-wrap: wrap;
 }
 
 .file-input-label {
@@ -579,15 +581,13 @@ input:checked+.slider:before {
    .password-change-fields {
       flex-direction: column;
    }
-
-   .backup-actions,
-   .import-actions {
-      flex-direction: column;
-      align-items: stretch;
-   }
 }
 
 @media (max-width: 480px) {
+   .backup-actions {
+      flex-direction: column;
+      align-items: stretch;
+   }
    .modal-card {
       height: 100vh;
       height: 100dvh;

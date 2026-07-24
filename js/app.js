@@ -44,8 +44,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     onSaveNote: handleSaveNote,
     onDeleteNote: handleDeleteNote,
     onOpenSettings: handleOpenSettings,
-    onSignout: handleDisableSync,
-    onPurgeLocalData: handlePurgeLocalData
+    onSignout: handleDisableSync
   });
 
   // 3. Register DB updates listener
@@ -262,6 +261,14 @@ async function handleSaveSyncSettings() {
 }
 
 async function handleDisableSync() {
+  try {
+    await db.clearAllNotes();
+  } catch (err) {
+    console.error("Failed to clear local notes cache on signout:", err);
+  }
+  cachedNotes = [];
+  ui.updateNotesData(cachedNotes);
+
   const settings = await db.getSyncSettings();
   settings.enabled = false;
 
@@ -286,18 +293,6 @@ async function handleDisableSync() {
 
   ui.updateProfileUI(settings);
   showSyncStatus(t('status_sync_disabled'), "success");
-}
-
-async function handlePurgeLocalData() {
-  if (confirm(t('confirm_purge_local_data'))) {
-    try {
-      showSyncStatus(t('status_purging'), "info");
-      await db.destroyDatabase();
-    } catch (err) {
-      console.error("Purging database failed:", err);
-      showSyncStatus("Purging failed. Try again.", "error");
-    }
-  }
 }
 
 function showSyncStatus(text, type) {
