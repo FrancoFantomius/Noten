@@ -6,7 +6,8 @@ import { t } from '../i18n.js';
 import { state, elements } from './state.js';
 import { escapeHtml, formatDate, openLightbox } from './utils.js';
 import { hasChecklistItems, buildChecklistDOM } from './checklist.js';
-import { openNoteModal } from './modal.js';
+import { openNoteModal, saveAndCloseModal } from './modal.js';
+import { showSettings, hideSettings } from './account.js';
 
 /**
  * Initializes sidebar toggling, search input listeners, sidebar navigations, and hash change event listeners
@@ -83,12 +84,38 @@ export function initCardsUI() {
     const currentPath = window.location.pathname;
     const isNotesPage = !currentPath.endsWith('archive.html') && !currentPath.endsWith('trash.html');
 
+    // Handle Settings modal hash navigation
+    const isSettingsOpen = elements.settingsModal && elements.settingsModal.classList.contains('active');
+    if (isSettingsOpen && hash !== '#settings') {
+      hideSettings();
+    } else if (!isSettingsOpen && hash === '#settings') {
+      showSettings();
+      return;
+    }
+
+    // If modal is currently open for a note, but URL hash no longer matches that note
+    if (state.editingNoteId && hash !== `#${state.editingNoteId}`) {
+      saveAndCloseModal();
+    }
+
+    // If modal is closed and hash matches a note in decryptedNotes
+    if (!state.editingNoteId && hash.length > 1 && !hash.startsWith('#tag-') && hash !== '#settings') {
+      const targetId = hash.substring(1);
+      const targetNote = state.decryptedNotes.find(n => n.id === targetId);
+      if (targetNote) {
+        openNoteModal(targetNote.id);
+        return;
+      }
+    }
+
     if (isNotesPage) {
       if (hash.startsWith('#tag-')) {
         const tag = decodeURIComponent(hash.substring(5));
         setCategory(`tag:${tag}`);
-      } else if (state.activeCategory.startsWith('tag:')) {
-        setCategory('notes');
+      } else if (!hash || hash === '#') {
+        if (state.activeCategory.startsWith('tag:')) {
+          setCategory('notes');
+        }
       }
     }
   });

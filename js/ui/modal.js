@@ -281,8 +281,11 @@ export function openNoteModal(noteId) {
   }
 
   elements.noteModal.classList.add('active');
-  
 
+  if (window.location.hash !== `#${noteId}`) {
+    state.isNoteModalHashPushed = true;
+    window.location.hash = noteId;
+  }
 
   if (!isTrashed) {
     if (state.isModalChecklistMode) {
@@ -346,8 +349,11 @@ export function openNewNoteModal() {
   elements.modalBodyText.classList.remove('hidden');
 
   elements.noteModal.classList.add('active');
-  
 
+  if (window.location.hash !== `#${state.editingNoteId}`) {
+    state.isNoteModalHashPushed = true;
+    window.location.hash = state.editingNoteId;
+  }
 
   setTimeout(() => elements.modalBodyText.focus(), 100);
 }
@@ -412,6 +418,8 @@ export async function saveAndCloseModal() {
 }
 
 export function closeModal() {
+  const closedNoteId = state.editingNoteId;
+
   elements.noteModal.classList.remove('active');
   state.editingNoteId = null;
   state.noteModalImages = [];
@@ -422,6 +430,17 @@ export function closeModal() {
   elements.btnModalChecklistToggle.classList.add('hidden');
   elements.btnModalChecklistToggle.classList.remove('active');
   renderModalImages();
+
+  if (closedNoteId && window.location.hash === `#${closedNoteId}`) {
+    if (state.isNoteModalHashPushed) {
+      state.isNoteModalHashPushed = false;
+      history.back();
+    } else {
+      history.replaceState("", document.title, window.location.pathname + window.location.search);
+    }
+  } else {
+    state.isNoteModalHashPushed = false;
+  }
 }
 
 export function renderModalTags() {

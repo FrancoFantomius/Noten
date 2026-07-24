@@ -16,6 +16,8 @@ export const state = {
   isCreatorPinned: false,
   isModalPinned: false,
   editingNoteId: null,
+  isNoteModalHashPushed: false,
+  isSettingsModalHashPushed: false,
   isModalChecklistMode: false,
   isCreatorChecklistMode: false,
 
