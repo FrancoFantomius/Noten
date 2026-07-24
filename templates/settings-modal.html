@@ -1,0 +1,82 @@
+  <!-- Settings & Sync Modal -->
+  <div id="settings-modal" class="modal-overlay">
+    <div class="modal-card" style="height: auto; min-height: unset; max-height: 90vh;">
+      <div class="settings-header">
+        <h2 data-i18n="settings_header">Settings</h2>
+        <button id="btn-settings-close" class="btn-icon" data-i18n-aria="btn_settings_close_aria"
+          aria-label="Close settings"><span class="material-symbols-outlined">close</span></button>
+      </div>
+
+      <div class="settings-body" style="gap: 20px;">
+
+        <!-- Tab: Appearance -->
+        <section class="settings-section">
+          <h3 data-i18n="settings_section_appearance">Appearance</h3>
+
+          <div class="settings-row">
+            <div class="settings-info">
+              <span class="settings-label" data-i18n="settings_theme_label">Dark Theme</span>
+              <span class="settings-desc" data-i18n="settings_theme_desc">Toggle between dark and light themes</span>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="theme-toggle" checked>
+              <span class="slider round"></span>
+            </label>
+          </div>
+
+          <div class="settings-row">
+            <div class="settings-info">
+              <span class="settings-label" data-i18n="settings_language_label">Language</span>
+              <span class="settings-desc" data-i18n="settings_language_desc">Choose your preferred application
+                language</span>
+            </div>
+            <select id="language-select" class="select-premium">
+              <option value="en">English</option>
+              <option value="it">Italiano</option>
+              <option value="de">Deutsch</option>
+              <option value="es">Español</option>
+              <option value="fr">Français</option>
+            </select>
+          </div>
+        </section>
+
+        <!-- Tab: Import / Export Backups -->
+        <section class="settings-section">
+          <h3 data-i18n="settings_section_backups">Local Backups</h3>
+          <p class="section-help" data-i18n="settings_backups_help">Export your notes to a JSON file or import notes
+            from a previous backup.</p>
+
+          <div class="backup-actions">
+            <button id="btn-export-backup" class="btn btn-secondary" data-i18n="btn_export_backup"
+              title="Export JSON notes backup">
+              <span class="material-symbols-outlined">download</span> Export Backup
+            </button>
+          </div>
+
+          <div class="import-actions">
+            <label class="btn btn-secondary file-input-label" data-i18n="btn_import_backup">
+              <span class="material-symbols-outlined">upload</span> Import Backup File
+              <input type="file" id="import-file-input" accept=".json" class="hidden">
+            </label>
+            <p id="import-status-text" class="status-message"></p>
+          </div>
+        </section>
+
+        <!-- Settings Footer / Attribution & License -->
+        <div class="settings-footer-attribution">
+          <p class="attribution-thanks">
+            <span class="material-symbols-outlined">favorite</span>
+            <span data-i18n-html="settings_filen_thanks">Special thanks to Filen for their <a
+                href="https://github.com/FilenCloudDienste/filen-sdk-ts" target="_blank">SDK</a>.</span>
+          </p>
+          <div class="settings-license-disclosure">
+            <span class="material-symbols-outlined">balance</span>
+            <span data-i18n-html="settings_license_notice">
+              Check us out on Github <a href="https://github.com/francofantomius/noten" target="_blank">Noten</a>
+            </span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>

@@ -1,0 +1,43 @@
+      <!-- Collapsible Sidebar -->
+      <aside id="app-sidebar" class="sidebar">
+        <div class="sidebar-mobile-header">
+          <div class="logo-area">
+            <img src="img/icons/icon.svg" alt="Noten Logo" class="app-logo-small">
+            <span class="app-title">Noten</span>
+          </div>
+          <button id="btn-sidebar-close-mobile" class="btn-icon" aria-label="Close Menu">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+        <nav class="sidebar-nav">
+          <ul>
+            <li>
+              <a href="index.html" class="nav-item {{#if navNotes}}active{{/if}}" data-category="notes">
+                <span class="material-symbols-outlined">note_stack</span>
+                <span class="nav-label" data-i18n="nav_notes">Notes</span>
+              </a>
+            </li>
+            <li>
+              <a href="archive.html" class="nav-item {{#if navArchive}}active{{/if}}" data-category="archive">
+                <span class="material-symbols-outlined">archive</span>
+                <span class="nav-label" data-i18n="nav_archive">Archive</span>
+              </a>
+            </li>
+            <li>
+              <a href="trash.html" class="nav-item {{#if navTrash}}active{{/if}}" data-category="trash">
+                <span class="material-symbols-outlined">delete</span>
+                <span class="nav-label" data-i18n="nav_trash">Trash</span>
+              </a>
+            </li>
+          </ul>
+
+          <div class="sidebar-divider"></div>
+
+          <div class="tags-section">
+            <span class="section-title" data-i18n="tags_section_title">Tags</span>
+            <ul id="sidebar-tags-list">
+              <!-- Dynamically populated tags list -->
+            </ul>
+          </div>
+        </nav>
+      </aside>

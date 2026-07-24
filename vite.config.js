@@ -1,10 +1,17 @@
 import { defineConfig } from 'vite';
 import { nodePolyfills } from 'vite-plugin-node-polyfills';
+import handlebars from 'vite-plugin-handlebars';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+const pageData = {
+  '/index.html': { bodyClass: 'index-page', navNotes: true },
+  '/archive.html': { bodyClass: 'archive-page', navArchive: true },
+  '/trash.html': { bodyClass: 'trash-page', navTrash: true },
+};
 
 export default defineConfig({
   base: './',
@@ -14,6 +21,13 @@ export default defineConfig({
     },
   },
   plugins: [
+    handlebars({
+      partialDirectory: path.resolve(__dirname, 'templates'),
+      context(pagePath) {
+        const normalized = pagePath.startsWith('/') ? pagePath : '/' + pagePath;
+        return pageData[normalized] || pageData[pagePath] || {};
+      }
+    }),
     nodePolyfills({
       globals: {
         Buffer: true,

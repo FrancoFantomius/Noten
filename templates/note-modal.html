@@ -1,0 +1,70 @@
+  <!-- Note Editor Modal -->
+  <div id="note-modal" class="modal-overlay">
+    <div class="modal-card" id="modal-card-element">
+      <div id="modal-images-preview" class="note-images-preview hidden"></div>
+      <input type="file" id="modal-image-input" accept="image/*" multiple class="hidden">
+      <div class="modal-header">
+        <button id="btn-modal-back" class="btn-icon modal-back-btn" aria-label="Go back" title="Save and close">
+          <span class="material-symbols-outlined">arrow_back</span>
+        </button>
+        <input type="text" id="modal-title" data-i18n-placeholder="modal_title_placeholder" placeholder="Title">
+        <button id="btn-modal-pin" class="btn-icon" data-i18n-title="btn_modal_pin_title" title="Pin note">
+          <span class="material-symbols-outlined">keep</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div id="modal-checklist-view" class="modal-checklist hidden"></div>
+        <textarea id="modal-body-text" data-i18n-placeholder="modal_body_placeholder" placeholder="Note"
+          rows="6"></textarea>
+
+        <div id="modal-tags-list" class="note-tags-container"></div>
+        <div class="tag-input-wrapper">
+          <input type="text" id="modal-tag-input" data-i18n-placeholder="modal_tag_input_placeholder"
+            placeholder="Add tag + press Enter...">
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <div class="modal-toolbar">
+          <div class="modal-toolbar-buttons">
+            <!-- Modal Color Picker -->
+            <div class="color-picker-wrapper">
+              <button class="btn-icon" data-i18n-title="btn_creator_color_title" title="Change color"><span
+                  class="material-symbols-outlined">palette</span></button>
+              <div class="color-palette-popup">
+                <button class="color-option default" data-color="default" data-i18n-title="color_default"
+                  title="Default"></button>
+                <button class="color-option red" data-color="red" data-i18n-title="color_red" title="Red"></button>
+                <button class="color-option orange" data-color="orange" data-i18n-title="color_orange"
+                  title="Orange"></button>
+                <button class="color-option yellow" data-color="yellow" data-i18n-title="color_yellow"
+                  title="Yellow"></button>
+                <button class="color-option green" data-color="green" data-i18n-title="color_green"
+                  title="Green"></button>
+                <button class="color-option teal" data-color="teal" data-i18n-title="color_teal" title="Teal"></button>
+                <button class="color-option blue" data-color="blue" data-i18n-title="color_blue" title="Blue"></button>
+                <button class="color-option purple" data-color="purple" data-i18n-title="color_purple"
+                  title="Purple"></button>
+                <button class="color-option pink" data-color="pink" data-i18n-title="color_pink" title="Pink"></button>
+              </div>
+            </div>
+            <button id="btn-modal-checklist-toggle" class="btn-icon hidden"
+              data-i18n-title="btn_modal_checklist_toggle_title" title="Toggle checklist view"><span
+                class="material-symbols-outlined">checklist</span></button>
+            <button id="btn-modal-image" class="btn-icon" data-i18n-title="btn_modal_image_title"
+              title="Add image"><span class="material-symbols-outlined">image</span></button>
+            <button id="btn-modal-archive" class="btn-icon" data-i18n-title="btn_modal_archive_title"
+              title="Archive"><span class="material-symbols-outlined">archive</span></button>
+            <button id="btn-modal-trash" class="btn-icon" data-i18n-title="btn_modal_trash_delete_title"
+              title="Delete"><span class="material-symbols-outlined">delete</span></button>
+            <button id="btn-modal-delete-forever" class="btn-icon hidden"
+              data-i18n-title="btn_modal_trash_delete_forever_title" title="Delete forever"><span
+                class="material-symbols-outlined">delete</span></button>
+          </div>
+          <span class="last-edited-label" id="modal-last-edited" data-i18n="modal_last_edited">Edited 2 mins ago</span>
+        </div>
+        <button id="btn-modal-close" class="btn btn-primary" data-i18n="btn_modal_close">Close</button>
+      </div>
+    </div>
+  </div>

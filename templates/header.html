@@ -1,0 +1,91 @@
+    <!-- Top Header / Navigation -->
+    <header class="main-header">
+      <div class="header-left">
+        <button id="btn-sidebar-toggle" class="btn-icon" aria-label="Toggle Sidebar">
+          <span class="material-symbols-outlined">menu</span>
+        </button>
+        <div class="logo-area">
+          <img src="img/icons/icon.svg" alt="Noten Logo" class="app-logo-small">
+          <span class="app-title">Noten</span>
+        </div>
+      </div>
+
+      <div class="header-center">
+        <div class="search-bar">
+          <span class="material-symbols-outlined search-icon">search</span>
+          <input type="text" id="search-input" data-i18n-placeholder="search_placeholder"
+            placeholder="Search notes, tags, ...">
+          <button id="btn-search-clear" class="btn-icon hidden" aria-label="Clear Search">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="header-right">
+        <!-- Sync Indicator Badge -->
+        <div id="sync-status" class="sync-badge offline" title="Sync Offline" style="cursor: pointer;">
+          <span class="material-symbols-outlined">cloud_off</span>
+          <span class="sync-text" data-i18n="sync_offline">Offline</span>
+        </div>
+
+        <button id="btn-settings-open" class="btn-icon" data-i18n-title="btn_settings_open_title"
+          data-i18n-aria="btn_settings_open_title" title="Settings" aria-label="Open Settings">
+          <span class="material-symbols-outlined">settings</span>
+        </button>
+
+        <!-- Login Button (shown when logged out) -->
+        <button id="btn-sync-login" class="btn btn-primary"
+          style="padding: 6px 16px; font-size: 0.85rem; border-radius: var(--radius-full);">
+          <span data-i18n="btn_login">Sign in</span>
+        </button>
+
+        <!-- Profile Avatar/Icon Button (shown when logged in) -->
+        <button id="btn-sync-profile" class="profile-btn" title="Profile" style="display: none;">
+          <img id="header-profile-avatar" src="" alt="Avatar" style="display: none;">
+          <div id="header-profile-letter" class="profile-avatar-letter" style="display: none;"></div>
+          <span id="header-profile-icon" class="material-symbols-outlined profile-btn-icon">account_circle</span>
+        </button>
+
+        <!-- Account Dropdown Card -->
+        <div id="account-dropdown" class="account-dropdown" style="display: none;">
+          <!-- Email -->
+          <div id="account-dropdown-email" class="account-dropdown-email">email@example.com</div>
+
+          <!-- Large Avatar Circle -->
+          <div class="dropdown-avatar-container">
+            <img id="dropdown-profile-avatar" src="" alt="Avatar" style="display: none;">
+            <div id="dropdown-profile-letter" class="dropdown-avatar-letter" style="display: none;"></div>
+            <span id="dropdown-profile-icon" class="material-symbols-outlined dropdown-avatar-icon">account_circle</span>
+          </div>
+
+          <!-- Display Name -->
+          <div id="dropdown-profile-username" class="dropdown-username">Username</div>
+
+          <!-- Actions -->
+          <div class="dropdown-actions">
+            <!-- Settings button -->
+            <button id="btn-dropdown-settings" class="dropdown-btn dropdown-btn-secondary">
+              <span class="material-symbols-outlined">settings</span>
+              <span data-i18n="settings_header">Settings</span>
+            </button>
+
+            <button id="btn-dropdown-signout" class="dropdown-btn dropdown-btn-secondary">
+              <span class="material-symbols-outlined">logout</span>
+              <span data-i18n="btn_signout">Sign out</span>
+            </button>
+
+            <button id="btn-dropdown-purge" class="dropdown-btn dropdown-btn-danger">
+              <span class="material-symbols-outlined">delete</span>
+              <span data-i18n="btn_purge_sync">Purge Local Cache</span>
+            </button>
+          </div>
+
+          <!-- Footer links -->
+          <div class="dropdown-footer">
+            <a href="./privacy.html" target="_blank" data-i18n="privacy_policy">Privacy Policy</a>
+            <span>•</span>
+            <a href="./terms.html" target="_blank" data-i18n="terms_of_service">Terms of Service</a>
+          </div>
+        </div>
+      </div>
+    </header>
