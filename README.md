@@ -111,11 +111,23 @@ You can synchronize your notes across multiple devices (desktops, phones, tablet
 ## Project Structure
 
 ```text
-├── archive.html         # Archive page view
-├── index.html           # Main dashboard and notes feed view
-├── trash.html           # Trash bin view
+├── archive.html         # Archive page view shell
+├── index.html           # Main dashboard view shell
+├── trash.html           # Trash bin view shell
 ├── terms.html           # Terms of Service static page
 ├── privacy.html         # Privacy Policy static page
+├── templates/           # Shared Handlebars HTML template partials
+│   ├── head.html        # App head meta, fonts, PouchDB setup
+│   ├── header.html      # Main app navigation header & profile dropdown
+│   ├── sidebar.html     # Sidebar navigation menu
+│   ├── note-creator.html# Note creator component
+│   ├── notes-grid.html  # Pinned/unpinned note grid container
+│   ├── note-modal.html   # Note editor modal overlay
+│   ├── settings-modal.html# Settings & sync configuration modal
+│   ├── login-modal.html # Filen sync login modal
+│   ├── lightbox.html    # Fullscreen image viewer modal
+│   ├── fab.html         # Mobile floating action button
+│   └── head-static.html # Head boilerplate for static pages
 ├── vite.config.js       # Vite configuration
 ├── package.json         # Node dependencies and scripts
 ├── sw.js                # Service Worker for offline PWA support
@@ -150,12 +162,18 @@ You can synchronize your notes across multiple devices (desktops, phones, tablet
 
 ## Tech Stack
 
-- **Markup & Layout**: Semantic HTML5
+- **Markup & Layout**: Semantic HTML5 with Handlebars partial templates (`vite-plugin-handlebars`)
 - **Styling**: Vanilla CSS3 (Custom Variables, Column Masonry Layouts, responsive media queries)
 - **Local Storage**: IndexedDB (managed via PouchDB)
 - **Replication & E2E Encryption**: Filen SDK Integration (`@filen/sdk`)
 - **Bundler**: Vite & Vite Node Polyfills Plugin
-- **Icons**: Lucide Icons CDN
+- **Icons**: Google Material Symbols Outlined
+
+---
+
+## Contributing
+
+Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct, development setup, template architecture, and pull request process.
 
 ---
 

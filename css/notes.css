@@ -431,8 +431,14 @@
    opacity: 1;
 }
 
-.note-card-pin.active {
+.note-card-pin.active,
+.btn-icon.active {
    color: var(--accent);
+}
+
+.note-card-pin.active .material-symbols-outlined,
+.btn-icon.active .material-symbols-outlined {
+   font-variation-settings: 'FILL' 1;
 }
 
 .note-card-footer {

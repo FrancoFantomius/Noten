@@ -16,7 +16,7 @@ import {
   hideLoginModal
 } from './ui/account.js';
 import { initCreatorUI } from './ui/creator.js';
-import { initModalUI, openNewNoteModal } from './ui/modal.js';
+import { initModalUI, openNoteModal, openNewNoteModal } from './ui/modal.js';
 import {
   initCardsUI,
   renderNotesFeed,
@@ -45,7 +45,6 @@ export function initUI(callbacks) {
   state.onDeleteNoteCallback = callbacks.onDeleteNote;
   state.onOpenSettingsCallback = callbacks.onOpenSettings;
   state.onSignoutCallback = callbacks.onSignout;
-  state.onPurgeCallback = callbacks.onPurgeLocalData;
 
   // Resolve initial active category based on path and hash
   const path = window.location.pathname;
@@ -118,10 +117,7 @@ export function initUI(callbacks) {
     });
   }
 
-  // Initial Lucide Icons rendering
-  if (window.lucide) {
-    window.lucide.createIcons();
-  }
+
 }
 
 /**
@@ -131,6 +127,17 @@ export function updateNotesData(notes) {
   state.decryptedNotes = notes;
   renderNotesFeed();
   renderSidebarTags();
+
+  if (!state.editingNoteId && window.location.hash) {
+    const hash = window.location.hash;
+    if (hash.length > 1 && !hash.startsWith('#tag-')) {
+      const targetId = hash.substring(1);
+      const note = state.decryptedNotes.find(n => n.id === targetId);
+      if (note) {
+        openNoteModal(note.id);
+      }
+    }
+  }
 }
 
 /**

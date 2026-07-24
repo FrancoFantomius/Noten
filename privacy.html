@@ -10,31 +10,18 @@
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website">
   <meta property="og:title" content="Noten - Privacy Policy">
-  <meta property="og:description" content="Read the Privacy Policy of Noten - Your notes private and secure accross devices.">
+  <meta property="og:description"
+    content="Read the Privacy Policy of Noten - Your notes private and secure accross devices.">
   <meta property="og:image" content="./img/icons/noten_x512.png">
 
   <!-- Twitter -->
   <meta property="twitter:card" content="summary_large_image">
   <meta property="twitter:title" content="Noten - Privacy Policy">
-  <meta property="twitter:description" content="Read the Privacy Policy of Noten - Your notes private and secure accross devices.">
+  <meta property="twitter:description"
+    content="Read the Privacy Policy of Noten - Your notes private and secure accross devices.">
   <meta property="twitter:image" content="./img/icons/noten_x512.png">
 
-  <!-- Favicon -->
-  <link rel="icon" href="./img/icons/noten_x48.png" type="image/png">
-  <link rel="icon" href="./img/icons/noten_x96.png" type="image/png" sizes="96x96">
-  <link rel="icon" href="./img/icons/noten_x192.png" type="image/png" sizes="192x192">
-  <link rel="apple-touch-icon" href="./img/icons/noten_x192.png">
-
-  <!-- Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-  <!-- CSS Stylesheet -->
-  <link rel="stylesheet" href="css/style.css">
-
-  <!-- Lucide Icons -->
-  <script src="https://unpkg.com/lucide@latest"></script>
+  {{> head-static}}
 </head>
 
 <body class="dark-theme static-layout">
@@ -42,7 +29,7 @@
     <div class="static-card">
       <header class="static-header">
         <div class="logo-area" style="justify-content: center; margin-bottom: 16px;">
-          <img src="img/icons/noten.png" alt="Noten Logo" class="app-logo-small">
+          <img src="img/icons/icon.svg" alt="Noten Logo" class="app-logo-small">
           <span class="app-title">Noten</span>
         </div>
         <h1 class="static-title">Privacy Policy</h1>
@@ -50,32 +37,39 @@
       </header>
 
       <section class="static-content">
-        <p>At Noten, your privacy is our core value. Noten is designed as a local-first, client-side application. We do not operate server infrastructure to collect, store, or sell your personal details or notes.</p>
+        <p>Noten is designed as a local-first, client-side application. We do not operate server infrastructure to
+          collect, store, or sell your personal details or notes.</p>
 
         <h2>1. Local Storage & Client-Side Encryption</h2>
-        <p>All notes, tags, and formatting data are stored locally in your browser's database (IndexedDB via PouchDB). All data synchronized to the cloud is encrypted client-side using industry-standard cryptography before it leaves your device. Neither we nor third parties have access to your decryption keys or plaintext notes.</p>
+        <p>All notes, tags, and formatting data are stored locally in your browser's database (IndexedDB via PouchDB).
+          All data synchronized to the cloud is encrypted client-side using industry-standard cryptography before it
+          leaves your device. Neither we nor third parties have access to your decryption keys or plaintext notes.</p>
 
         <h2>2. Third-Party Synchronization (Filen)</h2>
-        <p>If you choose to enable cloud synchronization, Noten connects directly to the secure storage APIs provided by <strong>Filen</strong> (Filen Cloud Dienste). Your email, password, and two-factor authentication codes are used strictly to establish an encrypted session directly with Filen. We do not store or transmit your login credentials to any servers other than Filen's official API endpoints.</p>
+        <p>If you choose to enable cloud synchronization, Noten connects directly to the secure storage APIs provided by
+          <strong>Filen</strong> (Filen Cloud Dienste). Your email, password, and two-factor authentication codes are
+          used strictly to establish an encrypted session directly with Filen. We do not store or transmit your login
+          credentials to any servers other than Filen's official API endpoints.</p>
 
         <h2>3. Data Collection</h2>
-        <p>We do not collect diagnostics, crash reports, analytics, or behavioral data. The application operates in complete anonymity.</p>
+        <p>We do not collect diagnostics, crash reports, analytics, or behavioral data. The application operates in
+          complete anonymity.</p>
 
         <h2>4. Contact & Support</h2>
-        <p>Since this project is open-source, you can audit the source code, open issues, or contribute directly on our official repository.</p>
+        <p>Since this project is open-source, you can audit the source code, open issues, or contribute directly on our
+          official repository.</p>
       </section>
 
       <footer class="static-footer">
         <a href="index.html" class="btn btn-secondary">
-          <i data-lucide="arrow-left"></i> Back to App
+          <span class="material-symbols-outlined">arrow_back</span>
+          <span>Back to App</span>
         </a>
       </footer>
     </div>
   </div>
 
   <script>
-    // Initialize Lucide icons on static page
-    lucide.createIcons();
 
     // Set theme based on local storage
     const savedTheme = localStorage.getItem('theme') || 'dark';

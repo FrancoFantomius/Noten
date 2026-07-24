@@ -28,6 +28,19 @@ export function initAccountUI() {
     });
   }
 
+  // Close Settings modal on Escape key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && elements.settingsModal && elements.settingsModal.classList.contains('active')) {
+      e.preventDefault();
+      hideSettings();
+    }
+  });
+
+  // Open Settings initially if hash is #settings
+  if (window.location.hash === '#settings') {
+    showSettings();
+  }
+
   // Account Dropdown & Profile Actions
   if (elements.btnDropdownSettings) {
     elements.btnDropdownSettings.addEventListener('click', () => {
@@ -84,13 +97,6 @@ export function initAccountUI() {
     });
   }
 
-  if (elements.btnDropdownPurge) {
-    elements.btnDropdownPurge.addEventListener('click', () => {
-      elements.accountDropdown.style.display = 'none';
-      if (state.onPurgeCallback) state.onPurgeCallback();
-    });
-  }
-
   document.addEventListener('click', (e) => {
     if (elements.accountDropdown && elements.accountDropdown.style.display === 'flex') {
       if (!elements.accountDropdown.contains(e.target) &&
@@ -108,6 +114,10 @@ export function initAccountUI() {
 export function showSettings() {
   if (elements.settingsModal) {
     elements.settingsModal.classList.add('active');
+    if (window.location.hash !== '#settings') {
+      state.isSettingsModalHashPushed = true;
+      window.location.hash = 'settings';
+    }
   }
 }
 
@@ -117,6 +127,17 @@ export function hideSettings() {
   }
   const statusMsg = document.getElementById('sync-settings-status');
   if (statusMsg) statusMsg.textContent = '';
+
+  if (window.location.hash === '#settings') {
+    if (state.isSettingsModalHashPushed) {
+      state.isSettingsModalHashPushed = false;
+      history.back();
+    } else {
+      history.replaceState("", document.title, window.location.pathname + window.location.search);
+    }
+  } else {
+    state.isSettingsModalHashPushed = false;
+  }
 }
 
 /**
@@ -227,9 +248,7 @@ export function updateProfileUI(syncSettings) {
     if (elements.accountDropdown) elements.accountDropdown.style.display = 'none';
   }
 
-  if (window.lucide) {
-    window.lucide.createIcons();
-  }
+
 }
 
 /**

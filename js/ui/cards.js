@@ -6,7 +6,8 @@ import { t } from '../i18n.js';
 import { state, elements } from './state.js';
 import { escapeHtml, formatDate, openLightbox } from './utils.js';
 import { hasChecklistItems, buildChecklistDOM } from './checklist.js';
-import { openNoteModal } from './modal.js';
+import { openNoteModal, saveAndCloseModal } from './modal.js';
+import { showSettings, hideSettings } from './account.js';
 
 /**
  * Initializes sidebar toggling, search input listeners, sidebar navigations, and hash change event listeners
@@ -83,12 +84,38 @@ export function initCardsUI() {
     const currentPath = window.location.pathname;
     const isNotesPage = !currentPath.endsWith('archive.html') && !currentPath.endsWith('trash.html');
 
+    // Handle Settings modal hash navigation
+    const isSettingsOpen = elements.settingsModal && elements.settingsModal.classList.contains('active');
+    if (isSettingsOpen && hash !== '#settings') {
+      hideSettings();
+    } else if (!isSettingsOpen && hash === '#settings') {
+      showSettings();
+      return;
+    }
+
+    // If modal is currently open for a note, but URL hash no longer matches that note
+    if (state.editingNoteId && hash !== `#${state.editingNoteId}`) {
+      saveAndCloseModal();
+    }
+
+    // If modal is closed and hash matches a note in decryptedNotes
+    if (!state.editingNoteId && hash.length > 1 && !hash.startsWith('#tag-') && hash !== '#settings') {
+      const targetId = hash.substring(1);
+      const targetNote = state.decryptedNotes.find(n => n.id === targetId);
+      if (targetNote) {
+        openNoteModal(targetNote.id);
+        return;
+      }
+    }
+
     if (isNotesPage) {
       if (hash.startsWith('#tag-')) {
         const tag = decodeURIComponent(hash.substring(5));
         setCategory(`tag:${tag}`);
-      } else if (state.activeCategory.startsWith('tag:')) {
-        setCategory('notes');
+      } else if (!hash || hash === '#') {
+        if (state.activeCategory.startsWith('tag:')) {
+          setCategory('notes');
+        }
       }
     }
   });
@@ -264,9 +291,7 @@ export function renderNotesFeed() {
     if (elements.notesViewContent) elements.notesViewContent.classList.remove('hidden');
   }
 
-  if (window.lucide) {
-    window.lucide.createIcons();
-  }
+
 }
 
 export function renderCardsToGrid(notes, gridElement) {
@@ -304,7 +329,7 @@ export function renderCardsToGrid(notes, gridElement) {
       ${coverHtml}
       ${!note.isTrashed ? `
       <button class="btn-icon note-card-pin ${note.isPinned ? 'active' : ''}" title="${note.isPinned ? t('btn_unpin_note_title') : t('btn_pin_note_title')}">
-        <i data-lucide="pin"></i>
+        <span class="material-symbols-outlined">keep</span>
       </button>
       ` : ''}
       ${note.title ? `<h3 class="note-card-title">${escapeHtml(note.title)}</h3>` : ''}
@@ -315,10 +340,10 @@ export function renderCardsToGrid(notes, gridElement) {
         ${note.isTrashed ? `
           <div class="note-card-trash-actions">
             <button class="btn-icon btn-card-restore" title="${t('btn_modal_trash_restore_title')}">
-              <i data-lucide="rotate-ccw"></i>
+              <span class="material-symbols-outlined">restore</span>
             </button>
             <button class="btn-icon btn-card-delete-forever" title="${t('btn_modal_trash_delete_forever_title')}">
-              <i data-lucide="trash-2"></i>
+              <span class="material-symbols-outlined">delete</span>
             </button>
           </div>
         ` : ''}
@@ -459,7 +484,7 @@ export function renderSidebarTags() {
     li.innerHTML = `
       <button class="tag-btn ${isActive}" data-tag="${tag}">
         <div style="display: flex; align-items: center; gap: 12px;">
-          <i data-lucide="hash" style="width: 16px; height: 16px;"></i>
+          <span class="material-symbols-outlined" style="font-size: 18px;">tag</span>
           <span>${escapeHtml(tag)}</span>
         </div>
       </button>
@@ -479,7 +504,5 @@ export function renderSidebarTags() {
     elements.sidebarTagsList.appendChild(li);
   });
 
-  if (window.lucide) {
-    window.lucide.createIcons();
-  }
+
 }

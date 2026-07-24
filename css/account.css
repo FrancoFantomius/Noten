@@ -227,6 +227,16 @@
    flex-shrink: 0;
 }
 
+.dropdown-btn .material-symbols-outlined {
+   width: 20px;
+   height: 20px;
+   font-size: 20px;
+   display: inline-flex;
+   align-items: center;
+   justify-content: center;
+   flex-shrink: 0;
+}
+
 .dropdown-btn-secondary {
    border: 1px solid var(--border-color);
    background-color: transparent;

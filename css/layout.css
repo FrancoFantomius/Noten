@@ -190,6 +190,16 @@
    flex-shrink: 0;
 }
 
+.nav-item .material-symbols-outlined {
+   width: 24px;
+   height: 24px;
+   font-size: 24px;
+   display: inline-flex;
+   align-items: center;
+   justify-content: center;
+   flex-shrink: 0;
+}
+
 .sidebar.collapsed .nav-label {
    display: none;
 }

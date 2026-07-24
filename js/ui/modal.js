@@ -237,10 +237,10 @@ export function openNoteModal(noteId) {
 
   elements.modalLastEdited.textContent = t('modal_last_edited', { time: formatDate(note.updatedAt) });
 
-  elements.btnModalArchive.innerHTML = note.isArchived ? '<i data-lucide="folder-up"></i>' : '<i data-lucide="archive"></i>';
+  elements.btnModalArchive.innerHTML = note.isArchived ? '<span class="material-symbols-outlined">unarchive</span>' : '<span class="material-symbols-outlined">archive</span>';
   elements.btnModalArchive.title = note.isArchived ? t('btn_modal_archive_unarchive_title') : t('btn_modal_archive_title');
 
-  elements.btnModalTrash.innerHTML = note.isTrashed ? '<i data-lucide="rotate-ccw"></i>' : '<i data-lucide="trash-2"></i>';
+  elements.btnModalTrash.innerHTML = note.isTrashed ? '<span class="material-symbols-outlined">restore</span>' : '<span class="material-symbols-outlined">delete</span>';
   elements.btnModalTrash.title = note.isTrashed ? t('btn_modal_trash_restore_title') : t('btn_modal_trash_delete_title');
   elements.btnModalTrash.className = note.isTrashed ? 'btn-icon text-green' : 'btn-icon';
 
@@ -281,9 +281,10 @@ export function openNoteModal(noteId) {
   }
 
   elements.noteModal.classList.add('active');
-  
-  if (window.lucide) {
-    window.lucide.createIcons();
+
+  if (window.location.hash !== `#${noteId}`) {
+    state.isNoteModalHashPushed = true;
+    window.location.hash = noteId;
   }
 
   if (!isTrashed) {
@@ -333,10 +334,10 @@ export function openNewNoteModal() {
 
   elements.modalLastEdited.textContent = '';
 
-  elements.btnModalArchive.innerHTML = '<i data-lucide="archive"></i>';
+  elements.btnModalArchive.innerHTML = '<span class="material-symbols-outlined">archive</span>';
   elements.btnModalArchive.title = t('btn_modal_archive_title');
 
-  elements.btnModalTrash.innerHTML = '<i data-lucide="trash-2"></i>';
+  elements.btnModalTrash.innerHTML = '<span class="material-symbols-outlined">delete</span>';
   elements.btnModalTrash.title = t('btn_modal_trash_delete_title');
   elements.btnModalTrash.className = 'btn-icon';
 
@@ -348,9 +349,10 @@ export function openNewNoteModal() {
   elements.modalBodyText.classList.remove('hidden');
 
   elements.noteModal.classList.add('active');
-  
-  if (window.lucide) {
-    window.lucide.createIcons();
+
+  if (window.location.hash !== `#${state.editingNoteId}`) {
+    state.isNoteModalHashPushed = true;
+    window.location.hash = state.editingNoteId;
   }
 
   setTimeout(() => elements.modalBodyText.focus(), 100);
@@ -416,6 +418,8 @@ export async function saveAndCloseModal() {
 }
 
 export function closeModal() {
+  const closedNoteId = state.editingNoteId;
+
   elements.noteModal.classList.remove('active');
   state.editingNoteId = null;
   state.noteModalImages = [];
@@ -426,6 +430,17 @@ export function closeModal() {
   elements.btnModalChecklistToggle.classList.add('hidden');
   elements.btnModalChecklistToggle.classList.remove('active');
   renderModalImages();
+
+  if (closedNoteId && window.location.hash === `#${closedNoteId}`) {
+    if (state.isNoteModalHashPushed) {
+      state.isNoteModalHashPushed = false;
+      history.back();
+    } else {
+      history.replaceState("", document.title, window.location.pathname + window.location.search);
+    }
+  } else {
+    state.isNoteModalHashPushed = false;
+  }
 }
 
 export function renderModalTags() {
@@ -442,7 +457,7 @@ export function renderModalTags() {
       span.innerHTML = `
         #${tag}
         <button class="btn-remove-tag" data-tag="${tag}">
-          <i data-lucide="x"></i>
+          <span class="material-symbols-outlined">close</span>
         </button>
       `;
       span.querySelector('button').addEventListener('click', (e) => {
@@ -455,9 +470,7 @@ export function renderModalTags() {
     elements.modalTagsList.appendChild(span);
   });
   
-  if (window.lucide) {
-    window.lucide.createIcons();
-  }
+
 }
 
 export function renderModalImages() {

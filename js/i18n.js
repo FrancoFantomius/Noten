@@ -3,7 +3,7 @@
  */
 
 const loadedTranslations = {};
-const SUPPORTED_LANGUAGES = ['en', 'it', 'de', 'es', 'fr'];
+const SUPPORTED_LANGUAGES = ["ab","ady","af","ar","az","ba","be","bg","bn","br","bs","ca","ce","crh","cs","csb","cv","cy","da","de","el","en","es","et","eu","fi","fo","fr","fy","ga","gag","gd","gl","gv","hi","hr","hsb","hu","inh","is","it","ka","kw","lb","lt","lv","mk","nds","nl","no","oc","pl","pt","rm","ro","ru","rup","sc","sco","se","sk","sl","sq","sr","sv","tr","tt","uk","ur","yi","zh"];
 
 async function loadLanguageFile(lang) {
   if (loadedTranslations[lang]) return;
@@ -16,12 +16,21 @@ async function loadLanguageFile(lang) {
   }
 }
 
+function pruneUnusedTranslations(activeLang) {
+  Object.keys(loadedTranslations).forEach(lang => {
+    if (lang !== 'en' && lang !== activeLang) {
+      delete loadedTranslations[lang];
+    }
+  });
+}
+
 /**
  * Initializes translations at application startup.
  * Loads the active language and English (for fallback) in parallel.
  */
 export async function initTranslations() {
   const activeLang = getLanguage();
+  pruneUnusedTranslations(activeLang);
   const langsToLoad = ['en'];
   if (activeLang !== 'en') {
     langsToLoad.push(activeLang);
@@ -54,6 +63,7 @@ export function getLanguage() {
 export async function setLanguage(lang) {
   if (SUPPORTED_LANGUAGES.includes(lang)) {
     await loadLanguageFile(lang);
+    pruneUnusedTranslations(lang);
     localStorage.setItem('language', lang);
   }
 }
