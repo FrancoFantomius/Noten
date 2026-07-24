@@ -3,10 +3,13 @@
   "short_name": "Noten",
   "description": "Your notes private and secure accross devices",
   "start_url": "./index.html",
-  "display": "standalone",
-  "background_color": "#0e1117",
-  "theme_color": "#f59e0b",
-  "categories": ["productivity", "utilities"],
+  "display": "fullscreen",
+  "background_color": "#ffffff",
+  "theme_color": "#fcf4eb",
+  "categories": [
+    "productivity",
+    "utilities"
+  ],
   "icons": [
     {
       "src": "./img/icons/noten_x48.png",
