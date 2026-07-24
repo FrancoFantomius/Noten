@@ -71,6 +71,9 @@ export default defineConfig({
 
           // Include core JS chunks and default English ('en.js') in pre-cache.
           // Other languages will be fetched and cached dynamically on-demand when the user selects or uses them.
+          const distDir = path.resolve(__dirname, 'dist');
+          const distAssets = [];
+
           if (fs.existsSync(distJsDir)) {
             const jsFiles = fs.readdirSync(distJsDir).filter(f => {
               if (!f.endsWith('.js')) return false;
@@ -82,18 +85,24 @@ export default defineConfig({
               }
               return true;
             }).map(f => `./js/${f}`);
+            distAssets.push(...jsFiles);
+          }
 
-            const assetsMatch = swContent.match(/const ASSETS_TO_CACHE = \[([\s\S]*?)\];/);
-            if (assetsMatch) {
-              const currentAssets = assetsMatch[1]
-                .split('\n')
-                .map(line => line.trim().replace(/^['"]|['"],?$/g, ''))
-                .filter(Boolean);
+          if (fs.existsSync(distDir)) {
+            const fontFiles = fs.readdirSync(distDir).filter(f => f.endsWith('.woff') || f.endsWith('.woff2')).map(f => `./${f}`);
+            distAssets.push(...fontFiles);
+          }
 
-              const combinedAssets = Array.from(new Set([...currentAssets, ...jsFiles]));
-              const formattedAssets = `const ASSETS_TO_CACHE = [\n  '${combinedAssets.join("',\n  '")}'\n];`;
-              swContent = swContent.replace(/const ASSETS_TO_CACHE = \[[\s\S]*?\];/, formattedAssets);
-            }
+          const assetsMatch = swContent.match(/const ASSETS_TO_CACHE = \[([\s\S]*?)\];/);
+          if (assetsMatch) {
+            const currentAssets = assetsMatch[1]
+              .split('\n')
+              .map(line => line.trim().replace(/^['"]|['"],?$/g, ''))
+              .filter(Boolean);
+
+            const combinedAssets = Array.from(new Set([...currentAssets, ...distAssets]));
+            const formattedAssets = `const ASSETS_TO_CACHE = [\n  '${combinedAssets.join("',\n  '")}'\n];`;
+            swContent = swContent.replace(/const ASSETS_TO_CACHE = \[[\s\S]*?\];/, formattedAssets);
           }
 
           fs.writeFileSync(distSwPath, swContent, 'utf-8');
