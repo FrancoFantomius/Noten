@@ -51,6 +51,7 @@
   "modal_tag_input_placeholder": "Add tag + press Enter...",
   "btn_modal_checklist_toggle_title": "Toggle checklist view",
   "btn_modal_image_title": "Add image",
+  "btn_modal_copy_title": "Make a copy",
   "btn_modal_archive_title": "Archive",
   "btn_modal_archive_unarchive_title": "Unarchive",
   "btn_modal_trash_delete_title": "Delete note",

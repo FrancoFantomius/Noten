@@ -51,6 +51,7 @@
   "modal_tag_input_placeholder": "Dodaj tag + naciśnij Enter...",
   "btn_modal_checklist_toggle_title": "Widok listy zadań",
   "btn_modal_image_title": "Dodaj obraz",
+  "btn_modal_copy_title": "Utwórz kopię",
   "btn_modal_archive_title": "Zarchiwizuj",
   "btn_modal_archive_unarchive_title": "Przywróć z archiwum",
   "btn_modal_trash_delete_title": "Usuń notatkę",

@@ -51,6 +51,7 @@
   "modal_tag_input_placeholder": "टैग जोड़ें + एंटर दबाएं...",
   "btn_modal_checklist_toggle_title": "चेकलिस्ट दृश्य बदलें",
   "btn_modal_image_title": "छवि जोड़ें",
+  "btn_modal_copy_title": "एक प्रति बनाएँ",
   "btn_modal_archive_title": "संग्रहित करें",
   "btn_modal_archive_unarchive_title": "अनअकाइव करें",
   "btn_modal_trash_delete_title": "नोट हटाएँ",

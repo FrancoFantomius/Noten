@@ -51,6 +51,7 @@
   "modal_tag_input_placeholder": "Ajouter un tag + Appuyer sur Entrée...",
   "btn_modal_checklist_toggle_title": "Afficher/masquer la liste de contrôle",
   "btn_modal_image_title": "Ajouter une image",
+  "btn_modal_copy_title": "Créer une copie",
   "btn_modal_archive_title": "Archiver",
   "btn_modal_archive_unarchive_title": "Désarchiver",
   "btn_modal_trash_delete_title": "Supprimer la note",

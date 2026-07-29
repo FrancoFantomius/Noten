@@ -51,6 +51,7 @@
   "modal_tag_input_placeholder": "Añadir etiqueta + pulsar Enter...",
   "btn_modal_checklist_toggle_title": "Alternar vista de lista de verificación",
   "btn_modal_image_title": "Añadir imagen",
+  "btn_modal_copy_title": "Hacer una copia",
   "btn_modal_archive_title": "Archivar",
   "btn_modal_archive_unarchive_title": "Desarchivar",
   "btn_modal_trash_delete_title": "Eliminar nota",

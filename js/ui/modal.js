@@ -157,6 +157,49 @@ export function initModalUI() {
     }
   });
 
+  // Modal Copy Action
+  if (elements.btnModalCopy) {
+    elements.btnModalCopy.addEventListener('click', async () => {
+      if (!state.editingNoteId) return;
+
+      const existingNote = state.decryptedNotes.find(n => n.id === state.editingNoteId);
+      if (existingNote && existingNote.isTrashed) return;
+
+      const titleVal = elements.modalTitle.value.trim();
+      const bodyVal = state.isModalChecklistMode
+        ? serializeModalChecklist()
+        : elements.modalBodyText.value.trim();
+      const tags = [...state.noteModalTags];
+      const color = state.modalActiveColor;
+      const isPinned = state.isModalPinned;
+      const isArchived = existingNote ? existingNote.isArchived : false;
+      const images = [...state.noteModalImages];
+
+      // Save current note state and close modal
+      await saveAndCloseModal();
+
+      // Create new note with the exact copied options & content
+      const newNoteId = 'note_' + crypto.randomUUID();
+      const copyNoteObj = {
+        title: titleVal,
+        body: bodyVal,
+        tags: tags,
+        color: color,
+        isPinned: isPinned,
+        isArchived: isArchived,
+        isTrashed: false,
+        trashedAt: null,
+        images: images,
+        createdAt: Date.now(),
+        updatedAt: Date.now()
+      };
+
+      if (state.onSaveNoteCallback) {
+        await state.onSaveNoteCallback(newNoteId, copyNoteObj);
+      }
+    });
+  }
+
   // Modal Archive Action
   elements.btnModalArchive.addEventListener('click', async () => {
     if (state.editingNoteId) {
@@ -256,6 +299,9 @@ export function openNoteModal(noteId) {
 
   elements.modalColorPickerWrapper.classList.toggle('hidden', isTrashed);
   elements.btnModalImage.classList.toggle('hidden', isTrashed);
+  if (elements.btnModalCopy) {
+    elements.btnModalCopy.classList.toggle('hidden', isTrashed);
+  }
   elements.btnModalArchive.classList.toggle('hidden', isTrashed);
   elements.btnModalPin.classList.toggle('hidden', isTrashed);
   elements.btnModalDeleteForever.classList.toggle('hidden', !isTrashed);
@@ -316,6 +362,9 @@ export function openNewNoteModal() {
 
   elements.modalColorPickerWrapper.classList.remove('hidden');
   elements.btnModalImage.classList.remove('hidden');
+  if (elements.btnModalCopy) {
+    elements.btnModalCopy.classList.remove('hidden');
+  }
   elements.btnModalArchive.classList.remove('hidden');
   elements.btnModalPin.classList.remove('hidden');
   elements.btnModalDeleteForever.classList.add('hidden');
