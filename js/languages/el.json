@@ -51,6 +51,7 @@
   "modal_tag_input_placeholder": "Προσθήκη ετικέτας + Enter...",
   "btn_modal_checklist_toggle_title": "Εναλλαγή προβολής λίστας",
   "btn_modal_image_title": "Προσθήκη εικόνας",
+  "btn_modal_copy_title": "Δημιουργία αντιγράφου",
   "btn_modal_archive_title": "Αρχειοθέτηση",
   "btn_modal_archive_unarchive_title": "Επαναφορά από αρχείο",
   "btn_modal_trash_delete_title": "Διαγραφή σημείωσης",

@@ -51,6 +51,7 @@
   "modal_tag_input_placeholder": "添加标签 + 按回车...",
   "btn_modal_checklist_toggle_title": "切换清单视图",
   "btn_modal_image_title": "添加图片",
+  "btn_modal_copy_title": "创建副本",
   "btn_modal_archive_title": "归档",
   "btn_modal_archive_unarchive_title": "取消归档",
   "btn_modal_trash_delete_title": "删除笔记",

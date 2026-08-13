@@ -51,6 +51,7 @@
   "modal_tag_input_placeholder": "Lägg till tagg + Tryck Enter...",
   "btn_modal_checklist_toggle_title": "Växla checklistevy",
   "btn_modal_image_title": "Lägg till bild",
+  "btn_modal_copy_title": "Skapa en kopia",
   "btn_modal_archive_title": "Arkivera",
   "btn_modal_archive_unarchive_title": "Återställ från arkiv",
   "btn_modal_trash_delete_title": "Ta bort anteckning",

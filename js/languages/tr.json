@@ -51,6 +51,7 @@
   "modal_tag_input_placeholder": "Etiket ekle + Enter'a bas...",
   "btn_modal_checklist_toggle_title": "Liste görünümünü aç/kapat",
   "btn_modal_image_title": "Görsel ekle",
+  "btn_modal_copy_title": "Kopya oluştur",
   "btn_modal_archive_title": "Arşivle",
   "btn_modal_archive_unarchive_title": "Arşivden çıkar",
   "btn_modal_trash_delete_title": "Notu sil",

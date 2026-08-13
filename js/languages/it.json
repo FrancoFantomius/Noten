@@ -51,6 +51,7 @@
   "modal_tag_input_placeholder": "Aggiungi tag + premi Invio...",
   "btn_modal_checklist_toggle_title": "Attiva/disattiva lista di controllo",
   "btn_modal_image_title": "Aggiungi immagine",
+  "btn_modal_copy_title": "Crea una copia",
   "btn_modal_archive_title": "Archivia",
   "btn_modal_archive_unarchive_title": "Ripristina dall'archivio",
   "btn_modal_trash_delete_title": "Sposta nel cestino",

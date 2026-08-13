@@ -93,6 +93,7 @@ export const elements = {
   btnModalClose: null,
   modalLastEdited: null,
   btnModalImage: null,
+  btnModalCopy: null,
   modalImageInput: null,
   modalImagesPreview: null,
   modalChecklistView: null,
@@ -202,6 +203,7 @@ export function initElements() {
   elements.btnModalClose = document.getElementById('btn-modal-close');
   elements.modalLastEdited = document.getElementById('modal-last-edited');
   elements.btnModalImage = document.getElementById('btn-modal-image');
+  elements.btnModalCopy = document.getElementById('btn-modal-copy');
   elements.modalImageInput = document.getElementById('modal-image-input');
   elements.modalImagesPreview = document.getElementById('modal-images-preview');
   elements.modalChecklistView = document.getElementById('modal-checklist-view');

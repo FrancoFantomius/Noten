@@ -51,6 +51,7 @@
   "modal_tag_input_placeholder": "Adicionar tag + pressione Enter...",
   "btn_modal_checklist_toggle_title": "Alternar visualização de lista",
   "btn_modal_image_title": "Adicionar imagem",
+  "btn_modal_copy_title": "Fazer uma cópia",
   "btn_modal_archive_title": "Arquivar",
   "btn_modal_archive_unarchive_title": "Desarquivar",
   "btn_modal_trash_delete_title": "Excluir nota",

@@ -51,6 +51,7 @@
   "modal_tag_input_placeholder": "Добавить тег + Enter...",
   "btn_modal_checklist_toggle_title": "Переключить список",
   "btn_modal_image_title": "Добавить изображение",
+  "btn_modal_copy_title": "Создать копию",
   "btn_modal_archive_title": "Архивировать",
   "btn_modal_archive_unarchive_title": "Разархивировать",
   "btn_modal_trash_delete_title": "Удалить заметку",

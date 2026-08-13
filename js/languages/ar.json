@@ -51,6 +51,7 @@
   "modal_tag_input_placeholder": "أضف وسماً + اضغط Enter...",
   "btn_modal_checklist_toggle_title": "تبديل عرض المهام",
   "btn_modal_image_title": "إضافة صورة",
+  "btn_modal_copy_title": "إنشاء نسخة",
   "btn_modal_archive_title": "أرشفة",
   "btn_modal_archive_unarchive_title": "إلغاء الأرشفة",
   "btn_modal_trash_delete_title": "حذف الملاحظة",

@@ -51,6 +51,7 @@
   "modal_tag_input_placeholder": "Tag hinzufügen + Eingabetaste...",
   "btn_modal_checklist_toggle_title": "Checklisten-Ansicht umschalten",
   "btn_modal_image_title": "Bild hinzufügen",
+  "btn_modal_copy_title": "Kopie erstellen",
   "btn_modal_archive_title": "Archivieren",
   "btn_modal_archive_unarchive_title": "Aus Archiv wiederherstellen",
   "btn_modal_trash_delete_title": "Notiz löschen",
