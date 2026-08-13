@@ -3,7 +3,7 @@
  */
 
 const loadedTranslations = {};
-const SUPPORTED_LANGUAGES = ["ab","ady","af","ar","az","ba","be","bg","bn","br","bs","ca","ce","crh","cs","csb","cv","cy","da","de","el","en","es","et","eu","fi","fo","fr","fy","ga","gag","gd","gl","gv","hi","hr","hsb","hu","inh","is","it","ka","kw","lb","lt","lv","mk","nds","nl","no","oc","pl","pt","rm","ro","ru","rup","sc","sco","se","sk","sl","sq","sr","sv","tr","tt","uk","ur","yi","zh"];
+const SUPPORTED_LANGUAGES = ["ar","de","el","en","es","fr","hi","it","nl","pl","pt","ru","sv","tr","uk","zh"];
 
 async function loadLanguageFile(lang) {
   if (loadedTranslations[lang]) return;

@@ -102,7 +102,7 @@ export const elements = {
   // Settings Modal
   settingsModal: null,
   btnSettingsClose: null,
-  themeToggle: null,
+  themeSelect: null,
 
   // Lightbox Modal
   lightboxModal: null,
@@ -211,7 +211,7 @@ export function initElements() {
   // Settings Modal
   elements.settingsModal = document.getElementById('settings-modal');
   elements.btnSettingsClose = document.getElementById('btn-settings-close');
-  elements.themeToggle = document.getElementById('theme-toggle');
+  elements.themeSelect = document.getElementById('theme-select');
 
   // Lightbox Modal
   elements.lightboxModal = document.getElementById('lightbox-modal');

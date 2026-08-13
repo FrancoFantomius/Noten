@@ -1,6 +1,6 @@
 # Noten
 
-[![Version 1.2](https://img.shields.io/badge/Version-1.2-blue.svg)](https://github.com/FrancoFantomius/Noten/pull/1)
+[![Version 1.3.0](https://img.shields.io/badge/Version-1.3.0-blue.svg)](https://github.com/FrancoFantomius/noten/releases)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 [![PWA Support](https://img.shields.io/badge/PWA-Supported-orange.svg)](#key-features)
 [![Local-First](https://img.shields.io/badge/Architecture-Local--First-green.svg)](#sync-setup-filen)
@@ -32,8 +32,9 @@ Because the encryption is client-side, the sync server only stores ciphertext. *
 - **Workflow Archiving & Trash**:
   - Move completed or old notes to the **Archive** to keep your feed clean.
   - Send notes to **Trash** with options to restore or delete them permanently.
-- **Multi-language Support (i18n)**: Fully translated into English, Italian (Italiano), German (Deutsch), Spanish (Español), and French (Français) with dynamic runtime switching.
-- **Premium User Interface**: Modern styling built on the *Plus Jakarta Sans* typeface, harmonious colors, glassmorphic styling, and interactive micro-animations. Responsive sidebar controls and mobile FAB (Floating Action Button).
+- **Multi-language Support (i18n)**: Fully translated into 16 languages — Arabic (العربية), Chinese (中文), Dutch (Nederlands), English, French (Français), German (Deutsch), Greek (Ελληνικά), Hindi (हिन्दी), Italian (Italiano), Polish (Polski), Portuguese (Português), Russian (Русский), Spanish (Español), Swedish (Svenska), Turkish (Türkçe), and Ukrainian (Українська) — with dynamic runtime switching and automatic browser-language detection.
+- **Premium User Interface**: Modern styling built on the *Plus Jakarta Sans* typeface, harmonious colors, glassmorphic styling, and interactive micro-animations. Responsive sidebar controls and mobile FAB (Floating Action Button). Self-hosted fonts for privacy and offline reliability.
+- **Theme Modes**: Light, Dark, and Device (system) theme switching.
 - **Data Portability**: Prevent platform lock-in by exporting database contents to a JSON file or importing backups to restore them.
 
 ---
@@ -73,8 +74,8 @@ To run the app locally, clone this repository, install the dependencies, and sta
 
 ```bash
 # Clone the repository
-git clone https://github.com/FrancoFantomius/Notes.git
-cd Notes
+git clone https://github.com/FrancoFantomius/noten.git
+cd noten
 
 # Install dependencies
 npm install
@@ -102,12 +103,12 @@ You can synchronize your notes across multiple devices (desktops, phones, tablet
 ### 1. Enabling Sync in the App
 1. Open the app and navigate to **Settings** (gear icon in the top right).
 2. Enter your **Filen Email** and **Password** (and Two-Factor Code if enabled on your account).
-3. Click **Save & Enable Sync**. The app will connect to your account and upload notes to the secure directory `/Noten/notes/`.
+3. Click **Save & Enable Sync**. The app will connect to your account and upload notes to the secure directory `/Apps/Noten/notes/`.
 
 ### 2. Syncing to a New Device
 1. Open the Noten app on your new device.
 2. Go to **Settings** and log in using your **Filen Email**, **Password**, and **Two-Factor Code**.
-3. The background sync process will automatically fetch the encrypted notes from `/Noten/notes/`, decrypt them locally using the SDK, and populate your local PouchDB instance.
+3. The background sync process will automatically fetch the encrypted notes from `/Apps/Noten/notes/`, decrypt them locally using the SDK, and populate your local PouchDB instance.
 
 ## Project Structure
 
@@ -143,14 +144,16 @@ You can synchronize your notes across multiple devices (desktops, phones, tablet
 │   ├── account.css      # User profile and account manager styling
 │   ├── static.css       # Static pages styling (terms, privacy)
 │   └── style.css        # Entrypoint importing all CSS modules
+├── img/                 # Logos and PWA icons
 └── js/                  # Application logic and scripts
     ├── app.js           # Core application flow and routing initialization
     ├── db.js            # PouchDB local database adapter and Filen E2E sync integration
     ├── ui.js            # General DOM manipulations, event listeners, and routing logic
     ├── i18n.js          # Internationalization module
-    ├── languages/       # Translation JSON dictionaries (de, en, es, fr, it)
+    ├── languages/       # Translation JSON dictionaries (ar, de, el, en, es, fr, hi, it, nl, pl, pt, ru, sv, tr, uk, zh)
     └── ui/              # Component-specific UI scripts
         ├── state.js     # Shared application state
+        ├── account.js   # Account dropdown, settings & login modal controls
         ├── cards.js     # Note card generation, rendering, and interactions
         ├── creator.js   # Note creation, editing modal trigger, and checklist handling
         ├── checklist.js # Checklist drag-and-drop & indentation logic
@@ -168,13 +171,15 @@ You can synchronize your notes across multiple devices (desktops, phones, tablet
 - **Local Storage**: IndexedDB (managed via PouchDB)
 - **Replication & E2E Encryption**: Filen SDK Integration (`@filen/sdk`)
 - **Bundler**: Vite & Vite Node Polyfills Plugin
-- **Icons**: Google Material Symbols Outlined
+- **Fonts & Icons**: Self-hosted Plus Jakarta Sans & Material Symbols Outlined (`@fontsource`)
 
 ---
 
 ## Contributing
 
 Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct, development setup, template architecture, and pull request process.
+
+See the [CHANGELOG.md](CHANGELOG.md) for a detailed history of releases and changes.
 
 ---
 

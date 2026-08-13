@@ -467,10 +467,10 @@ async function initFilenAndSync(settings) {
 
     // Ensure Directory structure exists
     try {
-      await filenClient.fs().mkdir({ path: '/Noten' });
+      await filenClient.fs().mkdir({ path: '/Apps/Noten' });
     } catch (e) { }
     try {
-      await filenClient.fs().mkdir({ path: '/Noten/notes' });
+      await filenClient.fs().mkdir({ path: '/Apps/Noten/notes' });
     } catch (e) { }
 
     // Trigger initial sync reconciliation
@@ -515,7 +515,7 @@ async function runSync() {
     const deletedQueue = await getDeletedNotesQueue();
     for (const noteId of deletedQueue) {
       try {
-        const filePath = `/Noten/notes/${noteId}.json`;
+        const filePath = `/Apps/Noten/notes/${noteId}.json`;
         await filenClient.fs().rm({ path: filePath, permanent: true });
         await removeFromDeletedNotesQueue(noteId);
       } catch (err) {
@@ -532,19 +532,19 @@ async function runSync() {
     });
     const localDocs = localResult.rows.map(row => row.doc);
 
-    // 3. Fetch remote files in '/Noten/notes'
+    // 3. Fetch remote files in '/Apps/Noten/notes'
     let remoteFiles = [];
     try {
-      remoteFiles = await filenClient.fs().readdir({ path: '/Noten/notes' });
+      remoteFiles = await filenClient.fs().readdir({ path: '/Apps/Noten/notes' });
     } catch (err) {
       // If the folder doesn't exist, create it and proceed with empty remote list
       if (err.message && err.message.includes('not found')) {
         console.warn("[Sync] Remote notes directory not found, creating it...");
         try {
-          await filenClient.fs().mkdir({ path: '/Noten' });
+          await filenClient.fs().mkdir({ path: '/Apps/Noten' });
         } catch (e) { /* may already exist */ }
         try {
-          await filenClient.fs().mkdir({ path: '/Noten/notes' });
+          await filenClient.fs().mkdir({ path: '/Apps/Noten/notes' });
         } catch (e) { /* may already exist */ }
         remoteFiles = [];
       } else {
@@ -558,7 +558,7 @@ async function runSync() {
     for (const filename of remoteFiles) {
       if (!filename.endsWith('.json')) continue;
       const noteId = filename.substring(0, filename.length - 5);
-      const filePath = `/Noten/notes/${filename}`;
+      const filePath = `/Apps/Noten/notes/${filename}`;
       try {
         const stats = await filenClient.fs().stat({ path: filePath });
         remoteMap.set(noteId, { filename, filePath, stats });
@@ -589,7 +589,7 @@ async function runSync() {
 
       // Resolve the parent directory UUID on Filen
       const parentUUID = await filenClient.fs().pathToItemUUID({
-        path: '/Noten/notes',
+        path: '/Apps/Noten/notes',
         type: 'directory'
       });
 

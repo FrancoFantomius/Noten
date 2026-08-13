@@ -15,13 +15,14 @@
 
           <div class="settings-row">
             <div class="settings-info">
-              <span class="settings-label" data-i18n="settings_theme_label">Dark Theme</span>
-              <span class="settings-desc" data-i18n="settings_theme_desc">Toggle between dark and light themes</span>
+              <span class="settings-label" data-i18n="settings_theme_label">Theme</span>
+              <span class="settings-desc" data-i18n="settings_theme_desc">Choose your preferred theme</span>
             </div>
-            <label class="switch">
-              <input type="checkbox" id="theme-toggle" checked>
-              <span class="slider round"></span>
-            </label>
+            <select id="theme-select" class="select-premium">
+              <option value="light" data-i18n="settings_theme_light">Light Theme</option>
+              <option value="system" data-i18n="settings_theme_system">Device Theme</option>
+              <option value="dark" data-i18n="settings_theme_dark">Dark Theme</option>
+            </select>
           </div>
 
           <div class="settings-row">
@@ -31,76 +32,21 @@
                 language</span>
             </div>
             <select id="language-select" class="select-premium">
-              <option value="ab">Аҧсшәа</option>
-              <option value="ady">Адыгабзэ</option>
-              <option value="af">Afrikaans</option>
               <option value="ar">العربية (Arabic)</option>
-              <option value="az">Azərbaycan</option>
-              <option value="ba">Башҡортса</option>
-              <option value="be">Беларуская</option>
-              <option value="bg">Български</option>
-              <option value="bn">বাংলা (Bengali)</option>
-              <option value="br">Brezhoneg</option>
-              <option value="bs">Bosanski</option>
-              <option value="ca">Català</option>
-              <option value="ce">Нохчийн</option>
-              <option value="crh">Qırımtatarca</option>
-              <option value="cs">Čeština</option>
-              <option value="csb">Kaszëbsczi</option>
-              <option value="cv">Чӑвашла</option>
-              <option value="cy">Cymraeg</option>
-              <option value="da">Dansk</option>
               <option value="de">Deutsch</option>
               <option value="el">Ελληνικά</option>
               <option value="en">English</option>
               <option value="es">Español</option>
-              <option value="et">Eesti</option>
-              <option value="eu">Euskara</option>
-              <option value="fi">Suomi</option>
-              <option value="fo">Føroyskt</option>
               <option value="fr">Français</option>
-              <option value="fy">Frysk</option>
-              <option value="ga">Gaeilge</option>
-              <option value="gag">Gagauz</option>
-              <option value="gd">Gàidhlig</option>
-              <option value="gl">Galego</option>
-              <option value="gv">Gaelg</option>
               <option value="hi">हिन्दी (Hindi)</option>
-              <option value="hr">Hrvatski</option>
-              <option value="hsb">Hornjoserbšćina</option>
-              <option value="hu">Magyar</option>
-              <option value="inh">ГӀалгӀай</option>
-              <option value="is">Íslenska</option>
               <option value="it">Italiano</option>
-              <option value="ka">ქართული</option>
-              <option value="kw">Kernewek</option>
-              <option value="lb">Lëtzebuergesch</option>
-              <option value="lt">Lietuvių</option>
-              <option value="lv">Latviešu</option>
-              <option value="mk">Македонски</option>
-              <option value="nds">Plattdüütsch</option>
               <option value="nl">Nederlands</option>
-              <option value="no">Norsk</option>
-              <option value="oc">Occitan</option>
               <option value="pl">Polski</option>
               <option value="pt">Português</option>
-              <option value="rm">Rumantsch</option>
-              <option value="ro">Română</option>
               <option value="ru">Русский</option>
-              <option value="rup">Armãneashti</option>
-              <option value="sc">Sardu</option>
-              <option value="sco">Scots</option>
-              <option value="se">Sámegiella</option>
-              <option value="sk">Slovenčina</option>
-              <option value="sl">Slovenščina</option>
-              <option value="sq">Shqip</option>
-              <option value="sr">Српски</option>
               <option value="sv">Svenska</option>
               <option value="tr">Türkçe</option>
-              <option value="tt">Татарча</option>
               <option value="uk">Українська</option>
-              <option value="ur">اردو (Urdu)</option>
-              <option value="yi">ייִדיש</option>
               <option value="zh">中文 (Chinese)</option>
             </select>
           </div>
