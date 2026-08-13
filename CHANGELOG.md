@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [1.3.1] - 2026-08-13
+
+### Changed
+- Bumped service worker cache version to `noten-v1.3.1` and package version to `1.3.1`.
+- Updated dependencies to latest versions (`@filen/sdk` ^0.4.2, `vite` ^8.2.1, `vite-plugin-node-polyfills` ^0.28.0, `@fontsource/material-symbols-outlined` ^5.3.2).
+
 ## [1.3.0] - 2026-08-13
 
 ### Changed
@@ -89,7 +95,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Fixed
 - Mobile responsiveness groundwork (WIP).
 
-[Unreleased]: https://github.com/FrancoFantomius/noten/compare/v1.3.0...HEAD
+[Unreleased]: https://github.com/FrancoFantomius/noten/compare/v1.3.1...HEAD
+[1.3.1]: https://github.com/FrancoFantomius/noten/releases/tag/v1.3.1
 [1.3.0]: https://github.com/FrancoFantomius/noten/releases/tag/v1.3.0
 [1.2.2]: https://github.com/FrancoFantomius/noten/releases/tag/v1.2.2
 [1.2.1]: https://github.com/FrancoFantomius/noten/releases/tag/v1.2.1
