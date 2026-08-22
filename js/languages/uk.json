@@ -14,6 +14,7 @@
   "tags_section_title": "Теги",
   "sidebar_no_tags": "Тегів не створено",
   "creator_collapsed_prompt": "Створіть захищену нотатку...",
+  "btn_new_note": "Нова замітка",
   "btn_quick_todo_title": "Новий список",
   "btn_creator_pin_title": "Закріпити нотатку",
   "creator_title_placeholder": "Заголовок",
@@ -112,5 +113,14 @@
   "btn_login": "Увійти",
   "btn_signout": "Вийти",
   "privacy_policy": "Політика конфіденційності",
-  "terms_of_service": "Умови використання"
+  "terms_of_service": "Умови використання",
+  "btn_change_language": "Змінити мову",
+  "btn_cancel": "Скасувати",
+  "btn_select_language": "Вибрати мову",
+  "settings_language_dialog_title": "Вибрати мову",
+  "settings_current_language": "Поточна:",
+  "btn_save": "Зберегти",
+  "storage_title": "Сховище облікового запису",
+  "manage_account": "Керуйте своїм обліковим записом Filen",
+  "header.apps": "Мої програми"
 }

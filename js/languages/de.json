@@ -14,6 +14,7 @@
   "tags_section_title": "Tags",
   "sidebar_no_tags": "Keine Tags erstellt",
   "creator_collapsed_prompt": "Sichere Notiz schreiben...",
+  "btn_new_note": "Neue Notiz",
   "btn_quick_todo_title": "Neue Checkliste",
   "btn_creator_pin_title": "Notiz anpinnen",
   "creator_title_placeholder": "Titel",
@@ -118,5 +119,8 @@
   "btn_select_language": "Sprache auswählen",
   "settings_language_dialog_title": "Sprache auswählen",
   "settings_current_language": "Aktuell:",
-  "btn_save": "Speichern"
+  "btn_save": "Speichern",
+  "storage_title": "Kontospeicher",
+  "manage_account": "Verwalte dein Filen-Konto",
+  "header.apps": "Meine Apps"
 }

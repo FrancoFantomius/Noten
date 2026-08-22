@@ -14,6 +14,7 @@
   "tags_section_title": "Ετικέτες",
   "sidebar_no_tags": "Δεν δημιουργήθηκαν ετικέτες",
   "creator_collapsed_prompt": "Γράψτε μια ασφαλή σημείωση...",
+  "btn_new_note": "Νέα σημείωση",
   "btn_quick_todo_title": "Νέα λίστα ελέγχου",
   "btn_creator_pin_title": "Καρφίτσωμα σημείωσης",
   "creator_title_placeholder": "Τίτλος",
@@ -112,5 +113,14 @@
   "btn_login": "Σύνδεση",
   "btn_signout": "Αποσύνδεση",
   "privacy_policy": "Πολιτική Απορρήτου",
-  "terms_of_service": "Όροι Χρήσης"
+  "terms_of_service": "Όροι Χρήσης",
+  "btn_change_language": "Αλλαγή γλώσσας",
+  "btn_cancel": "Ακύρωση",
+  "btn_select_language": "Επιλογή γλώσσας",
+  "settings_language_dialog_title": "Επιλογή γλώσσας",
+  "settings_current_language": "Τρέχουσα:",
+  "btn_save": "Αποθήκευση",
+  "storage_title": "Χώρος αποθήκευσης λογαριασμού",
+  "manage_account": "Διαχειριστείτε τον λογαριασμό σας στο Filen",
+  "header.apps": "Οι εφαρμογές μου"
 }

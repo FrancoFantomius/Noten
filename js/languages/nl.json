@@ -14,6 +14,7 @@
   "tags_section_title": "Tags",
   "sidebar_no_tags": "Geen tags aangemaakt",
   "creator_collapsed_prompt": "Maak een veilige notitie...",
+  "btn_new_note": "Nieuwe notitie",
   "btn_quick_todo_title": "Nieuwe checklist",
   "btn_creator_pin_title": "Notitie vastpinnen",
   "creator_title_placeholder": "Titel",
@@ -112,5 +113,14 @@
   "btn_login": "Inloggen",
   "btn_signout": "Uitloggen",
   "privacy_policy": "Privacybeleid",
-  "terms_of_service": "Servicevoorwaarden"
+  "terms_of_service": "Servicevoorwaarden",
+  "btn_change_language": "Taal wijzigen",
+  "btn_cancel": "Annuleren",
+  "btn_select_language": "Taal selecteren",
+  "settings_language_dialog_title": "Taal selecteren",
+  "settings_current_language": "Huidige:",
+  "btn_save": "Opslaan",
+  "storage_title": "Accountopslag",
+  "manage_account": "Beheer uw Filen-account",
+  "header.apps": "Mijn apps"
 }

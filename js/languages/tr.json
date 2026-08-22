@@ -14,6 +14,7 @@
   "tags_section_title": "Etiketler",
   "sidebar_no_tags": "Henüz etiket oluşturulmadı",
   "creator_collapsed_prompt": "Güvenli bir not alın...",
+  "btn_new_note": "Yeni Not",
   "btn_quick_todo_title": "Yeni yapılacaklar listesi",
   "btn_creator_pin_title": "Notu sabitle",
   "creator_title_placeholder": "Başlık",
@@ -112,5 +113,14 @@
   "btn_login": "Giriş Yap",
   "btn_signout": "Çıkış Yap",
   "privacy_policy": "Gizlilik Politikası",
-  "terms_of_service": "Hizmet Şartları"
+  "terms_of_service": "Hizmet Şartları",
+  "btn_change_language": "Dili değiştir",
+  "btn_cancel": "İptal",
+  "btn_select_language": "Dil seçin",
+  "settings_language_dialog_title": "Dil Seçin",
+  "settings_current_language": "Mevcut:",
+  "btn_save": "Kaydet",
+  "storage_title": "Hesap Depolama Alanı",
+  "manage_account": "Filen Hesabınızı Yönetin",
+  "header.apps": "Uygulamalarım"
 }

@@ -14,6 +14,7 @@
   "tags_section_title": "标签",
   "sidebar_no_tags": "暂无标签",
   "creator_collapsed_prompt": "记录一条安全笔记...",
+  "btn_new_note": "新建笔记",
   "btn_quick_todo_title": "新建清单",
   "btn_creator_pin_title": "固定笔记",
   "creator_title_placeholder": "标题",
@@ -112,5 +113,14 @@
   "btn_login": "登录",
   "btn_signout": "退出登录",
   "privacy_policy": "隐私政策",
-  "terms_of_service": "服务条款"
+  "terms_of_service": "服务条款",
+  "btn_change_language": "更改语言",
+  "btn_cancel": "取消",
+  "btn_select_language": "选择语言",
+  "settings_language_dialog_title": "选择语言",
+  "settings_current_language": "当前：",
+  "btn_save": "保存",
+  "storage_title": "账户存储空间",
+  "manage_account": "管理您的 Filen 账户",
+  "header.apps": "我的应用"
 }

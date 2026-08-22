@@ -14,6 +14,7 @@
   "tags_section_title": "टैग",
   "sidebar_no_tags": "कोई टैग नहीं बनाया गया",
   "creator_collapsed_prompt": "एक सुरक्षित नोट लिखें...",
+  "btn_new_note": "नया नोट",
   "btn_quick_todo_title": "नई चेकलिस्ट",
   "btn_creator_pin_title": "नोट पिन करें",
   "creator_title_placeholder": "शीर्षक",
@@ -112,5 +113,14 @@
   "btn_login": "साइन इन करें",
   "btn_signout": "साइन आउट करें",
   "privacy_policy": "गोपनीयता नीति",
-  "terms_of_service": "सेवा की शर्तें"
+  "terms_of_service": "सेवा की शर्तें",
+  "btn_change_language": "भाषा बदलें",
+  "btn_cancel": "रद्द करें",
+  "btn_select_language": "भाषा चुनें",
+  "settings_language_dialog_title": "भाषा चुनें",
+  "settings_current_language": "वर्तमान:",
+  "btn_save": "सहेजें",
+  "storage_title": "खाता संग्रहण",
+  "manage_account": "अपना Filen खाता प्रबंधित करें",
+  "header.apps": "मेरे ऐप्स"
 }

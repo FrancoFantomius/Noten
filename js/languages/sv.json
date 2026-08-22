@@ -14,6 +14,7 @@
   "tags_section_title": "Taggar",
   "sidebar_no_tags": "Inga taggar skapade",
   "creator_collapsed_prompt": "Skriv en säker anteckning...",
+  "btn_new_note": "Ny anteckning",
   "btn_quick_todo_title": "Ny Checklista",
   "btn_creator_pin_title": "Nåla fast anteckning",
   "creator_title_placeholder": "Titel",
@@ -112,5 +113,14 @@
   "btn_login": "Logga in",
   "btn_signout": "Logga ut",
   "privacy_policy": "Integritetspolicy",
-  "terms_of_service": "Användarvillkor"
+  "terms_of_service": "Användarvillkor",
+  "btn_change_language": "Ändra språk",
+  "btn_cancel": "Avbryt",
+  "btn_select_language": "Välj språk",
+  "settings_language_dialog_title": "Välj språk",
+  "settings_current_language": "Aktuellt:",
+  "btn_save": "Spara",
+  "storage_title": "Kontolagring",
+  "manage_account": "Hantera ditt Filen-konto",
+  "header.apps": "Mina appar"
 }

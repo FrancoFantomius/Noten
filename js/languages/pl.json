@@ -14,6 +14,7 @@
   "tags_section_title": "Tagi",
   "sidebar_no_tags": "Brak tagów",
   "creator_collapsed_prompt": "Napisz bezpieczną notatkę...",
+  "btn_new_note": "Nowa notatka",
   "btn_quick_todo_title": "Nowa lista zadań",
   "btn_creator_pin_title": "Przypnij notatkę",
   "creator_title_placeholder": "Tytuł",
@@ -112,5 +113,14 @@
   "btn_login": "Zaloguj się",
   "btn_signout": "Wyloguj się",
   "privacy_policy": "Polityka prywatności",
-  "terms_of_service": "Warunki korzystania"
+  "terms_of_service": "Warunki korzystania",
+  "btn_change_language": "Zmień język",
+  "btn_cancel": "Anuluj",
+  "btn_select_language": "Wybierz język",
+  "settings_language_dialog_title": "Wybierz język",
+  "settings_current_language": "Bieżący:",
+  "btn_save": "Zapisz",
+  "storage_title": "Pamięć konta",
+  "manage_account": "Zarządzaj swoim kontem Filen",
+  "header.apps": "Moje aplikacje"
 }

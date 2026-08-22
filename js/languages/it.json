@@ -14,6 +14,7 @@
   "tags_section_title": "Tag",
   "sidebar_no_tags": "Nessun tag creato",
   "creator_collapsed_prompt": "Scrivi una nota sicura...",
+  "btn_new_note": "Nuova nota",
   "btn_quick_todo_title": "Nuova lista di controllo",
   "btn_creator_pin_title": "Fissa nota",
   "creator_title_placeholder": "Titolo",
@@ -118,5 +119,8 @@
   "btn_select_language": "Seleziona lingua",
   "settings_language_dialog_title": "Seleziona lingua",
   "settings_current_language": "Attuale:",
-  "btn_save": "Salva"
+  "btn_save": "Salva",
+  "storage_title": "Archiviazione account",
+  "manage_account": "Gestisci il tuo account Filen",
+  "header.apps": "Le mie app"
 }

@@ -14,6 +14,7 @@
   "tags_section_title": "Tags",
   "sidebar_no_tags": "Nenhuma tag criada",
   "creator_collapsed_prompt": "Escreva uma nota segura...",
+  "btn_new_note": "Nova nota",
   "btn_quick_todo_title": "Nova lista de tarefas",
   "btn_creator_pin_title": "Fixar nota",
   "creator_title_placeholder": "Título",
@@ -112,5 +113,14 @@
   "btn_login": "Entrar",
   "btn_signout": "Sair",
   "privacy_policy": "Política de Privacidade",
-  "terms_of_service": "Termos de Serviço"
+  "terms_of_service": "Termos de Serviço",
+  "btn_change_language": "Alterar idioma",
+  "btn_cancel": "Cancelar",
+  "btn_select_language": "Selecionar idioma",
+  "settings_language_dialog_title": "Selecionar idioma",
+  "settings_current_language": "Atual:",
+  "btn_save": "Guardar",
+  "storage_title": "Armazenamento da conta",
+  "manage_account": "Gerir a sua conta Filen",
+  "header.apps": "As minhas aplicações"
 }

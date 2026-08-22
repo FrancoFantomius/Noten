@@ -14,6 +14,7 @@
   "tags_section_title": "Теги",
   "sidebar_no_tags": "Теги не созданы",
   "creator_collapsed_prompt": "Запишите защищенную заметку...",
+  "btn_new_note": "Новая заметка",
   "btn_quick_todo_title": "Новый список задач",
   "btn_creator_pin_title": "Закрепить заметку",
   "creator_title_placeholder": "Заголовок",
@@ -112,5 +113,14 @@
   "btn_login": "Войти",
   "btn_signout": "Выйти",
   "privacy_policy": "Политика конфиденциальности",
-  "terms_of_service": "Условия использования"
+  "terms_of_service": "Условия использования",
+  "btn_change_language": "Изменить язык",
+  "btn_cancel": "Отмена",
+  "btn_select_language": "Выбрать язык",
+  "settings_language_dialog_title": "Выбрать язык",
+  "settings_current_language": "Текущий:",
+  "btn_save": "Сохранить",
+  "storage_title": "Хранилище аккаунта",
+  "manage_account": "Управление аккаунтом Filen",
+  "header.apps": "Мои приложения"
 }
