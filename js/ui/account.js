@@ -6,7 +6,7 @@ import { t } from '../i18n.js';
 import { state, elements } from './state.js';
 
 /**
- * Initializes account dropdown, profile actions, settings, and login modal event listeners
+ * Initializes account menu, profile actions, settings, and login modal event listeners
  */
 export function initAccountUI() {
   // Settings Dialog Triggers
@@ -20,31 +20,29 @@ export function initAccountUI() {
     elements.btnSettingsClose.addEventListener('click', hideSettings);
   }
 
-  if (elements.settingsModal) {
-    elements.settingsModal.addEventListener('click', (e) => {
-      if (e.target === elements.settingsModal) {
-        hideSettings();
-      }
-    });
+  if (elements.btnSettingsCloseIcon) {
+    elements.btnSettingsCloseIcon.addEventListener('click', hideSettings);
   }
 
-  // Close Settings modal on Escape key
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && elements.settingsModal && elements.settingsModal.classList.contains('active')) {
-      e.preventDefault();
-      hideSettings();
-    }
-  });
+  if (elements.btnSettingsSave) {
+    elements.btnSettingsSave.addEventListener('click', hideSettings);
+  }
+
+  if (elements.settingsModal) {
+    elements.settingsModal.addEventListener('close', () => {
+      cleanupSettingsHash();
+    });
+  }
 
   // Open Settings initially if hash is #settings
   if (window.location.hash === '#settings') {
     showSettings();
   }
 
-  // Account Dropdown & Profile Actions
+  // Account Menu & Profile Actions
   if (elements.btnDropdownSettings) {
     elements.btnDropdownSettings.addEventListener('click', () => {
-      elements.accountDropdown.style.display = 'none';
+      if (elements.accountMenu) elements.accountMenu.open = false;
       if (state.onOpenSettingsCallback) state.onOpenSettingsCallback();
     });
   }
@@ -58,9 +56,8 @@ export function initAccountUI() {
   if (elements.syncStatus) {
     elements.syncStatus.addEventListener('click', (e) => {
       e.stopPropagation();
-      if (elements.btnSyncProfile && elements.btnSyncProfile.style.display !== 'none') {
-        const isVisible = elements.accountDropdown.style.display === 'flex';
-        elements.accountDropdown.style.display = isVisible ? 'none' : 'flex';
+      if (elements.accountMenu && elements.accountMenu.style.display !== 'none') {
+        elements.accountMenu.open = !elements.accountMenu.open;
       } else {
         showLoginModal();
       }
@@ -75,56 +72,32 @@ export function initAccountUI() {
     elements.btnLoginCancel.addEventListener('click', hideLoginModal);
   }
   if (elements.loginModal) {
-    elements.loginModal.addEventListener('click', (e) => {
-      if (e.target === elements.loginModal) {
-        hideLoginModal();
-      }
+    elements.loginModal.addEventListener('close', () => {
+      const syncStatusMsg = document.getElementById('sync-settings-status');
+      if (syncStatusMsg) syncStatusMsg.textContent = '';
     });
   }
 
-  if (elements.btnSyncProfile) {
-    elements.btnSyncProfile.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const isVisible = elements.accountDropdown.style.display === 'flex';
-      elements.accountDropdown.style.display = isVisible ? 'none' : 'flex';
+  if (elements.accountMenu) {
+    elements.accountMenu.addEventListener('manage-click', (e) => {
+      const url = e.detail?.manageUrl || 'https://app.filen.io/#/settings/account';
+      window.open(url, '_blank', 'noopener,noreferrer');
+    });
+
+    elements.accountMenu.addEventListener('edit-avatar', () => {
+      window.open('https://app.filen.io/#/settings/account', '_blank', 'noopener,noreferrer');
     });
   }
 
   if (elements.btnDropdownSignout) {
     elements.btnDropdownSignout.addEventListener('click', () => {
-      elements.accountDropdown.style.display = 'none';
+      if (elements.accountMenu) elements.accountMenu.open = false;
       if (state.onSignoutCallback) state.onSignoutCallback();
     });
   }
-
-  document.addEventListener('click', (e) => {
-    if (elements.accountDropdown && elements.accountDropdown.style.display === 'flex') {
-      if (!elements.accountDropdown.contains(e.target) &&
-        (!elements.btnSyncProfile || !elements.btnSyncProfile.contains(e.target)) &&
-        (!elements.syncStatus || !elements.syncStatus.contains(e.target))) {
-        elements.accountDropdown.style.display = 'none';
-      }
-    }
-  });
 }
 
-/**
- * Settings Modal trigger
- */
-export function showSettings() {
-  if (elements.settingsModal) {
-    elements.settingsModal.classList.add('active');
-    if (window.location.hash !== '#settings') {
-      state.isSettingsModalHashPushed = true;
-      window.location.hash = 'settings';
-    }
-  }
-}
-
-export function hideSettings() {
-  if (elements.settingsModal) {
-    elements.settingsModal.classList.remove('active');
-  }
+function cleanupSettingsHash() {
   const statusMsg = document.getElementById('sync-settings-status');
   if (statusMsg) statusMsg.textContent = '';
 
@@ -138,6 +111,34 @@ export function hideSettings() {
   } else {
     state.isSettingsModalHashPushed = false;
   }
+}
+
+/**
+ * Settings Modal trigger
+ */
+export function showSettings() {
+  if (elements.settingsModal) {
+    if (typeof elements.settingsModal.showModal === 'function') {
+      elements.settingsModal.showModal();
+    } else {
+      elements.settingsModal.open = true;
+    }
+    if (window.location.hash !== '#settings') {
+      state.isSettingsModalHashPushed = true;
+      window.location.hash = 'settings';
+    }
+  }
+}
+
+export function hideSettings() {
+  if (elements.settingsModal) {
+    if (typeof elements.settingsModal.close === 'function') {
+      elements.settingsModal.close();
+    } else {
+      elements.settingsModal.open = false;
+    }
+  }
+  cleanupSettingsHash();
 }
 
 /**
@@ -171,84 +172,131 @@ export function updateSyncStatusUI(status) {
   badge.title = t('sync_status_title', { status: text });
 }
 
+export function formatBytes(bytes) {
+  if (!bytes || bytes <= 0) return '0 B';
+  const k = 1024;
+  const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+}
+
+/**
+ * Update the account storage widget and md-account-menu storage properties
+ */
+export function updateAccountStorageUI(syncSettings) {
+  const metaEl = document.getElementById('account-storage-meta');
+  const barNotes = document.getElementById('account-storage-bar-notes');
+  const barOther = document.getElementById('account-storage-bar-other');
+  const notesText = document.getElementById('account-storage-notes-text');
+  const otherText = document.getElementById('account-storage-other-text');
+  const freeText = document.getElementById('account-storage-free-text');
+
+  // Calculate local notes storage size in bytes
+  let notesBytes = 0;
+  if (state.decryptedNotes && Array.isArray(state.decryptedNotes)) {
+    for (const note of state.decryptedNotes) {
+      if (note.isTrashed) continue;
+      try {
+        notesBytes += new Blob([JSON.stringify(note)]).size;
+      } catch {
+        notesBytes += (note.title || '').length * 2 + (note.body || '').length * 2;
+        if (note.images && Array.isArray(note.images)) {
+          note.images.forEach(img => { notesBytes += (img || '').length; });
+        }
+      }
+    }
+  }
+
+  // Account total storage capacity (default 10 GB for standard Filen tier if unstated)
+  const totalStorageBytes = (syncSettings && syncSettings.storageTotal) ? syncSettings.storageTotal : 10 * 1024 * 1024 * 1024;
+  // Total used bytes across the Filen account
+  const totalUsedBytes = Math.max(notesBytes, (syncSettings && syncSettings.storageUsed) ? syncSettings.storageUsed : 0);
+  const otherFilesBytes = Math.max(0, totalUsedBytes - notesBytes);
+  const freeBytes = Math.max(0, totalStorageBytes - totalUsedBytes);
+
+  const notesPercent = totalStorageBytes > 0 ? Math.min(100, (notesBytes / totalStorageBytes) * 100) : 0;
+  const otherPercent = totalStorageBytes > 0 ? Math.min(100 - notesPercent, (otherFilesBytes / totalStorageBytes) * 100) : 0;
+
+  if (metaEl) {
+    metaEl.textContent = `${formatBytes(totalUsedBytes)} of ${formatBytes(totalStorageBytes)} used`;
+  }
+  if (barNotes) {
+    barNotes.style.width = `${notesPercent}%`;
+  }
+  if (barOther) {
+    barOther.style.width = `${otherPercent}%`;
+  }
+  if (notesText) {
+    notesText.textContent = `Notes: ${formatBytes(notesBytes)}`;
+  }
+  if (otherText) {
+    otherText.textContent = `Other files: ${formatBytes(otherFilesBytes)}`;
+  }
+  if (freeText) {
+    freeText.textContent = `Free: ${formatBytes(freeBytes)}`;
+  }
+
+  if (elements.accountMenu) {
+    elements.accountMenu.storageUsed = formatBytes(totalUsedBytes);
+    elements.accountMenu.storageTotal = formatBytes(totalStorageBytes);
+    elements.accountMenu.storageProgress = totalStorageBytes > 0 ? (totalUsedBytes / totalStorageBytes) : 0;
+  }
+}
+
 /**
  * Update the profile UI elements based on sync settings state
  */
 export function updateProfileUI(syncSettings) {
-  if (!elements.btnSyncLogin || !elements.btnSyncProfile) return;
+  if (!elements.btnSyncLogin) return;
 
   const isSyncActive = syncSettings && syncSettings.enabled && (syncSettings.apiKey || syncSettings.email);
 
   if (isSyncActive) {
+    if (elements.syncStatus) {
+      elements.syncStatus.style.display = 'inline-flex';
+    }
+    if (elements.btnSettingsOpen) {
+      elements.btnSettingsOpen.style.display = 'none';
+    }
+    if (elements.appDrawer) {
+      elements.appDrawer.style.display = 'inline-block';
+    }
     elements.btnSyncLogin.style.display = 'none';
-    elements.btnSyncProfile.style.display = 'inline-flex';
 
     const email = syncSettings.email || '';
     const username = syncSettings.username || email.split('@')[0] || 'Connected';
-
-    if (elements.dropdownEmail) elements.dropdownEmail.textContent = email;
-    if (elements.dropdownUsername) elements.dropdownUsername.textContent = username;
-
     const letter = (username || email || '?').charAt(0).toUpperCase();
 
-    if (syncSettings.avatarURL) {
-      if (elements.headerProfileAvatar) {
-        elements.headerProfileAvatar.src = syncSettings.avatarURL;
-        elements.headerProfileAvatar.style.display = 'block';
-      }
-      if (elements.headerProfileLetter) elements.headerProfileLetter.style.display = 'none';
-      if (elements.headerProfileIcon) elements.headerProfileIcon.style.display = 'none';
+    if (elements.accountMenu) {
+      elements.accountMenu.style.display = 'inline-block';
+      elements.accountMenu.name = username;
+      elements.accountMenu.email = email;
+      elements.accountMenu.initials = letter;
+      elements.accountMenu.avatar = syncSettings.avatarURL || '';
+      elements.accountMenu.manageUrl = 'https://app.filen.io/#/settings/account';
+      elements.accountMenu.manageText = t('manage_account') || 'Manage your Filen Account';
+      elements.accountMenu.showTabs = false;
+      elements.accountMenu.removeAttribute('show-tabs');
 
-      if (elements.headerProfileAvatar) {
-        elements.headerProfileAvatar.onerror = () => {
-          elements.headerProfileAvatar.style.display = 'none';
-          if (elements.headerProfileLetter) {
-            elements.headerProfileLetter.textContent = letter;
-            elements.headerProfileLetter.style.display = 'flex';
-          }
-        };
-      }
-    } else {
-      if (elements.headerProfileAvatar) elements.headerProfileAvatar.style.display = 'none';
-      if (elements.headerProfileLetter) {
-        elements.headerProfileLetter.textContent = letter;
-        elements.headerProfileLetter.style.display = 'flex';
-      }
-      if (elements.headerProfileIcon) elements.headerProfileIcon.style.display = 'none';
-    }
-
-    if (syncSettings.avatarURL) {
-      if (elements.dropdownAvatar) {
-        elements.dropdownAvatar.src = syncSettings.avatarURL;
-        elements.dropdownAvatar.style.display = 'block';
-      }
-      if (elements.dropdownLetter) elements.dropdownLetter.style.display = 'none';
-      if (elements.dropdownIcon) elements.dropdownIcon.style.display = 'none';
-
-      if (elements.dropdownAvatar) {
-        elements.dropdownAvatar.onerror = () => {
-          elements.dropdownAvatar.style.display = 'none';
-          if (elements.dropdownLetter) {
-            elements.dropdownLetter.textContent = letter;
-            elements.dropdownLetter.style.display = 'flex';
-          }
-        };
-      }
-    } else {
-      if (elements.dropdownAvatar) elements.dropdownAvatar.style.display = 'none';
-      if (elements.dropdownLetter) {
-        elements.dropdownLetter.textContent = letter;
-        elements.dropdownLetter.style.display = 'flex';
-      }
-      if (elements.dropdownIcon) elements.dropdownIcon.style.display = 'none';
+      updateAccountStorageUI(syncSettings);
     }
   } else {
+    if (elements.syncStatus) {
+      elements.syncStatus.style.display = 'none';
+    }
+    if (elements.btnSettingsOpen) {
+      elements.btnSettingsOpen.style.display = 'inline-flex';
+    }
+    if (elements.appDrawer) {
+      elements.appDrawer.style.display = 'none';
+      elements.appDrawer.open = false;
+    }
     elements.btnSyncLogin.style.display = 'inline-flex';
-    elements.btnSyncProfile.style.display = 'none';
-    if (elements.accountDropdown) elements.accountDropdown.style.display = 'none';
+    if (elements.accountMenu) {
+      elements.accountMenu.style.display = 'none';
+      elements.accountMenu.open = false;
+    }
   }
-
-
 }
 
 /**
@@ -256,7 +304,11 @@ export function updateProfileUI(syncSettings) {
  */
 export function showLoginModal() {
   if (elements.loginModal) {
-    elements.loginModal.classList.add('active');
+    if (typeof elements.loginModal.showModal === 'function') {
+      elements.loginModal.showModal();
+    } else {
+      elements.loginModal.open = true;
+    }
   }
 }
 
@@ -265,7 +317,11 @@ export function showLoginModal() {
  */
 export function hideLoginModal() {
   if (elements.loginModal) {
-    elements.loginModal.classList.remove('active');
+    if (typeof elements.loginModal.close === 'function') {
+      elements.loginModal.close();
+    } else {
+      elements.loginModal.open = false;
+    }
     const syncStatusMsg = document.getElementById('sync-settings-status');
     if (syncStatusMsg) syncStatusMsg.textContent = '';
   }

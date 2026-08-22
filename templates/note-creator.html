@@ -1,13 +1,13 @@
         <!-- Note Creator Component -->
-        <div id="note-creator" class="note-creator-container">
+        <div id="note-creator" class="note-creator-container color-default">
           <!-- Minimized state -->
           <div id="creator-collapsed" class="creator-collapsed">
             <span data-i18n="creator_collapsed_prompt">Take a secure note...</span>
             <div class="creator-actions-collapsed">
-              <button id="btn-quick-todo" class="btn-icon" data-i18n-title="btn_quick_todo_title"
-                title="New checklist"><span class="material-symbols-outlined">check_box</span></button>
-              <button id="btn-quick-image" class="btn-icon" data-i18n-title="btn_creator_image_title"
-                title="Add image"><span class="material-symbols-outlined">image</span></button>
+              <md-icon-button id="btn-quick-todo" icon="check_box" data-i18n-title="btn_quick_todo_title"
+                title="New checklist" aria-label="New checklist"></md-icon-button>
+              <md-icon-button id="btn-quick-image" icon="image" data-i18n-title="btn_creator_image_title"
+                title="Add image" aria-label="Add image"></md-icon-button>
             </div>
           </div>
 
@@ -18,9 +18,7 @@
             <div class="creator-title-row">
               <input type="text" id="creator-title" data-i18n-placeholder="creator_title_placeholder"
                 placeholder="Title" autocomplete="off">
-              <button id="btn-creator-pin" class="btn-icon" data-i18n-title="btn_creator_pin_title" title="Pin note">
-                <span class="material-symbols-outlined">keep</span>
-              </button>
+              <md-icon-button id="btn-creator-pin" icon="keep" data-i18n-title="btn_creator_pin_title" title="Pin note" aria-label="Pin note"></md-icon-button>
             </div>
 
             <div id="creator-checklist-view" class="modal-checklist hidden"></div>
@@ -28,7 +26,7 @@
               placeholder="Take a secure note..." rows="3"></textarea>
 
             <!-- Dynamic tags input / list in note creator -->
-            <div id="creator-tags-list" class="note-tags-container"></div>
+            <md-chip-set id="creator-tags-list" class="note-tags-container"></md-chip-set>
             <div class="tag-input-wrapper">
               <input type="text" id="creator-tag-input" data-i18n-placeholder="creator_tag_input_placeholder"
                 placeholder="Add tag + press Enter...">
@@ -39,8 +37,7 @@
               <div class="creator-toolbar">
                 <!-- Color Selector Button -->
                 <div class="color-picker-wrapper">
-                  <button class="btn-icon" data-i18n-title="btn_creator_color_title" title="Change color"><span
-                      class="material-symbols-outlined">palette</span></button>
+                  <md-icon-button id="btn-creator-color" icon="palette" data-i18n-title="btn_creator_color_title" title="Change color" aria-label="Change color"></md-icon-button>
                   <div class="color-palette-popup">
                     <button class="color-option default active" data-color="default" data-i18n-title="color_default"
                       title="Default"></button>
@@ -61,19 +58,18 @@
                       title="Pink"></button>
                   </div>
                 </div>
-                <button id="btn-creator-checklist-toggle" class="btn-icon"
-                  data-i18n-title="btn_modal_checklist_toggle_title" title="Toggle checklist view"><span
-                    class="material-symbols-outlined">checklist</span></button>
-                <button id="btn-creator-image" class="btn-icon" data-i18n-title="btn_creator_image_title"
-                  title="Add image"><span class="material-symbols-outlined">image</span></button>
+                <md-icon-button id="btn-creator-checklist-toggle" icon="checklist"
+                  data-i18n-title="btn_modal_checklist_toggle_title" title="Toggle checklist view" aria-label="Toggle checklist view"></md-icon-button>
+                <md-icon-button id="btn-creator-image" icon="image" data-i18n-title="btn_creator_image_title"
+                  title="Add image" aria-label="Add image"></md-icon-button>
                 <!-- Archive/Trash helper inside creator -->
-                <button id="btn-creator-archive" class="btn-icon" data-i18n-title="btn_creator_archive_title"
-                  title="Archive note"><span class="material-symbols-outlined">archive</span></button>
-                <button id="btn-creator-trash" class="btn-icon" data-i18n-title="btn_creator_trash_title"
-                  title="Discard note"><span class="material-symbols-outlined">delete</span></button>
+                <md-icon-button id="btn-creator-archive" icon="archive" data-i18n-title="btn_creator_archive_title"
+                  title="Archive note" aria-label="Archive note"></md-icon-button>
+                <md-icon-button id="btn-creator-trash" icon="delete" data-i18n-title="btn_creator_trash_title"
+                  title="Discard note" aria-label="Discard note"></md-icon-button>
               </div>
 
-              <button id="btn-creator-close" class="btn btn-text" data-i18n="btn_creator_close">Close</button>
+              <md-button id="btn-creator-close" variant="text"><span data-i18n="btn_creator_close">Close</span></md-button>
             </div>
           </div>
         </div>

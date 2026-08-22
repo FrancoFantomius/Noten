@@ -22,20 +22,9 @@ export function initModalUI() {
   elements.btnModalClose.addEventListener('click', saveAndCloseModal);
   elements.btnModalBack.addEventListener('click', saveAndCloseModal);
 
-  // Closing Modal on background click
-  elements.noteModal.addEventListener('click', (e) => {
-    if (e.target === elements.noteModal) {
+  elements.noteModal.addEventListener('close', () => {
+    if (state.editingNoteId) {
       saveAndCloseModal();
-    }
-  });
-
-  // Close open note modal on Escape key
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-      if (state.editingNoteId) {
-        e.preventDefault();
-        saveAndCloseModal();
-      }
     }
   });
 
@@ -280,10 +269,10 @@ export function openNoteModal(noteId) {
 
   elements.modalLastEdited.textContent = t('modal_last_edited', { time: formatDate(note.updatedAt) });
 
-  elements.btnModalArchive.innerHTML = note.isArchived ? '<span class="material-symbols-outlined">unarchive</span>' : '<span class="material-symbols-outlined">archive</span>';
+  elements.btnModalArchive.setAttribute('icon', note.isArchived ? 'unarchive' : 'archive');
   elements.btnModalArchive.title = note.isArchived ? t('btn_modal_archive_unarchive_title') : t('btn_modal_archive_title');
 
-  elements.btnModalTrash.innerHTML = note.isTrashed ? '<span class="material-symbols-outlined">restore</span>' : '<span class="material-symbols-outlined">delete</span>';
+  elements.btnModalTrash.setAttribute('icon', note.isTrashed ? 'restore' : 'delete');
   elements.btnModalTrash.title = note.isTrashed ? t('btn_modal_trash_restore_title') : t('btn_modal_trash_delete_title');
   elements.btnModalTrash.className = note.isTrashed ? 'btn-icon text-green' : 'btn-icon';
 
@@ -326,7 +315,11 @@ export function openNoteModal(noteId) {
     elements.btnModalChecklistToggle.classList.add('hidden');
   }
 
-  elements.noteModal.classList.add('active');
+  if (typeof elements.noteModal.showModal === 'function') {
+    elements.noteModal.showModal();
+  } else {
+    elements.noteModal.open = true;
+  }
 
   if (window.location.hash !== `#${noteId}`) {
     state.isNoteModalHashPushed = true;
@@ -383,10 +376,10 @@ export function openNewNoteModal() {
 
   elements.modalLastEdited.textContent = '';
 
-  elements.btnModalArchive.innerHTML = '<span class="material-symbols-outlined">archive</span>';
+  elements.btnModalArchive.setAttribute('icon', 'archive');
   elements.btnModalArchive.title = t('btn_modal_archive_title');
 
-  elements.btnModalTrash.innerHTML = '<span class="material-symbols-outlined">delete</span>';
+  elements.btnModalTrash.setAttribute('icon', 'delete');
   elements.btnModalTrash.title = t('btn_modal_trash_delete_title');
   elements.btnModalTrash.className = 'btn-icon';
 
@@ -397,7 +390,11 @@ export function openNewNoteModal() {
   elements.modalChecklistView.innerHTML = '';
   elements.modalBodyText.classList.remove('hidden');
 
-  elements.noteModal.classList.add('active');
+  if (typeof elements.noteModal.showModal === 'function') {
+    elements.noteModal.showModal();
+  } else {
+    elements.noteModal.open = true;
+  }
 
   if (window.location.hash !== `#${state.editingNoteId}`) {
     state.isNoteModalHashPushed = true;
@@ -469,7 +466,12 @@ export async function saveAndCloseModal() {
 export function closeModal() {
   const closedNoteId = state.editingNoteId;
 
-  elements.noteModal.classList.remove('active');
+  if (typeof elements.noteModal.close === 'function') {
+    elements.noteModal.close();
+  } else {
+    elements.noteModal.open = false;
+  }
+
   state.editingNoteId = null;
   state.noteModalImages = [];
   state.isModalChecklistMode = false;
@@ -493,33 +495,25 @@ export function closeModal() {
 }
 
 export function renderModalTags() {
+  if (!elements.modalTagsList) return;
   elements.modalTagsList.innerHTML = '';
   const note = state.decryptedNotes.find(n => n.id === state.editingNoteId);
   const isTrashed = note && note.isTrashed;
 
   state.noteModalTags.forEach(tag => {
-    const span = document.createElement('span');
-    span.className = 'tag-badge';
-    if (isTrashed) {
-      span.innerHTML = `#${tag}`;
-    } else {
-      span.innerHTML = `
-        #${tag}
-        <button class="btn-remove-tag" data-tag="${tag}">
-          <span class="material-symbols-outlined">close</span>
-        </button>
-      `;
-      span.querySelector('button').addEventListener('click', (e) => {
+    const chip = document.createElement('md-chip');
+    chip.setAttribute('label', tag);
+    chip.setAttribute('variant', 'input');
+    if (!isTrashed) {
+      chip.setAttribute('removable', '');
+      chip.addEventListener('remove', (e) => {
         e.stopPropagation();
-        const removeVal = e.currentTarget.getAttribute('data-tag');
-        state.noteModalTags = state.noteModalTags.filter(t => t !== removeVal);
+        state.noteModalTags = state.noteModalTags.filter(t => t !== tag);
         renderModalTags();
       });
     }
-    elements.modalTagsList.appendChild(span);
+    elements.modalTagsList.appendChild(chip);
   });
-  
-
 }
 
 export function renderModalImages() {

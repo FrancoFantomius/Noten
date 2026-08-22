@@ -84,6 +84,29 @@ export function t(key, params = {}) {
   return val;
 }
 
+export const LANGUAGE_NAMES = {
+  ar: 'العربية (Arabic)',
+  de: 'Deutsch',
+  el: 'Ελληνικά',
+  en: 'English',
+  es: 'Español',
+  fr: 'Français',
+  hi: 'हिन्दी (Hindi)',
+  it: 'Italiano',
+  nl: 'Nederlands',
+  pl: 'Polski',
+  pt: 'Português',
+  ru: 'Русский',
+  sv: 'Svenska',
+  tr: 'Türkçe',
+  uk: 'Українська',
+  zh: '中文 (Chinese)'
+};
+
+export function getLanguageName(code) {
+  return LANGUAGE_NAMES[code] || code;
+}
+
 /**
  * Iterates through DOM elements with translation properties and updates them.
  */
@@ -145,6 +168,22 @@ export function applyTranslations(root = document) {
       el.setAttribute('aria-label', text);
     }
   });
+
+  // Translate element headlines (e.g. md-dialog)
+  root.querySelectorAll('[data-i18n-headline]').forEach(el => {
+    const key = el.getAttribute('data-i18n-headline');
+    const text = t(key);
+    if (text) {
+      el.setAttribute('headline', text);
+    }
+  });
+
+  // Update current language name label
+  const activeLang = getLanguage();
+  const currentLangLabel = root.querySelector('#current-language-name');
+  if (currentLangLabel) {
+    currentLangLabel.textContent = getLanguageName(activeLang);
+  }
 
   // Dynamically translate SEO description in head meta tags
   const description = t('app_description');

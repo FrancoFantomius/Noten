@@ -112,5 +112,14 @@
   "btn_login": "Sign in",
   "btn_signout": "Sign out",
   "privacy_policy": "Privacy Policy",
-  "terms_of_service": "Terms of Service"
+  "terms_of_service": "Terms of Service",
+  "btn_change_language": "Change language",
+  "btn_cancel": "Cancel",
+  "btn_select_language": "Select language",
+  "settings_language_dialog_title": "Select Language",
+  "settings_current_language": "Current:",
+  "btn_save": "Save",
+  "storage_title": "Account Storage",
+  "manage_account": "Manage your Filen Account",
+  "header.apps": "My Apps"
 }

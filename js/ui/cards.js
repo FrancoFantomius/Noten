@@ -59,22 +59,31 @@ export function initCardsUI() {
     });
   });
 
-  // Search Live Filtering
+  // Search Live Filtering & Suggestions
   if (elements.searchInput) {
-    elements.searchInput.addEventListener('input', (e) => {
-      const val = e.target.value.trim().toLowerCase();
-      if (elements.btnSearchClear) {
-        elements.btnSearchClear.classList.toggle('hidden', val === '');
-      }
+    const handleSearch = () => {
       renderNotesFeed();
+      updateSearchSuggestionsAndTags();
+    };
+    elements.searchInput.addEventListener('input', handleSearch);
+    elements.searchInput.addEventListener('search', handleSearch);
+    elements.searchInput.addEventListener('clear', handleSearch);
+    elements.searchInput.addEventListener('active-change', () => {
+      updateSearchSuggestionsAndTags();
+    });
+    elements.searchInput.addEventListener('suggestion-select', (e) => {
+      const suggestion = e.detail?.suggestion;
+      if (suggestion && suggestion.id) {
+        openNoteModal(suggestion.id);
+      }
     });
   }
 
   if (elements.btnSearchClear) {
     elements.btnSearchClear.addEventListener('click', () => {
-      elements.searchInput.value = '';
-      elements.btnSearchClear.classList.add('hidden');
+      if (elements.searchInput) elements.searchInput.value = '';
       renderNotesFeed();
+      updateSearchSuggestionsAndTags();
     });
   }
 
@@ -232,12 +241,32 @@ export function renderNotesFeed() {
       }
     }
 
-    // 2. Search Query Matching
+    // 2. Search Query Matching (support #tags and text terms)
     if (searchQuery) {
-      const matchTitle = note.title.toLowerCase().includes(searchQuery);
-      const matchBody = note.body.toLowerCase().includes(searchQuery);
-      const matchTags = note.tags.some(tag => tag.toLowerCase().includes(searchQuery));
-      return matchTitle || matchBody || matchTags;
+      const tokens = searchQuery.split(/\s+/).filter(Boolean);
+      const tagTokens = tokens.filter(t => t.startsWith('#')).map(t => t.substring(1).toLowerCase());
+      const textTokens = tokens.filter(t => !t.startsWith('#'));
+
+      // All #tag tokens must match note tags
+      if (tagTokens.length > 0) {
+        const noteTagsLower = (note.tags || []).map(t => t.toLowerCase());
+        const hasAllTags = tagTokens.every(tag => noteTagsLower.includes(tag));
+        if (!hasAllTags) return false;
+      }
+
+      // All text tokens must match title, body, or tags
+      if (textTokens.length > 0) {
+        const matchTitle = (note.title || '').toLowerCase();
+        const matchBody = (note.body || '').toLowerCase();
+        const matchTags = (note.tags || []).map(t => t.toLowerCase());
+        return textTokens.every(term =>
+          matchTitle.includes(term) ||
+          matchBody.includes(term) ||
+          matchTags.some(t => t.includes(term))
+        );
+      }
+
+      return true;
     }
 
     return true;
@@ -309,9 +338,9 @@ export function renderCardsToGrid(notes, gridElement) {
     let tagsHtml = '';
     if (note.tags && note.tags.length > 0) {
       tagsHtml = `
-        <div class="card-tags">
-          ${note.tags.map(t => `<span class="card-tag">#${t}</span>`).join('')}
-        </div>
+        <md-chip-set class="card-tags">
+          ${note.tags.map(t => `<md-chip label="${escapeHtml(t)}" variant="suggestion"></md-chip>`).join('')}
+        </md-chip-set>
       `;
     }
 
@@ -328,9 +357,7 @@ export function renderCardsToGrid(notes, gridElement) {
     card.innerHTML = `
       ${coverHtml}
       ${!note.isTrashed ? `
-      <button class="btn-icon note-card-pin ${note.isPinned ? 'active' : ''}" title="${note.isPinned ? t('btn_unpin_note_title') : t('btn_pin_note_title')}">
-        <span class="material-symbols-outlined">keep</span>
-      </button>
+      <md-icon-button class="btn-icon note-card-pin ${note.isPinned ? 'active' : ''}" icon="keep" title="${note.isPinned ? t('btn_unpin_note_title') : t('btn_pin_note_title')}" aria-label="Pin"></md-icon-button>
       ` : ''}
       ${note.title ? `<h3 class="note-card-title">${escapeHtml(note.title)}</h3>` : ''}
       ${note.body && !isChecklist ? `<div class="note-card-body ${isTruncated ? 'truncated' : ''}">${escapeHtml(bodyText)}</div>` : ''}
@@ -339,12 +366,8 @@ export function renderCardsToGrid(notes, gridElement) {
         <span>${formatDate(note.updatedAt)}</span>
         ${note.isTrashed ? `
           <div class="note-card-trash-actions">
-            <button class="btn-icon btn-card-restore" title="${t('btn_modal_trash_restore_title')}">
-              <span class="material-symbols-outlined">restore</span>
-            </button>
-            <button class="btn-icon btn-card-delete-forever" title="${t('btn_modal_trash_delete_forever_title')}">
-              <span class="material-symbols-outlined">delete</span>
-            </button>
+            <md-icon-button class="btn-icon btn-card-restore" icon="restore" title="${t('btn_modal_trash_restore_title')}" aria-label="Restore"></md-icon-button>
+            <md-icon-button class="btn-icon btn-card-delete-forever" icon="delete" title="${t('btn_modal_trash_delete_forever_title')}" aria-label="Delete Forever"></md-icon-button>
           </div>
         ` : ''}
       </div>
@@ -473,24 +496,21 @@ export function renderSidebarTags() {
   const tags = Array.from(tagsSet).sort();
 
   if (tags.length === 0) {
-    elements.sidebarTagsList.innerHTML = `<li class="sidebar-help-text" style="padding: 8px 12px; font-size: 0.8rem; color: var(--text-secondary);">${t('sidebar_no_tags')}</li>`;
+    elements.sidebarTagsList.innerHTML = `<span class="sidebar-help-text" style="padding: 8px 12px; font-size: 0.8rem; color: var(--text-secondary);">${t('sidebar_no_tags')}</span>`;
     return;
   }
 
   tags.forEach(tag => {
-    const li = document.createElement('li');
-    const isActive = state.activeCategory === `tag:${tag}` ? 'active' : '';
+    const chip = document.createElement('md-chip');
+    chip.setAttribute('label', tag);
+    chip.setAttribute('icon', 'tag');
+    chip.setAttribute('variant', 'filter');
+    if (state.activeCategory === `tag:${tag}`) {
+      chip.setAttribute('selected', '');
+    }
 
-    li.innerHTML = `
-      <button class="tag-btn ${isActive}" data-tag="${tag}">
-        <div style="display: flex; align-items: center; gap: 12px;">
-          <span class="material-symbols-outlined" style="font-size: 18px;">tag</span>
-          <span>${escapeHtml(tag)}</span>
-        </div>
-      </button>
-    `;
-
-    li.querySelector('button').addEventListener('click', (e) => {
+    chip.addEventListener('click', (e) => {
+      e.preventDefault();
       const currentPath = window.location.pathname;
       const isNotesPage = !currentPath.endsWith('archive.html') && !currentPath.endsWith('trash.html');
 
@@ -501,8 +521,138 @@ export function renderSidebarTags() {
         window.location.href = `index.html#tag-${encodeURIComponent(tag)}`;
       }
     });
-    elements.sidebarTagsList.appendChild(li);
+
+    elements.sidebarTagsList.appendChild(chip);
+  });
+}
+
+function escapeRegex(str) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/**
+ * Update search bar suggestions with matching notes and render filter tags beneath
+ */
+export function updateSearchSuggestionsAndTags() {
+  if (!elements.searchInput) return;
+
+  const searchQuery = elements.searchInput.value ? elements.searchInput.value.trim().toLowerCase() : '';
+  const availableNotes = state.decryptedNotes.filter(n => !n.isTrashed);
+
+  const tokens = searchQuery ? searchQuery.split(/\s+/).filter(Boolean) : [];
+  const tagTokens = tokens.filter(t => t.startsWith('#')).map(t => t.substring(1).toLowerCase());
+  const textTokens = tokens.filter(t => !t.startsWith('#'));
+
+  // 1. Calculate matching notes for suggestions
+  let matchingNotes = [];
+  if (searchQuery) {
+    matchingNotes = availableNotes.filter(note => {
+      if (tagTokens.length > 0) {
+        const noteTagsLower = (note.tags || []).map(t => t.toLowerCase());
+        const hasAllTags = tagTokens.every(tag => noteTagsLower.includes(tag));
+        if (!hasAllTags) return false;
+      }
+      if (textTokens.length > 0) {
+        const matchTitle = (note.title || '').toLowerCase();
+        const matchBody = (note.body || '').toLowerCase();
+        const matchTags = (note.tags || []).map(t => t.toLowerCase());
+        return textTokens.every(term =>
+          matchTitle.includes(term) ||
+          matchBody.includes(term) ||
+          matchTags.some(t => t.includes(term))
+        );
+      }
+      return true;
+    });
+  } else {
+    // Show top recent notes when query is empty
+    matchingNotes = availableNotes.slice().sort((a, b) => b.updatedAt - a.updatedAt);
+  }
+
+  // Populate search suggestions (up to 6)
+  const topNotes = matchingNotes.slice(0, 6);
+  elements.searchInput.suggestions = topNotes.map(note => {
+    const rawTitle = (note.title || '').trim();
+    let snippet = '';
+    if (note.body) {
+      snippet = note.body.replace(/\n+/g, ' ').trim().substring(0, 60);
+    }
+    const label = rawTitle || snippet || t('section_header_notes') || 'Note';
+
+    let trailing = '';
+    if (note.tags && note.tags.length > 0) {
+      trailing = '#' + note.tags.slice(0, 2).join(' #');
+    }
+
+    return {
+      id: note.id,
+      label: label,
+      supportingText: snippet && rawTitle ? snippet : (formatDate(note.updatedAt) || ''),
+      trailingSupportingText: trailing,
+      icon: note.isPinned ? 'push_pin' : (note.isArchived ? 'archive' : 'description'),
+      value: rawTitle || note.id
+    };
   });
 
+  // 2. Render tags below suggestions
+  const tagsList = document.getElementById('search-tags-list');
+  const tagsContainer = document.getElementById('search-tags-container');
+  if (tagsList && tagsContainer) {
+    const allTags = new Set();
+    availableNotes.forEach(n => {
+      if (n.tags) n.tags.forEach(t => allTags.add(t));
+    });
 
+    const sortedTags = Array.from(allTags).sort();
+    if (sortedTags.length === 0) {
+      tagsContainer.style.display = 'none';
+      tagsList.innerHTML = '';
+    } else {
+      tagsContainer.style.display = 'flex';
+      tagsList.innerHTML = '';
+
+      sortedTags.forEach(tag => {
+        const isSelected = tagTokens.includes(tag.toLowerCase());
+        const chip = document.createElement('md-chip');
+        chip.setAttribute('label', tag);
+        chip.setAttribute('icon', 'tag');
+        chip.setAttribute('variant', 'filter');
+        if (isSelected) {
+          chip.setAttribute('selected', '');
+        }
+
+        chip.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          toggleSearchTag(tag);
+        });
+
+        tagsList.appendChild(chip);
+      });
+    }
+  }
+}
+
+/**
+ * Toggle a tag in the search query to narrow results
+ */
+function toggleSearchTag(tag) {
+  if (!elements.searchInput) return;
+
+  const currentVal = elements.searchInput.value ? elements.searchInput.value.trim() : '';
+  const tagStr = `#${tag}`;
+  const tagRegex = new RegExp(`(^|\\s)#${escapeRegex(tag)}(?=\\s|$)`, 'gi');
+
+  let newVal = '';
+  if (tagRegex.test(currentVal)) {
+    newVal = currentVal.replace(tagRegex, '').replace(/\s+/g, ' ').trim();
+  } else {
+    newVal = currentVal ? `${currentVal} ${tagStr}` : tagStr;
+  }
+
+  elements.searchInput.value = newVal;
+
+  renderNotesFeed();
+  updateSearchSuggestionsAndTags();
+  elements.searchInput.focus();
 }

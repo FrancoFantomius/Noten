@@ -12,6 +12,7 @@ import {
   hideSettings,
   updateSyncStatusUI,
   updateProfileUI,
+  updateAccountStorageUI,
   showLoginModal,
   hideLoginModal
 } from './ui/account.js';
@@ -21,6 +22,7 @@ import {
   initCardsUI,
   renderNotesFeed,
   renderSidebarTags,
+  updateSearchSuggestionsAndTags,
   setCategory
 } from './ui/cards.js';
 
@@ -33,6 +35,7 @@ export {
   showLoginModal,
   hideLoginModal,
   renderNotesFeed,
+  updateSearchSuggestionsAndTags,
   setCategory
 };
 
@@ -127,6 +130,8 @@ export function updateNotesData(notes) {
   state.decryptedNotes = notes;
   renderNotesFeed();
   renderSidebarTags();
+  updateSearchSuggestionsAndTags();
+  updateAccountStorageUI();
 
   if (!state.editingNoteId && window.location.hash) {
     const hash = window.location.hash;
@@ -146,5 +151,7 @@ export function updateNotesData(notes) {
 export function retranslateDynamicUI() {
   renderNotesFeed();
   renderSidebarTags();
+  updateSearchSuggestionsAndTags();
+  updateAccountStorageUI();
   updateSyncStatusUI(state.currentSyncStatus);
 }

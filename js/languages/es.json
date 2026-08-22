@@ -112,5 +112,11 @@
   "btn_login": "Iniciar sesión",
   "btn_signout": "Cerrar sesión",
   "privacy_policy": "Política de privacidad",
-  "terms_of_service": "Términos de servicio"
+  "terms_of_service": "Términos de servicio",
+  "btn_change_language": "Cambiar idioma",
+  "btn_cancel": "Cancelar",
+  "btn_select_language": "Seleccionar idioma",
+  "settings_language_dialog_title": "Seleccionar idioma",
+  "settings_current_language": "Actual:",
+  "btn_save": "Guardar"
 }

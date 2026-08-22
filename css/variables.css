@@ -1,107 +1,208 @@
 /* ==========================================================================
-   Notes CSS Design System - Variables & Themes
+   Notes CSS Design System - Material Design 3 Variables & Themes
    ========================================================================== */
 
 :root {
-   /* Fonts */
-   --font-main: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  /* Fonts */
+  --font-main: 'Roboto', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --md-sys-typescale-font-family: var(--font-main);
 
-   /* Layout Dimensions */
-   --header-height: 64px;
-   --sidebar-width: 280px;
-   --sidebar-collapsed-width: 72px;
+  /* Layout Dimensions */
+  --header-height: 64px;
+  --sidebar-width: 280px;
+  --sidebar-collapsed-width: 72px;
 
-   /* Transition timings */
-   --transition-speed: 0.2s;
-   --transition-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  /* Transition timings */
+  --transition-speed: 0.2s;
+  --transition-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
 
-   /* Rounded Corners */
-   --radius-sm: 6px;
-   --radius-md: 12px;
-   --radius-lg: 24px;
-   --radius-full: 9999px;
+  /* Rounded Corners / Shapes */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 28px;
+  --radius-full: 9999px;
 
-   /* Theme: Dark Mode (Default) */
-   --bg-primary: #0e1117;
-   --bg-secondary: #161b22;
-   --bg-tertiary: #21262d;
-   --bg-modal: rgba(22, 27, 34, 0.95);
-   --text-primary: #c9d1d9;
-   --text-secondary: #8b949e;
-   --border-color: rgba(240, 246, 252, 0.1);
-   --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.4);
-   --shadow-modal: 0 16px 40px rgba(0, 0, 0, 0.6);
-   --shadow-glow: 0 0 15px rgba(245, 158, 11, 0.2);
+  --md-sys-shape-corner-none: 0px;
+  --md-sys-shape-corner-extra-small: 4px;
+  --md-sys-shape-corner-small: 8px;
+  --md-sys-shape-corner-medium: 12px;
+  --md-sys-shape-corner-large: 16px;
+  --md-sys-shape-corner-extra-large: 28px;
+  --md-sys-shape-corner-full: 9999px;
 
-   --accent: #f59e0b;
-   --accent-hover: #d97706;
-   --accent-bg-glow: rgba(245, 158, 11, 0.1);
-   --danger: #ef4444;
-   --danger-hover: #dc2626;
+  /* Theme: Dark Mode (Default) - M3 Tokens seeded from #f59e0b */
+  --md-sys-color-primary: #ffb951;
+  --md-sys-color-on-primary: #452b00;
+  --md-sys-color-primary-container: #633f00;
+  --md-sys-color-on-primary-container: #ffddb4;
 
-   /* Dark Note Card Colors */
-   --note-default: #161b22;
-   --note-red: #442726;
-   --note-orange: #4c3520;
-   --note-yellow: #4c441c;
-   --note-green: #263e2a;
-   --note-teal: #193f3c;
-   --note-blue: #1d354b;
-   --note-purple: #392849;
-   --note-pink: #472337;
-   --note-border-intensity: 0.15;
+  --md-sys-color-secondary: #dbc2a4;
+  --md-sys-color-on-secondary: #3c2d18;
+  --md-sys-color-secondary-container: #54432c;
+  --md-sys-color-on-secondary-container: #f8dfbf;
 
-   /* Refactored variables for theme-agnostic components */
-   --tag-badge-bg: rgba(255, 255, 255, 0.08);
-   --tag-badge-border: rgba(255, 255, 255, 0.05);
-   --shadow-card-hover: 0 4px 15px rgba(0, 0, 0, 0.15);
-   --border-card-hover: rgba(255, 255, 255, 0.25);
-   --bg-hover-item: rgba(255, 255, 255, 0.04);
-   --bg-hover-btn: rgba(255, 255, 255, 0.08);
-   --card-tag-bg: rgba(0, 0, 0, 0.15);
-   --card-tag-border: rgba(255, 255, 255, 0.05);
-   --select-arrow-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238b949e' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  --md-sys-color-tertiary: #b8cea1;
+  --md-sys-color-on-tertiary: #243515;
+  --md-sys-color-tertiary-container: #3a4c2a;
+  --md-sys-color-on-tertiary-container: #d4eabb;
+
+  --md-sys-color-error: #ffb4ab;
+  --md-sys-color-on-error: #690005;
+  --md-sys-color-error-container: #93000a;
+  --md-sys-color-on-error-container: #ffdad6;
+
+  --md-sys-color-background: #0e1117;
+  --md-sys-color-on-background: #e6e1e5;
+
+  --md-sys-color-surface: #161b22;
+  --md-sys-color-on-surface: #c9d1d9;
+  --md-sys-color-surface-variant: #21262d;
+  --md-sys-color-on-surface-variant: #8b949e;
+
+  --md-sys-color-outline: #8b949e;
+  --md-sys-color-outline-variant: rgba(240, 246, 252, 0.12);
+
+  --md-sys-color-shadow: #000000;
+  --md-sys-color-scrim: #000000;
+
+  --md-sys-color-inverse-surface: #e6e1e5;
+  --md-sys-color-inverse-on-surface: #161b22;
+  --md-sys-color-inverse-primary: #825500;
+
+  --md-sys-color-surface-dim: #0e1117;
+  --md-sys-color-surface-bright: #30363d;
+  --md-sys-color-surface-container-lowest: #0b0d13;
+  --md-sys-color-surface-container-low: #11151c;
+  --md-sys-color-surface-container: #161b22;
+  --md-sys-color-surface-container-high: #21262d;
+  --md-sys-color-surface-container-highest: #30363d;
+
+  /* Legacy & Helper tokens */
+  --bg-primary: var(--md-sys-color-background);
+  --bg-secondary: var(--md-sys-color-surface);
+  --bg-tertiary: var(--md-sys-color-surface-container-high);
+  --bg-modal: rgba(22, 27, 34, 0.95);
+  --text-primary: var(--md-sys-color-on-surface);
+  --text-secondary: var(--md-sys-color-on-surface-variant);
+  --border-color: var(--md-sys-color-outline-variant);
+  --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-modal: 0 16px 40px rgba(0, 0, 0, 0.6);
+  --shadow-glow: 0 0 15px rgba(245, 158, 11, 0.2);
+
+  --accent: #f59e0b;
+  --accent-hover: #d97706;
+  --accent-bg-glow: rgba(245, 158, 11, 0.1);
+  --danger: #ef4444;
+  --danger-hover: #dc2626;
+
+  /* Dark Note Card Colors */
+  --note-default: #161b22;
+  --note-red: #442726;
+  --note-orange: #4c3520;
+  --note-yellow: #4c441c;
+  --note-green: #263e2a;
+  --note-teal: #193f3c;
+  --note-blue: #1d354b;
+  --note-purple: #392849;
+  --note-pink: #472337;
+  --note-border-intensity: 0.15;
+
+  --tag-badge-bg: rgba(255, 255, 255, 0.08);
+  --tag-badge-border: rgba(255, 255, 255, 0.05);
+  --shadow-card-hover: 0 4px 15px rgba(0, 0, 0, 0.25);
+  --border-card-hover: rgba(255, 255, 255, 0.25);
+  --bg-hover-item: rgba(255, 255, 255, 0.04);
+  --bg-hover-btn: rgba(255, 255, 255, 0.08);
+  --card-tag-bg: rgba(0, 0, 0, 0.25);
+  --card-tag-border: rgba(255, 255, 255, 0.05);
+  --select-arrow-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238b949e' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
 }
 
-/* Theme: Light Mode Override */
-.light-theme {
-   --bg-primary: #f6f8fa;
-   --bg-secondary: #ffffff;
-   --bg-tertiary: #eff2f5;
-   --bg-modal: rgba(255, 255, 255, 0.98);
-   --text-primary: #1f2328;
-   --text-secondary: #57606a;
-   --border-color: rgba(31, 35, 40, 0.12);
-   --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.08);
-   --shadow-modal: 0 12px 32px rgba(0, 0, 0, 0.15);
-   --shadow-glow: 0 0 12px rgba(217, 119, 6, 0.15);
+/* Theme: Light Mode Override - M3 Tokens seeded from #d97706 */
+.light-theme, [data-theme='light'] {
+  --md-sys-color-primary: #825500;
+  --md-sys-color-on-primary: #ffffff;
+  --md-sys-color-primary-container: #ffddb4;
+  --md-sys-color-on-primary-container: #2a1800;
 
-   --accent: #d97706;
-   --accent-hover: #b45309;
-   --accent-bg-glow: rgba(217, 119, 6, 0.08);
-   --danger: #ef4444;
-   --danger-hover: #dc2626;
+  --md-sys-color-secondary: #6e5c46;
+  --md-sys-color-on-secondary: #ffffff;
+  --md-sys-color-secondary-container: #f8dfbf;
+  --md-sys-color-on-secondary-container: #261908;
 
-   /* Light Note Card Colors */
-   --note-default: #ffffff;
-   --note-red: #f8d7da;
-   --note-orange: #ffe8d6;
-   --note-yellow: #fff3cd;
-   --note-green: #d4edda;
-   --note-teal: #d1ecf1;
-   --note-blue: #cce5ff;
-   --note-purple: #e2d9f3;
-   --note-pink: #f8d7f1;
-   --note-border-intensity: 0.25;
+  --md-sys-color-tertiary: #516440;
+  --md-sys-color-on-tertiary: #ffffff;
+  --md-sys-color-tertiary-container: #d4eabb;
+  --md-sys-color-on-tertiary-container: #101f05;
 
-   /* Refactored variables for theme-agnostic components */
-   --tag-badge-bg: rgba(0, 0, 0, 0.05);
-   --tag-badge-border: rgba(0, 0, 0, 0.03);
-   --shadow-card-hover: 0 4px 12px rgba(0, 0, 0, 0.08);
-   --border-card-hover: rgba(0, 0, 0, 0.2);
-   --bg-hover-item: rgba(0, 0, 0, 0.03);
-   --bg-hover-btn: rgba(0, 0, 0, 0.05);
-   --card-tag-bg: rgba(255, 255, 255, 0.5);
-   --card-tag-border: rgba(0, 0, 0, 0.05);
-   --select-arrow-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2357606a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  --md-sys-color-error: #ba1a1a;
+  --md-sys-color-on-error: #ffffff;
+  --md-sys-color-error-container: #ffdad6;
+  --md-sys-color-on-error-container: #410002;
+
+  --md-sys-color-background: #f6f8fa;
+  --md-sys-color-on-background: #1f2328;
+
+  --md-sys-color-surface: #ffffff;
+  --md-sys-color-on-surface: #1f2328;
+  --md-sys-color-surface-variant: #eff2f5;
+  --md-sys-color-on-surface-variant: #57606a;
+
+  --md-sys-color-outline: #79747e;
+  --md-sys-color-outline-variant: rgba(31, 35, 40, 0.12);
+
+  --md-sys-color-shadow: #000000;
+  --md-sys-color-scrim: #000000;
+
+  --md-sys-color-inverse-surface: #1f2328;
+  --md-sys-color-inverse-on-surface: #f6f8fa;
+  --md-sys-color-inverse-primary: #ffb951;
+
+  --md-sys-color-surface-dim: #eff2f5;
+  --md-sys-color-surface-bright: #ffffff;
+  --md-sys-color-surface-container-lowest: #ffffff;
+  --md-sys-color-surface-container-low: #f6f8fa;
+  --md-sys-color-surface-container: #eff2f5;
+  --md-sys-color-surface-container-high: #e6eaee;
+  --md-sys-color-surface-container-highest: #dbe0e6;
+
+  --bg-primary: var(--md-sys-color-background);
+  --bg-secondary: var(--md-sys-color-surface);
+  --bg-tertiary: var(--md-sys-color-surface-container-high);
+  --bg-modal: rgba(255, 255, 255, 0.98);
+  --text-primary: var(--md-sys-color-on-surface);
+  --text-secondary: var(--md-sys-color-on-surface-variant);
+  --border-color: var(--md-sys-color-outline-variant);
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-modal: 0 12px 32px rgba(0, 0, 0, 0.15);
+  --shadow-glow: 0 0 12px rgba(217, 119, 6, 0.15);
+
+  --accent: #d97706;
+  --accent-hover: #b45309;
+  --accent-bg-glow: rgba(217, 119, 6, 0.08);
+  --danger: #ef4444;
+  --danger-hover: #dc2626;
+
+  /* Light Note Card Colors */
+  --note-default: #ffffff;
+  --note-red: #f8d7da;
+  --note-orange: #ffe8d6;
+  --note-yellow: #fff3cd;
+  --note-green: #d4edda;
+  --note-teal: #d1ecf1;
+  --note-blue: #cce5ff;
+  --note-purple: #e2d9f3;
+  --note-pink: #f8d7f1;
+  --note-border-intensity: 0.25;
+
+  --tag-badge-bg: rgba(0, 0, 0, 0.05);
+  --tag-badge-border: rgba(0, 0, 0, 0.03);
+  --shadow-card-hover: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --border-card-hover: rgba(0, 0, 0, 0.2);
+  --bg-hover-item: rgba(0, 0, 0, 0.03);
+  --bg-hover-btn: rgba(0, 0, 0, 0.05);
+  --card-tag-bg: rgba(255, 255, 255, 0.6);
+  --card-tag-border: rgba(0, 0, 0, 0.05);
+  --select-arrow-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2357606a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
 }

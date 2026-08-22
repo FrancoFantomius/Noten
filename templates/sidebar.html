@@ -5,39 +5,37 @@
             <img src="img/icons/icon.svg" alt="Noten Logo" class="app-logo-small">
             <span class="app-title">Noten</span>
           </div>
-          <button id="btn-sidebar-close-mobile" class="btn-icon" aria-label="Close Menu">
-            <span class="material-symbols-outlined">close</span>
-          </button>
+          <md-icon-button id="btn-sidebar-close-mobile" icon="close" aria-label="Close Menu"></md-icon-button>
         </div>
         <nav class="sidebar-nav">
-          <ul>
+          <ul class="sidebar-menu">
             <li>
               <a href="index.html" class="nav-item {{#if navNotes}}active{{/if}}" data-category="notes">
-                <span class="material-symbols-outlined">note_stack</span>
+                <md-icon name="note_stack"></md-icon>
                 <span class="nav-label" data-i18n="nav_notes">Notes</span>
               </a>
             </li>
             <li>
               <a href="archive.html" class="nav-item {{#if navArchive}}active{{/if}}" data-category="archive">
-                <span class="material-symbols-outlined">archive</span>
+                <md-icon name="archive"></md-icon>
                 <span class="nav-label" data-i18n="nav_archive">Archive</span>
               </a>
             </li>
             <li>
               <a href="trash.html" class="nav-item {{#if navTrash}}active{{/if}}" data-category="trash">
-                <span class="material-symbols-outlined">delete</span>
+                <md-icon name="delete"></md-icon>
                 <span class="nav-label" data-i18n="nav_trash">Trash</span>
               </a>
             </li>
           </ul>
 
-          <div class="sidebar-divider"></div>
+          <md-divider></md-divider>
 
           <div class="tags-section">
             <span class="section-title" data-i18n="tags_section_title">Tags</span>
-            <ul id="sidebar-tags-list">
-              <!-- Dynamically populated tags list -->
-            </ul>
+            <md-chip-set id="sidebar-tags-list" class="sidebar-tags-chip-set">
+              <!-- Dynamically populated tags with md-chip -->
+            </md-chip-set>
           </div>
         </nav>
       </aside>

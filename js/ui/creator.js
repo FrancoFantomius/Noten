@@ -269,26 +269,20 @@ export function discardNoteCreator() {
 }
 
 export function renderCreatorTags() {
+  if (!elements.creatorTagsList) return;
   elements.creatorTagsList.innerHTML = '';
   state.noteCreatorTags.forEach(tag => {
-    const span = document.createElement('span');
-    span.className = 'tag-badge';
-    span.innerHTML = `
-      #${tag}
-      <button class="btn-remove-tag" data-tag="${tag}">
-        <span class="material-symbols-outlined">close</span>
-      </button>
-    `;
-    span.querySelector('button').addEventListener('click', (e) => {
+    const chip = document.createElement('md-chip');
+    chip.setAttribute('label', tag);
+    chip.setAttribute('variant', 'input');
+    chip.setAttribute('removable', '');
+    chip.addEventListener('remove', (e) => {
       e.stopPropagation();
-      const removeVal = e.currentTarget.getAttribute('data-tag');
-      state.noteCreatorTags = state.noteCreatorTags.filter(t => t !== removeVal);
+      state.noteCreatorTags = state.noteCreatorTags.filter(t => t !== tag);
       renderCreatorTags();
     });
-    elements.creatorTagsList.appendChild(span);
+    elements.creatorTagsList.appendChild(chip);
   });
-  
-
 }
 
 export function renderCreatorImages() {

@@ -112,5 +112,11 @@
   "btn_login": "Einloggen",
   "btn_signout": "Abmelden",
   "privacy_policy": "Datenschutzerklärung",
-  "terms_of_service": "Nutzungsbedingungen"
+  "terms_of_service": "Nutzungsbedingungen",
+  "btn_change_language": "Sprache ändern",
+  "btn_cancel": "Abbrechen",
+  "btn_select_language": "Sprache auswählen",
+  "settings_language_dialog_title": "Sprache auswählen",
+  "settings_current_language": "Aktuell:",
+  "btn_save": "Speichern"
 }

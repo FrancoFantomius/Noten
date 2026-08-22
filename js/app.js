@@ -1,7 +1,4 @@
-/**
- * Noten - Main Application Controller
- */
-
+import '@francofantomius/material-components';
 import * as db from './db.js';
 import * as ui from './ui.js';
 import { t, getLanguage, setLanguage, applyTranslations, initTranslations } from './i18n.js';
@@ -11,17 +8,18 @@ let cachedNotes = [];
 
 const dom = {
   // Settings modal fields
-  settingsEmail: document.getElementById('sync-email'),
-  settingsPassword: document.getElementById('sync-password'),
-  settingsTwofactor: document.getElementById('sync-twofactor'),
-  btnSaveSync: document.getElementById('btn-save-sync'),
-  syncSettingsStatus: document.getElementById('sync-settings-status'),
-  syncCredentialsContainer: document.getElementById('sync-credentials-container'),
+  settingsEmail: null,
+  settingsPassword: null,
+  settingsTwofactor: null,
+  btnSaveSync: null,
+  syncSettingsStatus: null,
+  syncCredentialsContainer: null,
 
   // Import/Export
-  btnExportBackup: document.getElementById('btn-export-backup'),
-  importFileInput: document.getElementById('import-file-input'),
-  importStatusText: document.getElementById('import-status-text')
+  btnExportBackup: null,
+  btnImportBackupBtn: null,
+  importFileInput: null,
+  importStatusText: null
 };
 
 // --- Bootstrapping ---
@@ -224,25 +222,80 @@ async function handleOpenSettings() {
 
 // Setup Settings listeners
 function setupSettingsListeners() {
-  dom.btnSaveSync.addEventListener('click', handleSaveSyncSettings);
+  dom.settingsEmail = document.getElementById('sync-email');
+  dom.settingsPassword = document.getElementById('sync-password');
+  dom.settingsTwofactor = document.getElementById('sync-twofactor');
+  dom.btnSaveSync = document.getElementById('btn-save-sync');
+  dom.syncSettingsStatus = document.getElementById('sync-settings-status');
+  dom.syncCredentialsContainer = document.getElementById('sync-credentials-container');
+  dom.btnExportBackup = document.getElementById('btn-export-backup');
+  dom.btnImportBackupBtn = document.getElementById('btn-import-backup-btn');
+  dom.importFileInput = document.getElementById('import-file-input');
+  dom.importStatusText = document.getElementById('import-status-text');
+
+  if (dom.btnSaveSync) {
+    dom.btnSaveSync.addEventListener('click', handleSaveSyncSettings);
+  }
 
   // Backup triggers
-  dom.btnExportBackup.addEventListener('click', handleExportBackup);
-  dom.importFileInput.addEventListener('change', handleImportBackupFile);
+  if (dom.btnExportBackup) {
+    dom.btnExportBackup.addEventListener('click', handleExportBackup);
+  }
+  if (dom.btnImportBackupBtn && dom.importFileInput) {
+    dom.btnImportBackupBtn.addEventListener('click', () => {
+      dom.importFileInput.click();
+    });
+  }
+  if (dom.importFileInput) {
+    dom.importFileInput.addEventListener('change', handleImportBackupFile);
+  }
 
-  // Language selector change listener
-  const languageSelect = document.getElementById('language-select');
-  if (languageSelect) {
-    languageSelect.value = getLanguage();
-    languageSelect.addEventListener('change', async (e) => {
-      const newLang = e.target.value;
-      try {
-        await setLanguage(newLang);
-      } catch (err) {
-        console.error('Failed to change language:', err);
+  // Language selection modal setup
+  const btnOpenLanguageDialog = document.getElementById('btn-open-language-dialog');
+  const languageModal = document.getElementById('language-modal');
+  const languageRadioGroup = document.getElementById('language-radio-group');
+  const btnLanguageCancel = document.getElementById('btn-language-cancel');
+  const btnLanguageSelect = document.getElementById('btn-language-select');
+
+  function syncLanguageRadios(currentLang) {
+    if (!languageRadioGroup) return;
+    languageRadioGroup.value = currentLang;
+    const radios = languageRadioGroup.querySelectorAll('md-radio');
+    radios.forEach(radio => {
+      radio.checked = (radio.value === currentLang);
+    });
+  }
+
+  if (btnOpenLanguageDialog && languageModal) {
+    btnOpenLanguageDialog.addEventListener('click', () => {
+      const currentLang = getLanguage();
+      syncLanguageRadios(currentLang);
+      languageModal.showModal();
+    });
+  }
+
+  if (btnLanguageCancel && languageModal) {
+    btnLanguageCancel.addEventListener('click', () => {
+      languageModal.close();
+    });
+  }
+
+  if (btnLanguageSelect && languageModal && languageRadioGroup) {
+    btnLanguageSelect.addEventListener('click', async () => {
+      const checkedRadio = languageRadioGroup.querySelector('md-radio[checked]') ||
+        Array.from(languageRadioGroup.querySelectorAll('md-radio')).find(r => r.checked);
+      const newLang = checkedRadio?.value || languageRadioGroup.value;
+
+      if (newLang) {
+        try {
+          await setLanguage(newLang);
+        } catch (err) {
+          console.error('Failed to change language:', err);
+        }
+        applyTranslations();
+        ui.retranslateDynamicUI();
       }
-      applyTranslations();
-      ui.retranslateDynamicUI();
+      languageModal.close();
     });
   }
 }

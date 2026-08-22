@@ -71,7 +71,7 @@ export async function getSyncSettings() {
     return await db.get('_local/sync_settings');
   } catch (err) {
     if (err.status === 404) {
-      return { email: '', password: '', twoFactorCode: '', username: '', avatarURL: '', enabled: false };
+      return { email: '', password: '', twoFactorCode: '', username: '', avatarURL: '', storageUsed: 0, storageTotal: 0, enabled: false };
     }
     throw err;
   }
@@ -407,6 +407,8 @@ async function initFilenAndSync(settings) {
         if (accountInfo) {
           const nickname = accountInfo.nickName || accountInfo.displayName;
           const avatarURL = accountInfo.avatarURL || '';
+          const storageUsed = typeof accountInfo.storage === 'number' ? accountInfo.storage : 0;
+          const storageTotal = typeof accountInfo.maxStorage === 'number' ? accountInfo.maxStorage : 0;
           let changed = false;
           if (nickname && nickname !== settings.username) {
             settings.username = nickname;
@@ -414,6 +416,14 @@ async function initFilenAndSync(settings) {
           }
           if (avatarURL !== settings.avatarURL) {
             settings.avatarURL = avatarURL;
+            changed = true;
+          }
+          if (storageUsed !== settings.storageUsed) {
+            settings.storageUsed = storageUsed;
+            changed = true;
+          }
+          if (storageTotal !== settings.storageTotal) {
+            settings.storageTotal = storageTotal;
             changed = true;
           }
           if (changed) {
@@ -431,15 +441,19 @@ async function initFilenAndSync(settings) {
         twoFactorCode: settings.twoFactorCode || undefined
       });
 
-      // Fetch nickname and avatar from Filen
+      // Fetch nickname, avatar and storage from Filen
       let nickname = settings.email.split('@')[0];
       let avatarURL = '';
+      let storageUsed = 0;
+      let storageTotal = 0;
       try {
         const accountInfo = await filenClient.user().account();
         if (accountInfo) {
           if (accountInfo.nickName) nickname = accountInfo.nickName;
           else if (accountInfo.displayName) nickname = accountInfo.displayName;
           if (accountInfo.avatarURL) avatarURL = accountInfo.avatarURL;
+          if (typeof accountInfo.storage === 'number') storageUsed = accountInfo.storage;
+          if (typeof accountInfo.maxStorage === 'number') storageTotal = accountInfo.maxStorage;
         }
       } catch (e) {
         console.warn("[Sync] Failed to fetch profile info during login:", e);
@@ -449,6 +463,8 @@ async function initFilenAndSync(settings) {
         enabled: true,
         username: nickname,
         avatarURL: avatarURL,
+        storageUsed: storageUsed,
+        storageTotal: storageTotal,
         email: settings.email,
         apiKey: filenClient.config.apiKey,
         masterKeys: filenClient.config.masterKeys,

@@ -41,6 +41,7 @@ export const elements = {
   btnSearchClear: null,
   syncStatus: null,
   btnSettingsOpen: null,
+  appDrawer: null,
 
   // Navigation items
   navItems: null,
@@ -113,20 +114,10 @@ export const elements = {
   // Floating Action Button
   btnFabCreate: null,
 
-  // Account Dropdown Elements
+  // Account Menu Element
+  accountMenu: null,
   btnSyncLogin: null,
   btnSyncProfile: null,
-  headerProfileAvatar: null,
-  headerProfileLetter: null,
-  headerProfileIcon: null,
-
-  accountDropdown: null,
-  dropdownEmail: null,
-  dropdownAvatar: null,
-  dropdownLetter: null,
-  dropdownIcon: null,
-  dropdownUsername: null,
-
   btnDropdownSettings: null,
   btnDropdownSignout: null,
 
@@ -151,6 +142,7 @@ export function initElements() {
   elements.btnSearchClear = document.getElementById('btn-search-clear');
   elements.syncStatus = document.getElementById('sync-status');
   elements.btnSettingsOpen = document.getElementById('btn-settings-open');
+  elements.appDrawer = document.getElementById('app-drawer');
 
   // Navigation items
   elements.navItems = document.querySelectorAll('.nav-item');
@@ -213,6 +205,8 @@ export function initElements() {
   // Settings Modal
   elements.settingsModal = document.getElementById('settings-modal');
   elements.btnSettingsClose = document.getElementById('btn-settings-close');
+  elements.btnSettingsCloseIcon = document.getElementById('btn-settings-close-icon');
+  elements.btnSettingsSave = document.getElementById('btn-settings-save');
   elements.themeSelect = document.getElementById('theme-select');
 
   // Lightbox Modal
@@ -223,19 +217,10 @@ export function initElements() {
   // Floating Action Button
   elements.btnFabCreate = document.getElementById('btn-fab-create');
 
-  // Account Dropdown Elements
+  // Account Menu Elements
+  elements.accountMenu = document.getElementById('account-menu');
   elements.btnSyncLogin = document.getElementById('btn-sync-login');
   elements.btnSyncProfile = document.getElementById('btn-sync-profile');
-  elements.headerProfileAvatar = document.getElementById('header-profile-avatar');
-  elements.headerProfileLetter = document.getElementById('header-profile-letter');
-  elements.headerProfileIcon = document.getElementById('header-profile-icon');
-
-  elements.accountDropdown = document.getElementById('account-dropdown');
-  elements.dropdownEmail = document.getElementById('account-dropdown-email');
-  elements.dropdownAvatar = document.getElementById('dropdown-profile-avatar');
-  elements.dropdownLetter = document.getElementById('dropdown-profile-letter');
-  elements.dropdownIcon = document.getElementById('dropdown-profile-icon');
-  elements.dropdownUsername = document.getElementById('dropdown-profile-username');
 
   elements.btnDropdownSettings = document.getElementById('btn-dropdown-settings');
   elements.btnDropdownSignout = document.getElementById('btn-dropdown-signout');
