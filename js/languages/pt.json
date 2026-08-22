@@ -3,7 +3,6 @@
   "app_description": "Suas notas privadas e seguras em todos os dispositivos",
   "search_placeholder": "Pesquisar notas, tags...",
   "sync_offline": "Offline",
-  "sync_online": "Sincronizado",
   "sync_syncing": "Sincronizando",
   "sync_error": "Erro de sincronização",
   "btn_settings_open_title": "Configurações",

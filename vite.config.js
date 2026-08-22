@@ -162,6 +162,13 @@ export default defineConfig({
         } catch (err) {
           console.error('Failed to copy icons:', err);
         }
+        try {
+          const nojekyllPath = path.resolve(__dirname, 'dist/.nojekyll');
+          fs.writeFileSync(nojekyllPath, '', 'utf-8');
+          console.log('Successfully generated dist/.nojekyll for GitHub Pages');
+        } catch (err) {
+          console.error('Failed to create .nojekyll:', err);
+        }
       }
     }
   ],
@@ -182,7 +189,10 @@ export default defineConfig({
       },
       output: {
         entryFileNames: (chunkInfo) => {
-          if (chunkInfo.name === 'app' || chunkInfo.name === 'index' || chunkInfo.name === 'main' || chunkInfo.name === 'archive' || chunkInfo.name === 'trash' || chunkInfo.name === 'privacy' || chunkInfo.name === 'terms') {
+          if (chunkInfo.name === 'privacy' || chunkInfo.name === 'terms' || chunkInfo.name === 'static') {
+            return 'js/static.js';
+          }
+          if (chunkInfo.name === 'app' || chunkInfo.name === 'index' || chunkInfo.name === 'main' || chunkInfo.name === 'archive' || chunkInfo.name === 'trash') {
             return 'js/app.js';
           }
           return 'js/[name].js';

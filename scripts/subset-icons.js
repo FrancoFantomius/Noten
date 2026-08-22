@@ -7,16 +7,22 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const rootDir = path.resolve(__dirname, '..');
 
-// Default fallback set of known icons in Noten to guarantee safety
+// Default fallback set of known icons in Noten and @francofantomius/material-components to guarantee safety
 const DEFAULT_ICONS = [
+  'account_circle',
   'add',
   'add_notes',
+  'apartment',
   'archive',
-  'unarchive',
   'arrow_back',
+  'arrow_drop_down',
+  'arrow_forward',
+  'badge',
   'balance',
+  'calendar_today',
   'check',
   'check_box',
+  'check_circle',
   'checklist',
   'chevron_left',
   'chevron_right',
@@ -31,29 +37,49 @@ const DEFAULT_ICONS = [
   'description',
   'devices',
   'download',
+  'drag_handle',
   'drag_indicator',
+  'edit',
+  'engineering',
+  'expand_more',
   'favorite',
   'format_color_reset',
+  'history',
   'image',
   'keep',
+  'keyboard',
   'light_mode',
   'lock',
+  'lock_reset',
   'logout',
   'mail',
+  'manage_accounts',
   'menu',
+  'more_vert',
   'note_stack',
   'palette',
+  'people',
+  'person_add',
+  'photo_camera',
   'push_pin',
   'restore',
+  'schedule',
+  'search',
   'security',
   'settings',
+  'shield',
   'tag',
   'translate',
-  'upload'
+  'unarchive',
+  'upload',
+  'verified_user',
+  'visibility',
+  'visibility_off'
 ];
 
 function getAllFiles(dir, extensions = ['.html', '.js', '.css', '.handlebars']) {
   let results = [];
+  if (!fs.existsSync(dir)) return results;
   const entries = fs.readdirSync(dir, { withFileTypes: true });
 
   for (const entry of entries) {
@@ -77,18 +103,43 @@ function getAllFiles(dir, extensions = ['.html', '.js', '.css', '.handlebars']) 
   return results;
 }
 
+function getMaterialComponentsFiles(rootDir) {
+  const mcDir = path.join(rootDir, 'node_modules/@francofantomius/material-components');
+  if (!fs.existsSync(mcDir)) return [];
+  const results = [];
+
+  const scanDir = (dir) => {
+    const entries = fs.readdirSync(dir, { withFileTypes: true });
+    for (const entry of entries) {
+      const fullPath = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        scanDir(fullPath);
+      } else if (entry.name.endsWith('.js') || entry.name.endsWith('.d.ts')) {
+        results.push(fullPath);
+      }
+    }
+  };
+
+  scanDir(mcDir);
+  return results;
+}
+
 export function scanIcons() {
   const iconSet = new Set(DEFAULT_ICONS);
-  const files = getAllFiles(rootDir);
+  const files = [...getAllFiles(rootDir), ...getMaterialComponentsFiles(rootDir)];
 
   const patterns = [
-    /\b(?:icon|leading-icon|trailing-icon)=["']([a-zA-Z0-9_-]+)["']/g,
+    /\b(?:icon|leading-icon|trailing-icon|active-leading-icon|selected-icon|open-icon)=["']([a-zA-Z0-9_-]+)["']/g,
     /<md-icon[^>]*\bname=["']([a-zA-Z0-9_-]+)["']/g,
+    /<md-icon[^>]*\bname=\${[^}]*["']([a-zA-Z0-9_-]+)["']\}/g,
     /<md-icon[^>]*>([a-zA-Z0-9_-]+)<\/md-icon>/g,
     /<span[^>]*class=["'][^"']*material-symbols-outlined[^"']*["'][^>]*>\s*([a-zA-Z0-9_-]+)\s*<\/span>/g,
-    /\.setAttribute\(\s*["'](?:icon|leading-icon|trailing-icon)["']\s*,\s*["']([a-zA-Z0-9_-]+)["']\s*\)/g,
-    /\.setAttribute\(\s*["'](?:icon|leading-icon|trailing-icon)["']\s*,\s*[^?]+\?\s*["']([a-zA-Z0-9_-]+)["']\s*:\s*["']([a-zA-Z0-9_-]+)["']/g,
+    /\.setAttribute\(\s*["'](?:icon|leading-icon|trailing-icon|selected-icon|active-leading-icon)["']\s*,\s*["']([a-zA-Z0-9_-]+)["']\s*\)/g,
+    /\.setAttribute\(\s*["'](?:icon|leading-icon|trailing-icon|selected-icon|active-leading-icon)["']\s*,\s*[^?]+\?\s*["']([a-zA-Z0-9_-]+)["']\s*:\s*["']([a-zA-Z0-9_-]+)["']/g,
     /icon:\s*[^?]+\?\s*["']([a-zA-Z0-9_-]+)["']\s*:\s*(?:\([^?]+\?\s*["']([a-zA-Z0-9_-]+)["']\s*:\s*["']([a-zA-Z0-9_-]+)["']\)|["']([a-zA-Z0-9_-]+)["'])/g,
+    /\bicon:\s*["']([a-zA-Z0-9_-]+)["']/g,
+    /\b(?:trailingIcon|leadingIcon|activeLeadingIcon|openIcon|selectedIcon)\s*=\s*["']([a-zA-Z0-9_-]+)["']/g,
+    /\b(?:trailingIcon|leadingIcon|activeLeadingIcon|openIcon|selectedIcon)\s*:\s*["']([a-zA-Z0-9_-]+)["']/g,
     /\bicon\s*=\s*["']([a-zA-Z0-9_-]+)["']/g,
     /md-icon\[name=["']([a-zA-Z0-9_-]+)["']\]/g
   ];

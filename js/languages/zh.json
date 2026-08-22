@@ -3,7 +3,6 @@
   "app_description": " across devices",
   "search_placeholder": "搜索笔记、标签...",
   "sync_offline": "离线",
-  "sync_online": "已同步",
   "sync_syncing": "同步中",
   "sync_error": "同步错误",
   "btn_settings_open_title": "设置",

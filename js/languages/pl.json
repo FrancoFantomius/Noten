@@ -3,7 +3,6 @@
   "app_description": "Twoje notatki prywatne i bezpieczne na wszystkich urządzeniach",
   "search_placeholder": "Szukaj notatek, tagów...",
   "sync_offline": "Offline",
-  "sync_online": "Zsynchronizowano",
   "sync_syncing": "Synchronizacja",
   "sync_error": "Błąd synchronizacji",
   "btn_settings_open_title": "Ustawienia",

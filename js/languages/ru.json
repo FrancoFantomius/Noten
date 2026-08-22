@@ -3,7 +3,6 @@
   "app_description": "Ваши заметки личные и защищенные на всех устройствах",
   "search_placeholder": "Поиск заметок, тегов...",
   "sync_offline": "Офлайн",
-  "sync_online": "Синхронизировано",
   "sync_syncing": "Синхронизация",
   "sync_error": "Ошибка синхронизации",
   "btn_settings_open_title": "Настройки",

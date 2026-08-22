@@ -190,7 +190,7 @@ export function updateSyncStatusUI(status) {
     text = t('sync_syncing');
   } else if (status === 'online') {
     icon = 'cloud_done';
-    text = t('sync_online');
+    text = '';
   } else if (status === 'error') {
     icon = 'cloud_off';
     text = t('sync_error');
@@ -198,9 +198,9 @@ export function updateSyncStatusUI(status) {
 
   badge.innerHTML = `
     <span class="material-symbols-outlined">${icon}</span>
-    <span class="sync-text">${text}</span>
+    ${text ? `<span class="sync-text">${text}</span>` : ''}
   `;
-  badge.title = t('sync_status_title', { status: text });
+  badge.title = text ? t('sync_status_title', { status: text }) : 'Filen Sync';
 }
 
 export function formatBytes(bytes) {
