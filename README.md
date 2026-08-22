@@ -1,6 +1,6 @@
 # Noten
 
-[![Version 1.3.1](https://img.shields.io/badge/Version-1.3.1-blue.svg)](https://github.com/FrancoFantomius/noten/releases)
+[![Version 2.0.0](https://img.shields.io/badge/Version-2.0.0-blue.svg)](https://github.com/FrancoFantomius/noten/releases)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 [![PWA Support](https://img.shields.io/badge/PWA-Supported-orange.svg)](#key-features)
 [![Local-First](https://img.shields.io/badge/Architecture-Local--First-green.svg)](#sync-setup-filen)
@@ -15,6 +15,9 @@ Because the encryption is client-side, the sync server only stores ciphertext. *
 
 - **Local-First & Offline Support**: Stores notes locally in IndexedDB (via PouchDB) for instantaneous loading. The application is a fully functional Progressive Web App (PWA) with offline capabilities.
 - **Client-Side E2E Encrypted Sync**: Seamless synchronization with your personal **Filen** account using the official Filen SDK. All encryption and decryption happen in your browser using AES-256-GCM before data is uploaded.
+- **Material Design 3 Components**: Fully native Material Design 3 interface powered by `@francofantomius/material-components` and Lit, offering accessible, high-performance web components.
+- **Account Storage Breakdown**: Interactive account menu with visual indicators for total Filen storage usage (notes vs. other files vs. available space).
+- **App Drawer Ecosystem**: Integrated app switcher drawer for seamless navigation across companion web applications.
 - **Advanced Interactive Checklists**:
   - Toggle checklist format on notes.
   - **Hierarchical Tasks**: Indent checklist items using `Tab` (or `Shift + Tab` to outdent) or the on-screen left/right chevron buttons.
@@ -23,6 +26,7 @@ Because the encryption is client-side, the sync server only stores ciphertext. *
 - **Organization & Customization**:
   - Color-code note cards using curated premium palettes.
   - Categorize notes with custom hashtags (`#tags`).
+  - Search bar with integrated tag filter chips.
   - Dynamic Tag Section in the sidebar for quick filtering.
   - Real-time instant search across titles, descriptions, and tags.
 - **Media Attachments**:
@@ -33,8 +37,8 @@ Because the encryption is client-side, the sync server only stores ciphertext. *
   - Move completed or old notes to the **Archive** to keep your feed clean.
   - Send notes to **Trash** with options to restore or delete them permanently.
 - **Multi-language Support (i18n)**: Fully translated into 16 languages — Arabic (العربية), Chinese (中文), Dutch (Nederlands), English, French (Français), German (Deutsch), Greek (Ελληνικά), Hindi (हिन्दी), Italian (Italiano), Polish (Polski), Portuguese (Português), Russian (Русский), Spanish (Español), Swedish (Svenska), Turkish (Türkçe), and Ukrainian (Українська) — with dynamic runtime switching and automatic browser-language detection.
-- **Premium User Interface**: Modern Material Design 3 styling built on the *Roboto* typeface, harmonious colors, glassmorphic styling, and interactive micro-animations. Responsive sidebar controls and mobile FAB (Floating Action Button). Self-hosted fonts & optimized icon subset for privacy, speed, and offline reliability.
 - **Theme Modes**: Light, Dark, and Device (system) theme switching.
+- **Privacy-Focused & Self-Hosted Assets**: Self-hosted Roboto font and an automatically generated Material Symbols dynamic icon subset for zero-CDN tracking and maximum offline performance.
 - **Data Portability**: Prevent platform lock-in by exporting database contents to a JSON file or importing backups to restore them.
 
 ---
@@ -166,12 +170,13 @@ You can synchronize your notes across multiple devices (desktops, phones, tablet
 
 ## Tech Stack
 
+- **UI Components**: Material Design 3 Web Components (`@francofantomius/material-components`, `lit`)
 - **Markup & Layout**: Semantic HTML5 with Handlebars partial templates (`vite-plugin-handlebars`)
-- **Styling**: Vanilla CSS3 (Custom Variables, Column Masonry Layouts, responsive media queries)
-- **Local Storage**: IndexedDB (managed via PouchDB)
+- **Styling**: Material Design 3 & Vanilla CSS3 (Custom Variables, Column Masonry Layouts, responsive media queries)
+- **Local Storage**: IndexedDB (managed via PouchDB 9)
 - **Replication & E2E Encryption**: Filen SDK Integration (`@filen/sdk`)
 - **Bundler**: Vite & Vite Node Polyfills Plugin
-- **Fonts & Icons**: Self-hosted Roboto & Material Symbols Outlined dynamic subset (`@fontsource`, `subset-font`)
+- **Fonts & Icons**: Self-hosted Roboto (`@fontsource/roboto`) & Material Symbols Outlined dynamic subset (`@fontsource-variable/material-symbols-outlined`, `subset-font`)
 
 ---
 

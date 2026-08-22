@@ -1,6 +1,6 @@
 {
   "app_title": "Noten",
-  "app_description": " across devices",
+  "app_description": "跨设备保护您的笔记私密与安全",
   "search_placeholder": "搜索笔记、标签...",
   "sync_offline": "离线",
   "sync_syncing": "同步中",
@@ -98,7 +98,7 @@
   "confirm_import_notes": "是否导入 {count} 条笔记到数据库？",
   "status_connecting": "正在连接 Filen 并启动同步...",
   "status_sync_enabled": "同步启用成功。正在同步笔记...",
-  "status_sync_failed": "启动同步失败。请检查凭据和网络 connection。",
+  "status_sync_failed": "启动同步失败。请检查凭据和网络连接。",
   "status_sync_disabled": "同步已禁用。",
   "status_credentials_required": "需要提供 Filen 邮箱和密码。",
   "status_importing": "正在导入笔记...",
