@@ -43,7 +43,9 @@ export const elements = {
   btnSettingsOpen: null,
   appDrawer: null,
 
-  // Navigation items
+  // Navigation items & Sidebar
+  sidebarDrawer: null,
+  sidebarRail: null,
   navItems: null,
   sidebarTagsList: null,
 
@@ -144,8 +146,10 @@ export function initElements() {
   elements.btnSettingsOpen = document.getElementById('btn-settings-open');
   elements.appDrawer = document.getElementById('app-drawer');
 
-  // Navigation items
-  elements.navItems = document.querySelectorAll('.nav-item');
+  // Navigation items & Sidebar
+  elements.sidebarDrawer = document.getElementById('sidebar-drawer');
+  elements.sidebarRail = document.getElementById('sidebar-rail');
+  elements.navItems = document.querySelectorAll('.nav-item, md-navigation-drawer-item, md-navigation-rail-item');
   elements.sidebarTagsList = document.getElementById('sidebar-tags-list');
 
   // Note Creator

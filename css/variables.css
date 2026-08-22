@@ -10,7 +10,7 @@
   /* Layout Dimensions */
   --header-height: 64px;
   --sidebar-width: 280px;
-  --sidebar-collapsed-width: 72px;
+  --sidebar-collapsed-width: 80px;
 
   /* Transition timings */
   --transition-speed: 0.2s;

@@ -13,6 +13,17 @@ import { showSettings, hideSettings } from './account.js';
  * Initializes sidebar toggling, search input listeners, sidebar navigations, and hash change event listeners
  */
 export function initCardsUI() {
+  fixSidebarSpacing();
+
+  // Restore saved sidebar collapsed state across page navigations
+  try {
+    const isSavedCollapsed = localStorage.getItem('sidebar_collapsed') === 'true';
+    if (isSavedCollapsed && window.innerWidth > 768 && elements.sidebar) {
+      elements.sidebar.classList.add('collapsed');
+    }
+  } catch (e) {}
+  document.documentElement.classList.remove('sidebar-collapsed-preload');
+
   if (elements.btnSidebarToggle) {
     elements.btnSidebarToggle.addEventListener('click', toggleSidebar);
   }
@@ -47,8 +58,6 @@ export function initCardsUI() {
 
       if (shouldPreventDefault) {
         e.preventDefault();
-        elements.navItems.forEach(i => i.classList.remove('active'));
-        btn.classList.add('active');
 
         // Clear hash and tag highlight when switching to a main category in-memory
         if (window.location.hash) {
@@ -58,6 +67,28 @@ export function initCardsUI() {
       }
     });
   });
+
+  if (elements.sidebarRail) {
+    elements.sidebarRail.addEventListener('change', (e) => {
+      const val = e.detail?.value || e.detail?.item?.getAttribute('data-category');
+      if (val) {
+        const currentPath = window.location.pathname;
+        const isNotesPage = !currentPath.endsWith('archive.html') && !currentPath.endsWith('trash.html');
+        const isArchivePage = currentPath.endsWith('archive.html');
+        const isTrashPage = currentPath.endsWith('trash.html');
+
+        if ((val === 'notes' && isNotesPage) || (val === 'archive' && isArchivePage) || (val === 'trash' && isTrashPage)) {
+          if (window.location.hash) {
+            history.pushState("", document.title, window.location.pathname);
+          }
+          setCategory(val);
+        }
+      }
+    });
+  }
+
+  // Initial category sync across drawer and rail
+  setCategory(state.activeCategory);
 
   // Search Live Filtering & Suggestions
   if (elements.searchInput) {
@@ -131,6 +162,51 @@ export function initCardsUI() {
 }
 
 /**
+ * Removes extraneous top spacing inside md-navigation-drawer and md-navigation-rail
+ */
+export function fixSidebarSpacing() {
+  const applyFixes = () => {
+    if (elements.sidebarDrawer && elements.sidebarDrawer.shadowRoot) {
+      if (!elements.sidebarDrawer.shadowRoot.getElementById('drawer-spacing-fix')) {
+        const style = document.createElement('style');
+        style.id = 'drawer-spacing-fix';
+        style.textContent = `
+          .header {
+            padding: 0 !important;
+            display: none !important;
+          }
+          .content {
+            padding-top: 8px !important;
+          }
+        `;
+        elements.sidebarDrawer.shadowRoot.appendChild(style);
+      }
+    }
+
+    if (elements.sidebarRail && elements.sidebarRail.shadowRoot) {
+      if (!elements.sidebarRail.shadowRoot.getElementById('rail-spacing-fix')) {
+        const style = document.createElement('style');
+        style.id = 'rail-spacing-fix';
+        style.textContent = `
+          .header {
+            margin-bottom: 0 !important;
+            display: none !important;
+          }
+          .rail {
+            padding-top: 8px !important;
+          }
+        `;
+        elements.sidebarRail.shadowRoot.appendChild(style);
+      }
+    }
+  };
+
+  applyFixes();
+  customElements.whenDefined('md-navigation-drawer').then(applyFixes);
+  customElements.whenDefined('md-navigation-rail').then(applyFixes);
+}
+
+/**
  * Sidebar Navigation Toggling
  */
 export function toggleSidebar() {
@@ -143,7 +219,10 @@ export function toggleSidebar() {
       elements.sidebarOverlay.classList.toggle('active', isMobileOpen);
     }
   } else {
-    elements.sidebar.classList.toggle('collapsed');
+    const isCollapsed = elements.sidebar.classList.toggle('collapsed');
+    try {
+      localStorage.setItem('sidebar_collapsed', isCollapsed ? 'true' : 'false');
+    } catch (e) {}
   }
 }
 
@@ -161,25 +240,54 @@ export function setCategory(category) {
     elements.sidebarOverlay.classList.remove('active');
   }
 
-  // Highlight sidebar item if it's main category
+  const categoryToIndex = {
+    'notes': 0,
+    'archive': 1,
+    'trash': 2
+  };
+
+  // Sync md-navigation-rail activeIndex
+  if (elements.sidebarRail) {
+    if (category in categoryToIndex) {
+      const idx = categoryToIndex[category];
+      elements.sidebarRail.activeIndex = idx;
+      elements.sidebarRail.setAttribute('active-index', String(idx));
+    } else {
+      elements.sidebarRail.activeIndex = -1;
+      elements.sidebarRail.removeAttribute('active-index');
+    }
+  }
+
+  // Highlight all sidebar items across both drawer and rail
   elements.navItems.forEach(i => {
     const dataCat = i.getAttribute('data-category');
-    if (category === dataCat) {
-      i.classList.add('active');
+    const isMatch = category === dataCat;
+    i.classList.toggle('active', isMatch);
+    if (isMatch) {
+      i.setAttribute('active', '');
+      i.setAttribute('selected', '');
+      if ('active' in i) i.active = true;
+      if ('selected' in i) i.selected = true;
     } else {
-      i.classList.remove('active');
+      i.removeAttribute('active');
+      i.removeAttribute('selected');
+      if ('active' in i) i.active = false;
+      if ('selected' in i) i.selected = false;
     }
   });
 
-  // Highlights tag lists
+  // Highlights tag chip in sidebar
   if (elements.sidebarTagsList) {
-    const tagBtns = elements.sidebarTagsList.querySelectorAll('.tag-btn');
-    tagBtns.forEach(btn => {
-      const tagVal = btn.getAttribute('data-tag');
-      if (`tag:${tagVal}` === category) {
-        btn.classList.add('active');
+    const tagChips = elements.sidebarTagsList.querySelectorAll('md-chip');
+    tagChips.forEach(chip => {
+      const tagVal = chip.getAttribute('label');
+      const isSelected = `tag:${tagVal}` === category;
+      if (isSelected) {
+        chip.setAttribute('selected', '');
+        if ('selected' in chip) chip.selected = true;
       } else {
-        btn.classList.remove('active');
+        chip.removeAttribute('selected');
+        if ('selected' in chip) chip.selected = false;
       }
     });
   }
@@ -569,8 +677,8 @@ export function updateSearchSuggestionsAndTags() {
     matchingNotes = availableNotes.slice().sort((a, b) => b.updatedAt - a.updatedAt);
   }
 
-  // Populate search suggestions (up to 6)
-  const topNotes = matchingNotes.slice(0, 6);
+  // Populate search suggestions (up to 4)
+  const topNotes = matchingNotes.slice(0, 4);
   elements.searchInput.suggestions = topNotes.map(note => {
     const rawTitle = (note.title || '').trim();
     let snippet = '';

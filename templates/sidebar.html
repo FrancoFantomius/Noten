@@ -7,35 +7,91 @@
           </div>
           <md-icon-button id="btn-sidebar-close-mobile" icon="close" aria-label="Close Menu"></md-icon-button>
         </div>
-        <nav class="sidebar-nav">
-          <ul class="sidebar-menu">
-            <li>
-              <a href="index.html" class="nav-item {{#if navNotes}}active{{/if}}" data-category="notes">
-                <md-icon name="note_stack"></md-icon>
-                <span class="nav-label" data-i18n="nav_notes">Notes</span>
-              </a>
-            </li>
-            <li>
-              <a href="archive.html" class="nav-item {{#if navArchive}}active{{/if}}" data-category="archive">
-                <md-icon name="archive"></md-icon>
-                <span class="nav-label" data-i18n="nav_archive">Archive</span>
-              </a>
-            </li>
-            <li>
-              <a href="trash.html" class="nav-item {{#if navTrash}}active{{/if}}" data-category="trash">
-                <md-icon name="delete"></md-icon>
-                <span class="nav-label" data-i18n="nav_trash">Trash</span>
-              </a>
-            </li>
-          </ul>
 
-          <md-divider></md-divider>
+        <!-- Navigation Drawer (Expanded State) -->
+        <md-navigation-drawer id="sidebar-drawer" type="standard" open class="sidebar-drawer">
+          <md-navigation-drawer-item
+            icon="note_stack"
+            href="index.html"
+            class="nav-item {{#if navNotes}}active{{/if}}"
+            data-category="notes"
+            {{#if navNotes}}active selected{{/if}}
+          >
+            <span class="nav-label" data-i18n="nav_notes">Notes</span>
+          </md-navigation-drawer-item>
 
-          <div class="tags-section">
-            <span class="section-title" data-i18n="tags_section_title">Tags</span>
-            <md-chip-set id="sidebar-tags-list" class="sidebar-tags-chip-set">
-              <!-- Dynamically populated tags with md-chip -->
-            </md-chip-set>
+          <md-navigation-drawer-item
+            icon="archive"
+            href="archive.html"
+            class="nav-item {{#if navArchive}}active{{/if}}"
+            data-category="archive"
+            {{#if navArchive}}active selected{{/if}}
+          >
+            <span class="nav-label" data-i18n="nav_archive">Archive</span>
+          </md-navigation-drawer-item>
+
+          <md-navigation-drawer-item
+            icon="delete"
+            href="trash.html"
+            class="nav-item {{#if navTrash}}active{{/if}}"
+            data-category="trash"
+            {{#if navTrash}}active selected{{/if}}
+          >
+            <span class="nav-label" data-i18n="nav_trash">Trash</span>
+          </md-navigation-drawer-item>
+
+          <div slot="footer" class="drawer-tags-footer">
+            <md-divider></md-divider>
+
+            <div class="tags-section">
+              <span class="section-title" data-i18n="tags_section_title">Tags</span>
+              <md-chip-set id="sidebar-tags-list" class="sidebar-tags-chip-set">
+                <!-- Dynamically populated tags with md-chip -->
+              </md-chip-set>
+            </div>
           </div>
-        </nav>
+        </md-navigation-drawer>
+
+        <!-- Navigation Rail (Collapsed State) -->
+        <md-navigation-rail
+          id="sidebar-rail"
+          alignment="top"
+          class="sidebar-rail"
+          {{#if navNotes}}active-index="0"{{/if}}
+          {{#if navArchive}}active-index="1"{{/if}}
+          {{#if navTrash}}active-index="2"{{/if}}
+        >
+          <md-navigation-rail-item
+            icon="note_stack"
+            href="index.html"
+            class="nav-item {{#if navNotes}}active{{/if}}"
+            data-category="notes"
+            value="notes"
+            {{#if navNotes}}active selected{{/if}}
+          >
+            <span class="nav-label" data-i18n="nav_notes">Notes</span>
+          </md-navigation-rail-item>
+
+          <md-navigation-rail-item
+            icon="archive"
+            href="archive.html"
+            class="nav-item {{#if navArchive}}active{{/if}}"
+            data-category="archive"
+            value="archive"
+            {{#if navArchive}}active selected{{/if}}
+          >
+            <span class="nav-label" data-i18n="nav_archive">Archive</span>
+          </md-navigation-rail-item>
+
+          <md-navigation-rail-item
+            icon="delete"
+            href="trash.html"
+            class="nav-item {{#if navTrash}}active{{/if}}"
+            data-category="trash"
+            value="trash"
+            {{#if navTrash}}active selected{{/if}}
+          >
+            <span class="nav-label" data-i18n="nav_trash">Trash</span>
+          </md-navigation-rail-item>
+        </md-navigation-rail>
       </aside>
