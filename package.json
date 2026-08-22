@@ -1,6 +1,6 @@
 {
   "name": "noten",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "description": "Secure local-first notes with Filen sync integration.",
   "license": "AGPL-3.0-only",
   "type": "module",

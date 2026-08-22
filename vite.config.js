@@ -146,6 +146,20 @@ export default defineConfig({
           console.error('Failed to copy fonts:', err);
         }
         try {
+          const srcImgDir = path.resolve(__dirname, 'img');
+          const destImgDir = path.resolve(__dirname, 'dist/img');
+          if (fs.existsSync(srcImgDir)) {
+            fs.mkdirSync(destImgDir, { recursive: true });
+            const entries = fs.readdirSync(srcImgDir, { withFileTypes: true });
+            for (const entry of entries) {
+              if (entry.isFile()) {
+                fs.copyFileSync(
+                  path.resolve(srcImgDir, entry.name),
+                  path.resolve(destImgDir, entry.name)
+                );
+              }
+            }
+          }
           const srcDir = path.resolve(__dirname, 'img/icons');
           const destDir = path.resolve(__dirname, 'dist/img/icons');
           if (fs.existsSync(srcDir)) {
@@ -157,7 +171,7 @@ export default defineConfig({
                 path.resolve(destDir, file)
               );
             }
-            console.log('Successfully copied icons to dist/img/icons/');
+            console.log('Successfully copied icons to dist/img/ and dist/img/icons/');
           }
         } catch (err) {
           console.error('Failed to copy icons:', err);

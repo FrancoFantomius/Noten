@@ -1,6 +1,6 @@
 # Noten
 
-[![Version 2.0.0](https://img.shields.io/badge/Version-2.0.0-blue.svg)](https://github.com/FrancoFantomius/noten/releases)
+[![Version 2.1.0](https://img.shields.io/badge/Version-2.1.0-blue.svg)](https://github.com/FrancoFantomius/noten/releases)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 [![PWA Support](https://img.shields.io/badge/PWA-Supported-orange.svg)](#key-features)
 [![Local-First](https://img.shields.io/badge/Architecture-Local--First-green.svg)](#sync-setup-filen)
@@ -13,7 +13,7 @@ Because the encryption is client-side, the sync server only stores ciphertext. *
 
 ## Key Features
 
-- **Local-First & Offline Support**: Stores notes locally in IndexedDB (via PouchDB) for instantaneous loading. The application is a fully functional Progressive Web App (PWA) with offline capabilities.
+- **Local-First & Offline PWA**: Stores notes locally in IndexedDB (via PouchDB) for instantaneous loading. The application is a fully functional Progressive Web App (PWA) with offline support, app launcher shortcuts (New Note, Archive, Trash, Settings), and dynamic manifest localization.
 - **Client-Side E2E Encrypted Sync**: Seamless synchronization with your personal **Filen** account using the official Filen SDK. All encryption and decryption happen in your browser using AES-256-GCM before data is uploaded.
 - **Material Design 3 Components**: Fully native Material Design 3 interface powered by `@francofantomius/material-components` and Lit, offering accessible, high-performance web components.
 - **Account Storage Breakdown**: Interactive account menu with visual indicators for total Filen storage usage (notes vs. other files vs. available space).

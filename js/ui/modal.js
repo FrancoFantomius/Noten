@@ -275,6 +275,11 @@ export function initModalUI() {
       }
     }
   });
+
+  // Open New Note modal initially if hash is #new or #new-note
+  if (window.location.hash === '#new' || window.location.hash === '#new-note') {
+    openNewNoteModal();
+  }
 }
 
 /**

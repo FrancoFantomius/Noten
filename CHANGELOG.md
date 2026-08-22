@@ -6,7 +6,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
-## [2.0.0] - 2026-08-22
+## [2.1.0] - 2026-08-22
+
+### Added
+- Progressive Web App (PWA) app shortcuts for instant navigation to **New Note**, **Archive**, **Trash**, and **Settings** directly from the home screen / application launcher.
+- Dynamic Web App Manifest synchronization (`updateDynamicManifest`), dynamically updating manifest name, description, and shortcut action labels in real time when switching UI languages.
+- Deep linking / hash navigation support (`#new` and `#new-note`) to open the note creation dialog immediately on launch.
+- Dedicated shortcut icon assets (`ArchiveIcon.png`, `TrashIcon.png`, `SettingsIcon.png`) with offline service worker caching support.
+
+### Changed
+- Bumped package version and Service Worker cache version to `noten-v2.1.0`.
+- Enhanced Vite build pipeline to copy root `img/` image assets into `dist/img/`.
+
+### Fixed
+- Fixed mobile bottom navigation bar layout with fixed viewport positioning and adjusted content panel bottom padding to avoid overlapping note cards.
+- Prevented reserved URL hash routes (`#settings`, `#new`, `#new-note`) from triggering invalid note ID lookups on page load.
 
 ### Added
 - Complete Material Design 3 overhaul adopting custom web components from `@francofantomius/material-components` (`md-account-menu`, `md-app-drawer`, `md-search-bar`, `md-button`, `md-icon-button`, `md-chip-set`, `md-dialog`, `md-fab`, `md-snackbar`).
@@ -112,7 +126,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Fixed
 - Mobile responsiveness groundwork (WIP).
 
-[Unreleased]: https://github.com/FrancoFantomius/noten/compare/v2.0.0...HEAD
+[Unreleased]: https://github.com/FrancoFantomius/noten/compare/v2.1.0...HEAD
+[2.1.0]: https://github.com/FrancoFantomius/noten/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/FrancoFantomius/noten/releases/tag/v2.0.0
 [1.3.1]: https://github.com/FrancoFantomius/noten/releases/tag/v1.3.1
 [1.3.0]: https://github.com/FrancoFantomius/noten/releases/tag/v1.3.0

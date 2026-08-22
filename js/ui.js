@@ -226,7 +226,7 @@ export function updateNotesData(notes) {
 
   if (!state.editingNoteId && window.location.hash) {
     const hash = window.location.hash;
-    if (hash.length > 1 && !hash.startsWith('#tag-')) {
+    if (hash.length > 1 && !hash.startsWith('#tag-') && hash !== '#settings' && hash !== '#new' && hash !== '#new-note') {
       const targetId = hash.substring(1);
       const note = state.decryptedNotes.find(n => n.id === targetId);
       if (note) {

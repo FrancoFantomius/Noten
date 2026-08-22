@@ -417,7 +417,11 @@ md-navigation-bar.mobile-nav-bar {
    #bottom-nav,
    md-navigation-bar.mobile-nav-bar {
       display: flex !important;
-      width: 100%;
+      position: fixed !important;
+      bottom: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      width: 100% !important;
       flex-shrink: 0;
       z-index: 90;
       border-top: 1px solid var(--border-color);
@@ -430,6 +434,10 @@ md-navigation-bar.mobile-nav-bar {
       height: auto;
       flex: 1;
       min-height: 0;
+   }
+
+   .content-panel {
+      padding-bottom: calc(var(--md-navigation-bar-container-height, 80px) + 24px);
    }
 
    #btn-sidebar-toggle {
