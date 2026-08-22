@@ -47,7 +47,7 @@ export function convertChecklistToText(text) {
  * Builds a DOM element containing rendered checklist items and plain text.
  * Checkboxes are interactive and toggle the note body on click.
  */
-export function buildChecklistDOM(bodyText, noteId, isTruncated) {
+export function buildChecklistDOM(bodyText, noteId, isTruncated, isTrashed = false) {
   const container = document.createElement('div');
   container.className = `note-card-body checklist-items ${isTruncated ? 'truncated' : ''}`;
 
@@ -77,31 +77,29 @@ export function buildChecklistDOM(bodyText, noteId, isTruncated) {
       item.style.paddingLeft = `${indent.length * 8}px`;
 
       item.innerHTML = `
-        <label class="checklist-checkbox">
-          <input type="checkbox" ${isChecked ? 'checked' : ''} data-note-id="${noteId}" data-line-index="${lineIndex}">
-          <span class="checklist-checkmark">
-            <svg viewBox="0 0 14 14"><polyline points="2.5 7 5.5 10.5 11.5 3.5"></polyline></svg>
-          </span>
-        </label>
+        <md-checkbox ${isChecked ? 'checked' : ''} ${isTrashed ? 'disabled' : ''} data-note-id="${noteId}" data-line-index="${lineIndex}"></md-checkbox>
         <span class="checklist-label">${escapeHtml(labelText)}</span>
       `;
 
-      // Toggle handler
-      const checkbox = item.querySelector('input[type="checkbox"]');
-      checkbox.addEventListener('change', (e) => {
-        e.stopPropagation();
-        toggleChecklistItem(noteId, lineIndex, e.target.checked);
-        item.classList.toggle('checked', e.target.checked);
-      });
+      const checkbox = item.querySelector('md-checkbox');
 
-      // Prevent the label click from bubbling to open the modal
-      item.addEventListener('click', (e) => {
-        e.stopPropagation();
-        if (!e.target.closest('.checklist-checkbox')) {
-          checkbox.checked = !checkbox.checked;
-          checkbox.dispatchEvent(new Event('change', { bubbles: true }));
-        }
-      });
+      if (!isTrashed) {
+        // Toggle handler
+        checkbox.addEventListener('change', (e) => {
+          e.stopPropagation();
+          toggleChecklistItem(noteId, lineIndex, checkbox.checked);
+          item.classList.toggle('checked', checkbox.checked);
+        });
+
+        // Prevent the label click from bubbling to open the modal
+        item.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (!e.target.closest('md-checkbox')) {
+            checkbox.checked = !checkbox.checked;
+            checkbox.dispatchEvent(new Event('change', { bubbles: true }));
+          }
+        });
+      }
 
       container.appendChild(item);
     } else {
@@ -295,12 +293,7 @@ export function createChecklistItemElement(text, isChecked, indent, isModal, isT
 
   item.innerHTML = `
     ${dragHandleHtml}
-    <label class="checklist-checkbox">
-      <input type="checkbox" ${isChecked ? 'checked' : ''} ${isTrashed ? 'disabled' : ''}>
-      <span class="checklist-checkmark">
-        <svg viewBox="0 0 14 14"><polyline points="2.5 7 5.5 10.5 11.5 3.5"></polyline></svg>
-      </span>
-    </label>
+    <md-checkbox ${isChecked ? 'checked' : ''} ${isTrashed ? 'disabled' : ''}></md-checkbox>
     <input type="text" class="modal-checklist-input" value="" ${isTrashed ? 'readonly' : ''}>
     ${actionsHtml}
   `;
@@ -309,7 +302,7 @@ export function createChecklistItemElement(text, isChecked, indent, isModal, isT
   textInput.value = text;
 
   if (!isTrashed) {
-    const checkbox = item.querySelector('input[type="checkbox"]');
+    const checkbox = item.querySelector('md-checkbox');
     checkbox.addEventListener('change', () => {
       item.classList.toggle('checked', checkbox.checked);
       if (isModal) {
@@ -431,9 +424,9 @@ export function serializeModalChecklist() {
 
   for (const child of children) {
     if (child.classList.contains('modal-checklist-item')) {
-      const checkbox = child.querySelector('input[type="checkbox"]');
+      const checkbox = child.querySelector('md-checkbox');
       const textInput = child.querySelector('.modal-checklist-input');
-      const marker = checkbox.checked ? 'x' : ' ';
+      const marker = checkbox && checkbox.checked ? 'x' : ' ';
       const indent = child.dataset.indent || '';
       lines.push(`${indent}- [${marker}] ${textInput.value}`);
     } else if (child.classList.contains('modal-checklist-text')) {
@@ -504,9 +497,9 @@ export function serializeCreatorChecklist() {
 
   for (const child of children) {
     if (child.classList.contains('modal-checklist-item')) {
-      const checkbox = child.querySelector('input[type="checkbox"]');
+      const checkbox = child.querySelector('md-checkbox');
       const textInput = child.querySelector('.modal-checklist-input');
-      const marker = checkbox.checked ? 'x' : ' ';
+      const marker = checkbox && checkbox.checked ? 'x' : ' ';
       const indent = child.dataset.indent || '';
       lines.push(`${indent}- [${marker}] ${textInput.value}`);
     } else if (child.classList.contains('modal-checklist-text')) {

@@ -22,28 +22,62 @@ export function initModalUI() {
   elements.btnModalClose.addEventListener('click', saveAndCloseModal);
   elements.btnModalBack.addEventListener('click', saveAndCloseModal);
 
-  elements.noteModal.addEventListener('close', () => {
-    if (state.editingNoteId) {
+  // Closing Modal on background click
+  elements.noteModal.addEventListener('click', (e) => {
+    if (e.target === elements.noteModal) {
       saveAndCloseModal();
+    }
+  });
+
+  // Close open note modal on Escape key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      if (state.editingNoteId) {
+        e.preventDefault();
+        saveAndCloseModal();
+      }
     }
   });
 
   // Modal Pin Toggle
   elements.btnModalPin.addEventListener('click', () => {
     state.isModalPinned = !state.isModalPinned;
-    elements.btnModalPin.classList.toggle('active', state.isModalPinned);
+    updateModalPinButton();
   });
 
-  // Modal Color Picker
+  // Modal Color Picker toggle and swatch handling
+  const btnModalColor = elements.noteModal.querySelector('#btn-modal-color');
+  const modalColorWrapper = elements.noteModal.querySelector('.color-picker-wrapper');
+  if (btnModalColor && modalColorWrapper) {
+    btnModalColor.addEventListener('click', (e) => {
+      e.stopPropagation();
+      modalColorWrapper.classList.toggle('open');
+    });
+  }
+
+  // Dismiss modal color picker on outside click
+  document.addEventListener('click', (e) => {
+    if (modalColorWrapper && !modalColorWrapper.contains(e.target)) {
+      modalColorWrapper.classList.remove('open');
+    }
+  });
+
   const modalColors = elements.noteModal.querySelectorAll('.color-option');
   modalColors.forEach(opt => {
     opt.addEventListener('click', (e) => {
-      modalColors.forEach(o => o.classList.remove('active'));
-      e.target.classList.add('active');
+      e.stopPropagation();
+      const current = e.currentTarget;
+      modalColors.forEach(o => {
+        o.classList.remove('active');
+        o.setAttribute('aria-checked', 'false');
+      });
+      current.classList.add('active');
+      current.setAttribute('aria-checked', 'true');
 
-      const color = e.target.getAttribute('data-color');
+      const color = current.getAttribute('data-color') || 'default';
       state.modalActiveColor = color;
       elements.modalCard.className = `modal-card color-${color}`;
+      if (modalColorWrapper) modalColorWrapper.classList.remove('open');
     });
   });
 
@@ -241,6 +275,25 @@ export function initModalUI() {
 }
 
 /**
+ * Updates the modal pin button UI (icon fill, active class, title/tooltip, and aria-label)
+ */
+export function updateModalPinButton() {
+  if (!elements.btnModalPin) return;
+  const isPinned = Boolean(state.isModalPinned);
+  elements.btnModalPin.classList.toggle('active', isPinned);
+  elements.btnModalPin.selected = isPinned;
+  if (isPinned) {
+    elements.btnModalPin.setAttribute('selected', '');
+    elements.btnModalPin.title = t('btn_unpin_note_title');
+    elements.btnModalPin.setAttribute('aria-label', t('btn_unpin_note_title'));
+  } else {
+    elements.btnModalPin.removeAttribute('selected');
+    elements.btnModalPin.title = t('btn_pin_note_title');
+    elements.btnModalPin.setAttribute('aria-label', t('btn_pin_note_title'));
+  }
+}
+
+/**
  * Note Modal (Edit dialog)
  */
 export function openNoteModal(noteId) {
@@ -251,15 +304,20 @@ export function openNoteModal(noteId) {
   elements.modalTitle.value = note.title || '';
   elements.modalBodyText.value = note.body || '';
   state.isModalPinned = note.isPinned || false;
-  elements.btnModalPin.classList.toggle('active', state.isModalPinned);
+  updateModalPinButton();
   state.modalActiveColor = note.color || 'default';
   elements.modalCard.className = `modal-card color-${state.modalActiveColor}`;
 
   const modalColors = elements.noteModal.querySelectorAll('.color-option');
   modalColors.forEach(opt => {
     const c = opt.getAttribute('data-color');
-    opt.classList.toggle('active', c === state.modalActiveColor);
+    const isActive = c === state.modalActiveColor;
+    opt.classList.toggle('active', isActive);
+    opt.setAttribute('aria-checked', isActive ? 'true' : 'false');
   });
+  if (elements.modalColorPickerWrapper) {
+    elements.modalColorPickerWrapper.classList.remove('open');
+  }
 
   state.noteModalTags = [...note.tags];
   renderModalTags();
@@ -315,11 +373,7 @@ export function openNoteModal(noteId) {
     elements.btnModalChecklistToggle.classList.add('hidden');
   }
 
-  if (typeof elements.noteModal.showModal === 'function') {
-    elements.noteModal.showModal();
-  } else {
-    elements.noteModal.open = true;
-  }
+  elements.noteModal.classList.add('active');
 
   if (window.location.hash !== `#${noteId}`) {
     state.isNoteModalHashPushed = true;
@@ -341,7 +395,7 @@ export function openNewNoteModal() {
   elements.modalTitle.value = '';
   elements.modalBodyText.value = '';
   state.isModalPinned = false;
-  elements.btnModalPin.classList.remove('active');
+  updateModalPinButton();
   state.modalActiveColor = 'default';
   elements.modalCard.className = `modal-card color-default`;
 
@@ -365,8 +419,13 @@ export function openNewNoteModal() {
   const modalColors = elements.noteModal.querySelectorAll('.color-option');
   modalColors.forEach(opt => {
     const c = opt.getAttribute('data-color');
-    opt.classList.toggle('active', c === 'default');
+    const isDef = c === 'default';
+    opt.classList.toggle('active', isDef);
+    opt.setAttribute('aria-checked', isDef ? 'true' : 'false');
   });
+  if (elements.modalColorPickerWrapper) {
+    elements.modalColorPickerWrapper.classList.remove('open');
+  }
 
   state.noteModalTags = [];
   renderModalTags();
@@ -390,11 +449,7 @@ export function openNewNoteModal() {
   elements.modalChecklistView.innerHTML = '';
   elements.modalBodyText.classList.remove('hidden');
 
-  if (typeof elements.noteModal.showModal === 'function') {
-    elements.noteModal.showModal();
-  } else {
-    elements.noteModal.open = true;
-  }
+  elements.noteModal.classList.add('active');
 
   if (window.location.hash !== `#${state.editingNoteId}`) {
     state.isNoteModalHashPushed = true;
@@ -466,11 +521,7 @@ export async function saveAndCloseModal() {
 export function closeModal() {
   const closedNoteId = state.editingNoteId;
 
-  if (typeof elements.noteModal.close === 'function') {
-    elements.noteModal.close();
-  } else {
-    elements.noteModal.open = false;
-  }
+  elements.noteModal.classList.remove('active');
 
   state.editingNoteId = null;
   state.noteModalImages = [];

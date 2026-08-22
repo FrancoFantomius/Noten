@@ -1,6 +1,7 @@
   <!-- Fullscreen Lightbox Modal -->
-  <div id="lightbox-modal" class="lightbox-overlay hidden">
-    <md-icon-button id="btn-lightbox-close" icon="close" class="lightbox-close" data-i18n-title="btn_lightbox_close_title"
+  <div id="lightbox-modal" class="lightbox-overlay hidden" role="dialog" aria-modal="true" aria-label="Fullscreen Image View">
+    <div id="lightbox-filename" class="lightbox-filename"></div>
+    <md-icon-button id="btn-lightbox-close" variant="filled" icon="close" class="lightbox-close" data-i18n-title="btn_lightbox_close_title"
       title="Close fullscreen view" aria-label="Close fullscreen view"></md-icon-button>
     <div class="lightbox-content">
       <img id="lightbox-image" src="" alt="Fullscreen view">

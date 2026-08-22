@@ -111,6 +111,7 @@ export const elements = {
   // Lightbox Modal
   lightboxModal: null,
   lightboxImage: null,
+  lightboxFilename: null,
   btnLightboxClose: null,
 
   // Floating Action Button
@@ -216,6 +217,7 @@ export function initElements() {
   // Lightbox Modal
   elements.lightboxModal = document.getElementById('lightbox-modal');
   elements.lightboxImage = document.getElementById('lightbox-image');
+  elements.lightboxFilename = document.getElementById('lightbox-filename');
   elements.btnLightboxClose = document.getElementById('btn-lightbox-close');
 
   // Floating Action Button

@@ -14,14 +14,20 @@
 .modal-checklist-item {
    display: flex;
    align-items: center;
-   gap: 10px;
-   padding: 6px 4px;
+   gap: 6px;
+   padding: 2px 4px;
    border-radius: var(--radius-sm);
    transition: background-color 0.15s ease, margin-left 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .modal-checklist-item:hover {
    background-color: var(--bg-hover-item);
+}
+
+.modal-checklist-item md-checkbox {
+   flex-shrink: 0;
+   margin-left: -8px;
+   margin-right: -4px;
 }
 
 .modal-checklist-input {
@@ -225,32 +231,23 @@ md-dialog {
    transform: scale(1) translateY(0);
 }
 
-.note-modal-dialog .modal-card,
-.settings-modal-dialog .modal-card,
-.login-modal-dialog .modal-card {
-   border: none;
-   box-shadow: none;
-   width: 100%;
-   max-width: 100%;
-   min-height: unset;
-   background: transparent;
-   transform: none;
-   border-radius: 0;
-}
-
-.note-modal-dialog .modal-card {
-   height: 70vh;
-   min-height: 440px;
-   max-height: 85vh;
-}
-
 .modal-header {
-   padding: 16px 20px;
+   padding: 20px 24px;
    display: flex;
    align-items: center;
    justify-content: space-between;
-   border-bottom: 1px solid var(--border-color);
    gap: 12px;
+   position: relative;
+}
+
+.modal-header::after {
+   content: '';
+   position: absolute;
+   bottom: 0;
+   left: 20px;
+   right: 20px;
+   height: 1px;
+   background-color: var(--border-color);
 }
 
 .modal-header input {
@@ -289,7 +286,17 @@ md-dialog {
    display: flex;
    align-items: center;
    justify-content: space-between;
-   border-top: 1px solid var(--border-color);
+   position: relative;
+}
+
+.modal-footer::before {
+   content: '';
+   position: absolute;
+   top: 0;
+   left: 20px;
+   right: 20px;
+   height: 1px;
+   background-color: var(--border-color);
 }
 
 .modal-toolbar {
@@ -723,6 +730,12 @@ input:checked+.slider:before {
       border-radius: 0;
    }
 
+   .modal-header::after,
+   .modal-footer::before {
+      left: 16px;
+      right: 16px;
+   }
+
    #btn-modal-close {
       display: none !important;
    }
@@ -761,15 +774,16 @@ input:checked+.slider:before {
 .lightbox-overlay {
    position: fixed;
    inset: 0;
-   background-color: rgba(10, 11, 14, 0.95);
-   backdrop-filter: blur(10px);
+   background-color: rgba(0, 0, 0, 0.45);
+   backdrop-filter: blur(4px) grayscale(50%) brightness(0.85);
+   -webkit-backdrop-filter: blur(4px) grayscale(50%) brightness(0.85);
    z-index: 10000;
    display: flex;
    align-items: center;
    justify-content: center;
    opacity: 0;
    pointer-events: none;
-   transition: opacity 0.25s ease;
+   transition: opacity 0.25s cubic-bezier(0.2, 0, 0, 1);
 }
 
 .lightbox-overlay.active {
@@ -785,6 +799,8 @@ input:checked+.slider:before {
    justify-content: center;
    transform: scale(0.92);
    transition: transform 0.3s var(--transition-bounce);
+   position: relative;
+   z-index: 10001;
 }
 
 .lightbox-overlay.active .lightbox-content {
@@ -792,35 +808,51 @@ input:checked+.slider:before {
 }
 
 .lightbox-content img {
-   max-width: 100%;
-   max-height: 90vh;
+   max-width: 90vw;
+   max-height: 88vh;
+   width: auto;
+   height: auto;
    object-fit: contain;
-   border-radius: var(--radius-md);
-   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.7);
-   border: 1px solid rgba(255, 255, 255, 0.1);
+   border-radius: var(--radius-md, 12px);
+   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.75);
+   border: 1px solid rgba(255, 255, 255, 0.15);
+   user-select: none;
+}
+
+.lightbox-filename {
+   position: absolute;
+   top: 24px;
+   left: 24px;
+   z-index: 10002;
+   font-family: var(--md-sys-typescale-title-medium-font, 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif);
+   font-size: 0.95rem;
+   font-weight: 500;
+   color: #ffffff;
+   background-color: rgba(0, 0, 0, 0.45);
+   backdrop-filter: blur(8px);
+   -webkit-backdrop-filter: blur(8px);
+   border: 1px solid rgba(255, 255, 255, 0.15);
+   border-radius: var(--radius-full, 9999px);
+   padding: 8px 16px;
+   max-width: min(60vw, 400px);
+   overflow: hidden;
+   text-overflow: ellipsis;
+   white-space: nowrap;
+   pointer-events: none;
+   user-select: none;
+   box-shadow: var(--shadow-sm, 0 2px 6px rgba(0, 0, 0, 0.2));
+}
+
+.lightbox-filename:empty {
+   display: none;
 }
 
 .lightbox-close {
    position: absolute;
    top: 24px;
    right: 24px;
-   background-color: rgba(255, 255, 255, 0.08);
-   backdrop-filter: blur(4px);
-   color: white !important;
-   width: 44px;
-   height: 44px;
-   border: 1px solid rgba(255, 255, 255, 0.15) !important;
-   z-index: 10001;
+   z-index: 10002;
    cursor: pointer;
-}
-
-.lightbox-close:hover {
-   background-color: rgba(255, 255, 255, 0.2);
-   color: white !important;
-   transform: scale(1.08) rotate(90deg);
-}
-
-.lightbox-close i {
-   width: 20px;
-   height: 20px;
+   --md-sys-color-primary: rgba(255, 255, 255, 0.18);
+   --md-sys-color-on-primary: #ffffff;
 }

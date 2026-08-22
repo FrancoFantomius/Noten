@@ -289,6 +289,14 @@ html.sidebar-collapsed-preload .sidebar {
    --md-navigation-drawer-container-color: transparent;
 }
 
+.sidebar-drawer md-navigation-drawer-item {
+   margin-bottom: 8px;
+}
+
+.sidebar-drawer md-navigation-drawer-item:first-of-type {
+   margin-top: 12px;
+}
+
 .sidebar.collapsed .sidebar-drawer,
 html.sidebar-collapsed-preload .sidebar .sidebar-drawer {
    display: none;
@@ -301,6 +309,10 @@ html.sidebar-collapsed-preload .sidebar .sidebar-drawer {
    --md-navigation-rail-width: 100%;
    --md-navigation-rail-container-color: transparent;
    --md-navigation-rail-border: none;
+}
+
+.sidebar-rail md-navigation-rail-item:first-of-type {
+   margin-top: 12px;
 }
 
 .sidebar.collapsed .sidebar-rail,

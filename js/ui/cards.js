@@ -4,7 +4,7 @@
 
 import { t } from '../i18n.js';
 import { state, elements } from './state.js';
-import { escapeHtml, formatDate, openLightbox } from './utils.js';
+import { escapeHtml, formatDate, openLightbox, setupCarouselItemClicks } from './utils.js';
 import { hasChecklistItems, buildChecklistDOM } from './checklist.js';
 import { openNoteModal, saveAndCloseModal } from './modal.js';
 import { showSettings, hideSettings } from './account.js';
@@ -465,7 +465,7 @@ export function renderCardsToGrid(notes, gridElement) {
     card.innerHTML = `
       ${coverHtml}
       ${!note.isTrashed ? `
-      <md-icon-button class="btn-icon note-card-pin ${note.isPinned ? 'active' : ''}" icon="keep" title="${note.isPinned ? t('btn_unpin_note_title') : t('btn_pin_note_title')}" aria-label="Pin"></md-icon-button>
+      <md-icon-button class="btn-icon note-card-pin ${note.isPinned ? 'active' : ''}" ${note.isPinned ? 'selected' : ''} icon="keep" title="${note.isPinned ? t('btn_unpin_note_title') : t('btn_pin_note_title')}" aria-label="${note.isPinned ? t('btn_unpin_note_title') : t('btn_pin_note_title')}"></md-icon-button>
       ` : ''}
       ${note.title ? `<h3 class="note-card-title">${escapeHtml(note.title)}</h3>` : ''}
       ${note.body && !isChecklist ? `<div class="note-card-body ${isTruncated ? 'truncated' : ''}">${escapeHtml(bodyText)}</div>` : ''}
@@ -482,7 +482,7 @@ export function renderCardsToGrid(notes, gridElement) {
     `;
 
     if (note.body && isChecklist) {
-      const checklistContainer = buildChecklistDOM(bodyText, note.id, isTruncated);
+      const checklistContainer = buildChecklistDOM(bodyText, note.id, isTruncated, note.isTrashed);
       const titleEl = card.querySelector('.note-card-title');
       const pinBtn = card.querySelector('.note-card-pin');
       const insertAfter = titleEl || pinBtn;
@@ -495,25 +495,40 @@ export function renderCardsToGrid(notes, gridElement) {
       }
     }
 
+    const carousel = card.querySelector('md-carousel');
+    if (carousel) {
+      setupCarouselItemClicks(carousel, (src, item, name) => {
+        openLightbox(src, name);
+      });
+    }
+
     card.addEventListener('click', (e) => {
+      const path = e.composedPath ? e.composedPath() : [e.target];
       const pinBtn = card.querySelector('.note-card-pin');
       const restoreBtn = card.querySelector('.btn-card-restore');
       const deleteForeverBtn = card.querySelector('.btn-card-delete-forever');
-      const gridImg = e.target.closest('.grid-image-wrapper img');
-      const checklistClick = e.target.closest('.checklist-item');
+      const carouselItem = path.find(el => el && el.tagName === 'MD-CAROUSEL-ITEM') || e.target.closest('md-carousel-item');
+      const carouselEl = path.find(el => el && el.tagName === 'MD-CAROUSEL') || e.target.closest('md-carousel');
+      const checklistClick = path.find(el => el && el.classList && el.classList.contains('checklist-item')) || e.target.closest('.checklist-item');
 
-      if (pinBtn && (e.target === pinBtn || pinBtn.contains(e.target))) {
+      if (pinBtn && (e.target === pinBtn || pinBtn.contains(e.target) || path.includes(pinBtn))) {
         e.stopPropagation();
         toggleNotePin(note.id);
-      } else if (restoreBtn && (e.target === restoreBtn || restoreBtn.contains(e.target))) {
+      } else if (restoreBtn && (e.target === restoreBtn || restoreBtn.contains(e.target) || path.includes(restoreBtn))) {
         e.stopPropagation();
         restoreNote(note.id);
-      } else if (deleteForeverBtn && (e.target === deleteForeverBtn || deleteForeverBtn.contains(e.target))) {
+      } else if (deleteForeverBtn && (e.target === deleteForeverBtn || deleteForeverBtn.contains(e.target) || path.includes(deleteForeverBtn))) {
         e.stopPropagation();
         deleteNoteForever(note.id);
-      } else if (gridImg) {
+      } else if (carouselItem) {
         e.stopPropagation();
-        openLightbox(gridImg.src);
+        const src = carouselItem.getAttribute('src') || carouselItem.src;
+        const name = carouselItem.getAttribute('alt') || carouselItem.getAttribute('name') || '';
+        if (src) {
+          openLightbox(src, name);
+        }
+      } else if (carouselEl) {
+        e.stopPropagation();
       } else if (checklistClick) {
         e.stopPropagation();
       } else {
@@ -560,31 +575,28 @@ export async function deleteNoteForever(noteId) {
 }
 
 /**
- * Generates responsive image grid HTML string for note cards.
+ * Generates responsive image carousel HTML string for note cards.
  */
-export function generateImageGridHtml(images) {
+export function generateImageCarouselHtml(images) {
   if (!images || images.length === 0) return '';
 
-  const numCols = Math.min(images.length, 2);
-  const colsHtml = Array.from({ length: numCols }, () => []);
-  const displayImages = images.slice(0, 4);
-
-  displayImages.forEach((imgSrc, index) => {
-    colsHtml[index % numCols].push(`
-      <div class="grid-image-wrapper">
-        <img src="${imgSrc}" alt="Attached image ${index + 1}">
-      </div>
-    `);
-  });
-
-  const colsFormatted = colsHtml.map(colImgs => `
-    <div class="image-grid-column">
-      ${colImgs.join('')}
-    </div>
+  const isSingle = images.length === 1;
+  const itemsHtml = images.map((imgSrc, index) => `
+    <md-carousel-item
+      src="${imgSrc}"
+      alt="image-${index + 1}.jpg"
+      interactive
+    ></md-carousel-item>
   `).join('');
 
-  return `<div class="image-grid-row">${colsFormatted}</div>`;
+  return `
+    <md-carousel layout="${isSingle ? 'full-width' : 'multi-browse'}" item-height="180px" hide-indicators aria-label="Note images">
+      ${itemsHtml}
+    </md-carousel>
+  `;
 }
+
+export const generateImageGridHtml = generateImageCarouselHtml;
 
 /**
  * Render tags in Sidebar List

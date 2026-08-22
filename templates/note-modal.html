@@ -1,12 +1,12 @@
   <!-- Note Editor Modal -->
-  <md-dialog id="note-modal" class="note-modal-dialog">
+  <div id="note-modal" class="modal-overlay">
     <div class="modal-card" id="modal-card-element">
       <div id="modal-images-preview" class="note-images-preview hidden"></div>
       <input type="file" id="modal-image-input" accept="image/*" multiple class="hidden">
       <div class="modal-header">
         <md-icon-button id="btn-modal-back" icon="arrow_back" class="modal-back-btn" aria-label="Go back" title="Save and close"></md-icon-button>
         <input type="text" id="modal-title" data-i18n-placeholder="modal_title_placeholder" placeholder="Title">
-        <md-icon-button id="btn-modal-pin" icon="keep" data-i18n-title="btn_modal_pin_title" title="Pin note" aria-label="Pin note"></md-icon-button>
+        <md-icon-button id="btn-modal-pin" icon="keep" data-i18n-title="btn_pin_note_title" title="Pin note" aria-label="Pin note"></md-icon-button>
       </div>
 
       <div class="modal-body">
@@ -27,21 +27,35 @@
             <!-- Modal Color Picker -->
             <div class="color-picker-wrapper">
               <md-icon-button id="btn-modal-color" icon="palette" data-i18n-title="btn_creator_color_title" title="Change color" aria-label="Change color"></md-icon-button>
-              <div class="color-palette-popup">
-                <button class="color-option default" data-color="default" data-i18n-title="color_default"
-                  title="Default"></button>
-                <button class="color-option red" data-color="red" data-i18n-title="color_red" title="Red"></button>
-                <button class="color-option orange" data-color="orange" data-i18n-title="color_orange"
-                  title="Orange"></button>
-                <button class="color-option yellow" data-color="yellow" data-i18n-title="color_yellow"
-                  title="Yellow"></button>
-                <button class="color-option green" data-color="green" data-i18n-title="color_green"
-                  title="Green"></button>
-                <button class="color-option teal" data-color="teal" data-i18n-title="color_teal" title="Teal"></button>
-                <button class="color-option blue" data-color="blue" data-i18n-title="color_blue" title="Blue"></button>
-                <button class="color-option purple" data-color="purple" data-i18n-title="color_purple"
-                  title="Purple"></button>
-                <button class="color-option pink" data-color="pink" data-i18n-title="color_pink" title="Pink"></button>
+              <div class="color-palette-popup" role="radiogroup" aria-label="Color options">
+                <button type="button" class="color-option default" data-color="default" role="radio" aria-checked="false" data-i18n-title="color_default" data-i18n-aria="color_default" title="Default" aria-label="Default">
+                  <md-icon name="format_color_reset" size="18"></md-icon>
+                  <md-icon name="check" size="18" class="color-check-icon"></md-icon>
+                </button>
+                <button type="button" class="color-option red" data-color="red" role="radio" aria-checked="false" data-i18n-title="color_red" data-i18n-aria="color_red" title="Red" aria-label="Red">
+                  <md-icon name="check" size="18" class="color-check-icon"></md-icon>
+                </button>
+                <button type="button" class="color-option orange" data-color="orange" role="radio" aria-checked="false" data-i18n-title="color_orange" data-i18n-aria="color_orange" title="Orange" aria-label="Orange">
+                  <md-icon name="check" size="18" class="color-check-icon"></md-icon>
+                </button>
+                <button type="button" class="color-option yellow" data-color="yellow" role="radio" aria-checked="false" data-i18n-title="color_yellow" data-i18n-aria="color_yellow" title="Yellow" aria-label="Yellow">
+                  <md-icon name="check" size="18" class="color-check-icon"></md-icon>
+                </button>
+                <button type="button" class="color-option green" data-color="green" role="radio" aria-checked="false" data-i18n-title="color_green" data-i18n-aria="color_green" title="Green" aria-label="Green">
+                  <md-icon name="check" size="18" class="color-check-icon"></md-icon>
+                </button>
+                <button type="button" class="color-option teal" data-color="teal" role="radio" aria-checked="false" data-i18n-title="color_teal" data-i18n-aria="color_teal" title="Teal" aria-label="Teal">
+                  <md-icon name="check" size="18" class="color-check-icon"></md-icon>
+                </button>
+                <button type="button" class="color-option blue" data-color="blue" role="radio" aria-checked="false" data-i18n-title="color_blue" data-i18n-aria="color_blue" title="Blue" aria-label="Blue">
+                  <md-icon name="check" size="18" class="color-check-icon"></md-icon>
+                </button>
+                <button type="button" class="color-option purple" data-color="purple" role="radio" aria-checked="false" data-i18n-title="color_purple" data-i18n-aria="color_purple" title="Purple" aria-label="Purple">
+                  <md-icon name="check" size="18" class="color-check-icon"></md-icon>
+                </button>
+                <button type="button" class="color-option pink" data-color="pink" role="radio" aria-checked="false" data-i18n-title="color_pink" data-i18n-aria="color_pink" title="Pink" aria-label="Pink">
+                  <md-icon name="check" size="18" class="color-check-icon"></md-icon>
+                </button>
               </div>
             </div>
             <md-icon-button id="btn-modal-checklist-toggle" icon="checklist" class="hidden"
@@ -62,4 +76,4 @@
         <md-button id="btn-modal-close" variant="filled"><span data-i18n="btn_modal_close">Close</span></md-button>
       </div>
     </div>
-  </md-dialog>
+  </div>

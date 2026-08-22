@@ -24,6 +24,9 @@ export function initCreatorUI() {
 
   // Auto-Save Note Creator on Clicking Outside
   document.addEventListener('click', (e) => {
+    if (creatorColorWrapper && !creatorColorWrapper.contains(e.target)) {
+      creatorColorWrapper.classList.remove('open');
+    }
     if (!elements.noteCreator.contains(e.target) && !elements.creatorExpanded.classList.contains('hidden')) {
       closeNoteCreator();
     }
@@ -58,20 +61,36 @@ export function initCreatorUI() {
   // Creator Pin Toggle
   elements.btnCreatorPin.addEventListener('click', () => {
     state.isCreatorPinned = !state.isCreatorPinned;
-    elements.btnCreatorPin.classList.toggle('active', state.isCreatorPinned);
+    updateCreatorPinButton();
   });
 
-  // Creator Color Picker popup handling
+  // Creator Color Picker toggle and swatch handling
+  const btnCreatorColor = elements.noteCreator.querySelector('#btn-creator-color');
+  const creatorColorWrapper = elements.noteCreator.querySelector('.color-picker-wrapper');
+  if (btnCreatorColor && creatorColorWrapper) {
+    btnCreatorColor.addEventListener('click', (e) => {
+      e.stopPropagation();
+      creatorColorWrapper.classList.toggle('open');
+    });
+  }
+
   const creatorColors = elements.noteCreator.querySelectorAll('.color-option');
   creatorColors.forEach(opt => {
     opt.addEventListener('click', (e) => {
-      creatorColors.forEach(o => o.classList.remove('active'));
-      e.target.classList.add('active');
+      e.stopPropagation();
+      const current = e.currentTarget;
+      creatorColors.forEach(o => {
+        o.classList.remove('active');
+        o.setAttribute('aria-checked', 'false');
+      });
+      current.classList.add('active');
+      current.setAttribute('aria-checked', 'true');
 
-      const color = e.target.getAttribute('data-color');
+      const color = current.getAttribute('data-color') || 'default';
       state.activeColor = color;
 
       elements.noteCreator.className = `note-creator-container color-${color}`;
+      if (creatorColorWrapper) creatorColorWrapper.classList.remove('open');
     });
   });
 
@@ -179,6 +198,25 @@ export function initCreatorUI() {
 }
 
 /**
+ * Updates the note creator pin button UI (icon fill, active class, title/tooltip, and aria-label)
+ */
+export function updateCreatorPinButton() {
+  if (!elements.btnCreatorPin) return;
+  const isPinned = Boolean(state.isCreatorPinned);
+  elements.btnCreatorPin.classList.toggle('active', isPinned);
+  elements.btnCreatorPin.selected = isPinned;
+  if (isPinned) {
+    elements.btnCreatorPin.setAttribute('selected', '');
+    elements.btnCreatorPin.title = t('btn_unpin_note_title');
+    elements.btnCreatorPin.setAttribute('aria-label', t('btn_unpin_note_title'));
+  } else {
+    elements.btnCreatorPin.removeAttribute('selected');
+    elements.btnCreatorPin.title = t('btn_pin_note_title');
+    elements.btnCreatorPin.setAttribute('aria-label', t('btn_pin_note_title'));
+  }
+}
+
+/**
  * Note Creator Expand / Collapse
  */
 export function expandNoteCreator() {
@@ -187,9 +225,17 @@ export function expandNoteCreator() {
 
   // Set default state
   state.isCreatorPinned = false;
-  elements.btnCreatorPin.classList.remove('active');
+  updateCreatorPinButton();
   state.activeColor = 'default';
   elements.noteCreator.className = 'note-creator-container color-default';
+  const creatorColors = elements.noteCreator.querySelectorAll('.color-option');
+  creatorColors.forEach(opt => {
+    const isDef = opt.getAttribute('data-color') === 'default';
+    opt.classList.toggle('active', isDef);
+    opt.setAttribute('aria-checked', isDef ? 'true' : 'false');
+  });
+  const creatorColorWrapper = elements.noteCreator.querySelector('.color-picker-wrapper');
+  if (creatorColorWrapper) creatorColorWrapper.classList.remove('open');
   state.noteCreatorTags = [];
   state.noteCreatorImages = [];
   state.isCreatorChecklistMode = false;
