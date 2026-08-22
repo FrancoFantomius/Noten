@@ -2,11 +2,15 @@
  * Noten - Internationalization & Translation Module
  */
 
-const loadedTranslations = {};
+import enTranslations from './languages/en.json';
+
+const loadedTranslations = {
+  en: enTranslations
+};
 const SUPPORTED_LANGUAGES = ["ar","de","el","en","es","fr","hi","it","nl","pl","pt","ru","sv","tr","uk","zh"];
 
 async function loadLanguageFile(lang) {
-  if (loadedTranslations[lang]) return;
+  if (lang === 'en' || loadedTranslations[lang]) return;
   try {
     const module = await import(`./languages/${lang}.json`);
     loadedTranslations[lang] = module.default;

@@ -1,6 +1,6 @@
 {
   "name": "noten",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Secure local-first notes with Filen sync integration.",
   "license": "AGPL-3.0-only",
   "type": "module",
@@ -26,6 +26,8 @@
     "vite-plugin-node-polyfills": "^0.28.0"
   },
   "allowScripts": {
-    "esbuild@0.28.2": true
+    "esbuild@0.28.2": true,
+    "leveldown@5.6.0": true,
+    "leveldown@6.1.1": true
   }
 }

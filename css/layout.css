@@ -398,8 +398,10 @@ html.sidebar-collapsed-preload .sidebar .sidebar-rail {
 }
 
 /* Mobile Navigation Bar */
-.mobile-nav-bar {
-   display: none;
+.mobile-nav-bar,
+#bottom-nav,
+md-navigation-bar.mobile-nav-bar {
+   display: none !important;
 }
 
 /* ==========================================================================
@@ -411,8 +413,10 @@ html.sidebar-collapsed-preload .sidebar .sidebar-rail {
       --sidebar-width: 280px;
    }
 
-   .mobile-nav-bar {
-      display: flex;
+   .mobile-nav-bar,
+   #bottom-nav,
+   md-navigation-bar.mobile-nav-bar {
+      display: flex !important;
       width: 100%;
       flex-shrink: 0;
       z-index: 90;
