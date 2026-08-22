@@ -4,7 +4,7 @@
 
 import { t } from '../i18n.js';
 import { state, elements } from './state.js';
-import { escapeHtml, formatDate, openLightbox, setupCarouselItemClicks } from './utils.js';
+import { escapeHtml, formatDate, openLightbox, setupCarouselItemClicks, getImageSrc } from './utils.js';
 import { hasChecklistItems, buildChecklistDOM } from './checklist.js';
 import { openNoteModal, saveAndCloseModal } from './modal.js';
 import { showSettings, hideSettings } from './account.js';
@@ -620,14 +620,20 @@ export async function deleteNoteForever(noteId) {
 export function generateImageCarouselHtml(images) {
   if (!images || images.length === 0) return '';
 
-  const isSingle = images.length === 1;
-  const itemsHtml = images.map((imgSrc, index) => `
+  const validImages = images.filter(img => Boolean(getImageSrc(img)));
+  if (validImages.length === 0) return '';
+
+  const isSingle = validImages.length === 1;
+  const itemsHtml = validImages.map((img, index) => {
+    const src = getImageSrc(img);
+    return `
     <md-carousel-item
-      src="${imgSrc}"
+      src="${src}"
       alt="image-${index + 1}.jpg"
       interactive
     ></md-carousel-item>
-  `).join('');
+  `;
+  }).join('');
 
   return `
     <md-carousel layout="${isSingle ? 'full-width' : 'multi-browse'}" item-height="180px" hide-indicators aria-label="Note images">

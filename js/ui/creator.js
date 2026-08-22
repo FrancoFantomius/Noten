@@ -161,7 +161,10 @@ export function initCreatorUI() {
     for (const file of files) {
       try {
         const compressed = await compressImage(file);
-        state.noteCreatorImages.push(compressed);
+        state.noteCreatorImages.push({
+          url: compressed,
+          optimized: true
+        });
       } catch (err) {
         console.error('Failed to compress image:', err);
       }

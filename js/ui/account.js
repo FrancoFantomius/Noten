@@ -232,7 +232,10 @@ export function updateAccountStorageUI(syncSettings) {
       } catch {
         notesBytes += (note.title || '').length * 2 + (note.body || '').length * 2;
         if (note.images && Array.isArray(note.images)) {
-          note.images.forEach(img => { notesBytes += (img || '').length; });
+          note.images.forEach(img => {
+            const str = typeof img === 'string' ? img : (img?.url || img?.data || img?.src || '');
+            notesBytes += str.length;
+          });
         }
       }
     }

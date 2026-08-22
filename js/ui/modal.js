@@ -130,7 +130,10 @@ export function initModalUI() {
     for (const file of files) {
       try {
         const compressed = await compressImage(file);
-        state.noteModalImages.push(compressed);
+        state.noteModalImages.push({
+          url: compressed,
+          optimized: true
+        });
       } catch (err) {
         console.error('Failed to compress image:', err);
       }

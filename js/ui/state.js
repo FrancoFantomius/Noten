@@ -129,7 +129,10 @@ export const elements = {
   // Dedicated Login Modal
   loginModal: null,
   btnLoginClose: null,
-  btnLoginCancel: null
+  btnLoginCancel: null,
+
+  // Global Snackbar
+  appSnackbar: null
 };
 
 /**
@@ -239,4 +242,7 @@ export function initElements() {
   elements.loginModal = document.getElementById('login-modal');
   elements.btnLoginClose = document.getElementById('btn-login-close');
   elements.btnLoginCancel = document.getElementById('btn-login-cancel');
+
+  // Global Snackbar
+  elements.appSnackbar = document.getElementById('app-snackbar');
 }

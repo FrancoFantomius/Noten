@@ -5,7 +5,7 @@
 import { t } from './i18n.js';
 import { state, elements, initElements } from './ui/state.js';
 import { initTheme } from './ui/theme.js';
-import { closeLightbox } from './ui/utils.js';
+import { closeLightbox, showSnackbar } from './ui/utils.js';
 import { getDragAfterElement } from './ui/checklist.js';
 import {
   initAccountUI,
@@ -37,7 +37,8 @@ export {
   hideLoginModal,
   renderNotesFeed,
   updateSearchSuggestionsAndTags,
-  setCategory
+  setCategory,
+  showSnackbar
 };
 
 /**

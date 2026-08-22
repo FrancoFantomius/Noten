@@ -43,15 +43,28 @@ export function formatDate(timestamp) {
 }
 
 /**
- * Compress image using Canvas API
+ * Extracts raw image source URL from string or image object
  */
-export function compressImage(file) {
+export function getImageSrc(img) {
+  if (!img) return '';
+  if (typeof img === 'string') return img;
+  return img.url || img.data || img.src || '';
+}
+
+/**
+ * Checks if an image has the optimized tag
+ */
+export function isImageOptimized(img) {
+  return typeof img === 'object' && img !== null && Boolean(img.optimized);
+}
+
+/**
+ * Compress image using Canvas API (supports File, Blob, or base64 string)
+ */
+export function compressImage(fileOrSrc) {
   return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = (event) => {
+    const processImageSrc = (src) => {
       const img = new Image();
-      img.src = event.target.result;
       img.onload = () => {
         const canvas = document.createElement('canvas');
         let width = img.width;
@@ -78,9 +91,39 @@ export function compressImage(file) {
         resolve(dataUrl);
       };
       img.onerror = (err) => reject(err);
+      img.src = src;
     };
-    reader.onerror = (err) => reject(err);
+
+    if (typeof fileOrSrc === 'string') {
+      processImageSrc(fileOrSrc);
+    } else if (fileOrSrc instanceof Blob || (typeof File !== 'undefined' && fileOrSrc instanceof File)) {
+      const reader = new FileReader();
+      reader.onload = (e) => processImageSrc(e.target.result);
+      reader.onerror = (err) => reject(err);
+      reader.readAsDataURL(fileOrSrc);
+    } else {
+      reject(new Error('Invalid image input: expected File, Blob, or Data URL string'));
+    }
   });
+}
+
+/**
+ * Optimizes an image item if it is not already tagged as optimized
+ */
+export async function optimizeImageItem(img) {
+  if (isImageOptimized(img)) {
+    return {
+      url: getImageSrc(img),
+      optimized: true
+    };
+  }
+  const src = getImageSrc(img);
+  if (!src) return null;
+  const compressed = await compressImage(src);
+  return {
+    url: compressed,
+    optimized: true
+  };
 }
 
 /**
@@ -219,7 +262,10 @@ export function renderImageGrid(container, images, isEditable, onRemove) {
   carousel.setAttribute('item-height', '240px');
   carousel.setAttribute('aria-label', 'Attached note images');
 
-  images.forEach((imgSrc, index) => {
+  images.forEach((img, index) => {
+    const imgSrc = getImageSrc(img);
+    if (!imgSrc) return;
+
     const item = document.createElement('md-carousel-item');
     item.setAttribute('src', imgSrc);
     item.setAttribute('alt', `image-${index + 1}.jpg`);
@@ -250,3 +296,30 @@ export function renderImageGrid(container, images, isEditable, onRemove) {
 }
 
 export const renderImageCarousel = renderImageGrid;
+
+/**
+ * Displays a Material 3 snackbar notification
+ * @param {string} message - Message text
+ * @param {Object} [options] - Options like actionText, onAction, timeoutMs
+ */
+export function showSnackbar(message, options = {}) {
+  const snackbar = elements.appSnackbar || document.getElementById('app-snackbar');
+  if (!snackbar) return;
+
+  snackbar.message = message;
+  snackbar.actionText = options.actionText || '';
+  snackbar.closeable = options.closeable !== undefined ? options.closeable : true;
+  if (options.timeoutMs !== undefined) {
+    snackbar.timeoutMs = options.timeoutMs;
+  }
+
+  if (options.onAction) {
+    const handleAction = () => {
+      options.onAction();
+      snackbar.removeEventListener('action', handleAction);
+    };
+    snackbar.addEventListener('action', handleAction, { once: true });
+  }
+
+  snackbar.show();
+}

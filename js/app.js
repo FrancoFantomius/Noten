@@ -2,6 +2,7 @@ import '@francofantomius/material-components';
 import * as db from './db.js';
 import * as ui from './ui.js';
 import { t, getLanguage, setLanguage, applyTranslations, initTranslations } from './i18n.js';
+import { isImageOptimized, optimizeImageItem } from './ui/utils.js';
 
 // Global In-Memory State
 let cachedNotes = [];
@@ -100,6 +101,59 @@ function registerServiceWorker() {
 }
 
 /**
+ * Automatically optimizes any unoptimized images in a note and persists them to DB
+ */
+async function optimizeNoteImages(note) {
+  if (!note || !note.images || !Array.isArray(note.images) || note.images.length === 0) {
+    return false;
+  }
+
+  const hasUnoptimized = note.images.some(img => !isImageOptimized(img));
+  if (!hasUnoptimized) {
+    return false;
+  }
+
+  console.log(`[Images] Optimizing ${note.images.length} images in note ${note.id}...`);
+  const updatedImages = [];
+  for (const img of note.images) {
+    try {
+      const optimizedItem = await optimizeImageItem(img);
+      if (optimizedItem) {
+        updatedImages.push(optimizedItem);
+      }
+    } catch (err) {
+      console.error(`[Images] Failed to optimize image in note ${note.id}:`, err);
+      updatedImages.push(img);
+    }
+  }
+
+  note.images = updatedImages;
+  await db.saveNote(note.id, note);
+  return true;
+}
+
+/**
+ * Scans notes for untagged/unoptimized images and retroactively optimizes them
+ */
+async function optimizeAllNotesImages(notes) {
+  let updatedCount = 0;
+  for (const note of notes) {
+    try {
+      const didOptimize = await optimizeNoteImages(note);
+      if (didOptimize) {
+        updatedCount++;
+      }
+    } catch (err) {
+      console.error(`[Images] Error processing note ${note.id}:`, err);
+    }
+  }
+  if (updatedCount > 0) {
+    ui.updateNotesData(cachedNotes);
+    ui.showSnackbar(`Optimized images in ${updatedCount} note${updatedCount > 1 ? 's' : ''}`);
+  }
+}
+
+/**
  * Load local notes and start background sync if enabled
  */
 async function initializeWorkspace() {
@@ -107,6 +161,11 @@ async function initializeWorkspace() {
     cachedNotes = await db.loadAllNotes();
     await purgeExpiredTrashedNotes();
     ui.updateNotesData(cachedNotes);
+
+    // Retroactively optimize any untagged/unoptimized images in loaded notes
+    optimizeAllNotesImages(cachedNotes).catch(err => {
+      console.error('[Images] Background image optimization error:', err);
+    });
 
     const syncSettings = await db.getSyncSettings();
     ui.updateProfileUI(syncSettings);
@@ -154,6 +213,7 @@ async function handleDBChange(change) {
   if (change.deleted) {
     // Note deleted remotely
     cachedNotes = cachedNotes.filter(n => n.id !== noteId);
+    ui.showSnackbar('Note removed from sync');
   } else {
     // Note added or updated
     try {
@@ -165,9 +225,18 @@ async function handleDBChange(change) {
         const existingNote = cachedNotes[existingIdx];
         if (doc.updatedAt > existingNote.updatedAt) {
           cachedNotes[existingIdx] = { id: noteId, ...doc };
+          optimizeNoteImages(cachedNotes[existingIdx]).then(opt => {
+            if (opt) ui.updateNotesData(cachedNotes);
+          });
+          ui.showSnackbar('Note updated from sync');
         }
       } else {
-        cachedNotes.push({ id: noteId, ...doc });
+        const newNote = { id: noteId, ...doc };
+        cachedNotes.push(newNote);
+        optimizeNoteImages(newNote).then(opt => {
+          if (opt) ui.updateNotesData(cachedNotes);
+        });
+        ui.showSnackbar('New note synced');
       }
     } catch (err) {
       console.error("Failed to process changed note:", noteId, err);
@@ -203,6 +272,7 @@ async function handleSaveNote(id, noteObj) {
   }
 
   ui.updateNotesData(cachedNotes);
+  ui.showSnackbar('Note saved');
 }
 
 async function handleDeleteNote(id) {
@@ -212,6 +282,7 @@ async function handleDeleteNote(id) {
   // Remove from memory
   cachedNotes = cachedNotes.filter(n => n.id !== id);
   ui.updateNotesData(cachedNotes);
+  ui.showSnackbar('Note deleted');
 }
 
 // --- Settings & Sync Actions ---
@@ -438,7 +509,8 @@ function handleImportBackupFile(e) {
           dom.importStatusText.className = "status-message info";
 
           for (const note of data.notes) {
-            const noteId = 'note_' + crypto.randomUUID();
+            const rawId = note.id || note._id || ('note_' + crypto.randomUUID());
+            const noteId = db.normalizeNoteId(rawId);
             note.updatedAt = Date.now();
             note.trashedAt = note.trashedAt !== undefined ? note.trashedAt : (note.isTrashed ? Date.now() : null);
             await db.saveNote(noteId, note);
@@ -448,6 +520,7 @@ function handleImportBackupFile(e) {
           dom.importStatusText.textContent = t('status_import_success', { count: data.notes.length });
           dom.importStatusText.className = "status-message success";
           ui.updateNotesData(cachedNotes);
+          optimizeAllNotesImages(cachedNotes).catch(console.error);
         }
       } else {
         alert(t('status_import_invalid'));
