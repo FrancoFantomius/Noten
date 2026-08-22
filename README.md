@@ -33,7 +33,7 @@ Because the encryption is client-side, the sync server only stores ciphertext. *
   - Move completed or old notes to the **Archive** to keep your feed clean.
   - Send notes to **Trash** with options to restore or delete them permanently.
 - **Multi-language Support (i18n)**: Fully translated into 16 languages — Arabic (العربية), Chinese (中文), Dutch (Nederlands), English, French (Français), German (Deutsch), Greek (Ελληνικά), Hindi (हिन्दी), Italian (Italiano), Polish (Polski), Portuguese (Português), Russian (Русский), Spanish (Español), Swedish (Svenska), Turkish (Türkçe), and Ukrainian (Українська) — with dynamic runtime switching and automatic browser-language detection.
-- **Premium User Interface**: Modern styling built on the *Plus Jakarta Sans* typeface, harmonious colors, glassmorphic styling, and interactive micro-animations. Responsive sidebar controls and mobile FAB (Floating Action Button). Self-hosted fonts for privacy and offline reliability.
+- **Premium User Interface**: Modern Material Design 3 styling built on the *Roboto* typeface, harmonious colors, glassmorphic styling, and interactive micro-animations. Responsive sidebar controls and mobile FAB (Floating Action Button). Self-hosted fonts & optimized icon subset for privacy, speed, and offline reliability.
 - **Theme Modes**: Light, Dark, and Device (system) theme switching.
 - **Data Portability**: Prevent platform lock-in by exporting database contents to a JSON file or importing backups to restore them.
 
@@ -119,7 +119,7 @@ You can synchronize your notes across multiple devices (desktops, phones, tablet
 ├── terms.html           # Terms of Service static page
 ├── privacy.html         # Privacy Policy static page
 ├── templates/           # Shared Handlebars HTML template partials
-│   ├── head.html        # App head meta, fonts, PouchDB setup
+│   ├── head.html        # App head meta, fonts setup
 │   ├── header.html      # Main app navigation header & profile dropdown
 │   ├── sidebar.html     # Sidebar navigation menu
 │   ├── note-creator.html# Note creator component
@@ -171,7 +171,7 @@ You can synchronize your notes across multiple devices (desktops, phones, tablet
 - **Local Storage**: IndexedDB (managed via PouchDB)
 - **Replication & E2E Encryption**: Filen SDK Integration (`@filen/sdk`)
 - **Bundler**: Vite & Vite Node Polyfills Plugin
-- **Fonts & Icons**: Self-hosted Plus Jakarta Sans & Material Symbols Outlined (`@fontsource`)
+- **Fonts & Icons**: Self-hosted Roboto & Material Symbols Outlined dynamic subset (`@fontsource`, `subset-font`)
 
 ---
 

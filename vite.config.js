@@ -4,6 +4,7 @@ import handlebars from 'vite-plugin-handlebars';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { generateIconSubset } from './scripts/subset-icons.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -38,7 +39,12 @@ export default defineConfig({
     }),
     {
       name: 'sync-and-copy-sw',
-      buildStart() {
+      async buildStart() {
+        try {
+          await generateIconSubset();
+        } catch (err) {
+          console.error('Failed to generate icon subset:', err);
+        }
         try {
           const pkgPath = path.resolve(__dirname, 'package.json');
           const swPath = path.resolve(__dirname, 'sw.js');
@@ -89,7 +95,19 @@ export default defineConfig({
           }
 
           if (fs.existsSync(distDir)) {
-            const fontFiles = fs.readdirSync(distDir).filter(f => f.endsWith('.woff') || f.endsWith('.woff2')).map(f => `./${f}`);
+            const findFontFiles = (dir, prefix = './') => {
+              let list = [];
+              const entries = fs.readdirSync(dir, { withFileTypes: true });
+              for (const entry of entries) {
+                if (entry.isDirectory() && entry.name !== 'node_modules') {
+                  list = list.concat(findFontFiles(path.join(dir, entry.name), `${prefix}${entry.name}/`));
+                } else if (entry.isFile() && (entry.name.endsWith('.woff') || entry.name.endsWith('.woff2'))) {
+                  list.push(`${prefix}${entry.name}`);
+                }
+              }
+              return list;
+            };
+            const fontFiles = findFontFiles(distDir);
             distAssets.push(...fontFiles);
           }
 
@@ -106,9 +124,26 @@ export default defineConfig({
           }
 
           fs.writeFileSync(distSwPath, swContent, 'utf-8');
-          console.log('Successfully updated dist/sw.js with all JS chunk assets');
+          console.log('Successfully updated dist/sw.js with all JS chunk and font assets');
         } catch (err) {
           console.error('Failed to copy sw.js:', err);
+        }
+        try {
+          const fontsSrcDir = path.resolve(__dirname, 'fonts');
+          const fontsDestDir = path.resolve(__dirname, 'dist/fonts');
+          if (fs.existsSync(fontsSrcDir)) {
+            fs.mkdirSync(fontsDestDir, { recursive: true });
+            const files = fs.readdirSync(fontsSrcDir);
+            for (const file of files) {
+              fs.copyFileSync(
+                path.resolve(fontsSrcDir, file),
+                path.resolve(fontsDestDir, file)
+              );
+            }
+            console.log('Successfully copied fonts to dist/fonts/');
+          }
+        } catch (err) {
+          console.error('Failed to copy fonts:', err);
         }
         try {
           const srcDir = path.resolve(__dirname, 'img/icons');

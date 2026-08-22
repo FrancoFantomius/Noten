@@ -2,6 +2,7 @@
  * Noten - Database and Sync Module (PouchDB wrapper with Filen replication)
  */
 
+import PouchDB from "pouchdb";
 import { FilenSDK } from "@filen/sdk";
 import { Buffer } from "buffer";
 import { Readable } from "stream";
