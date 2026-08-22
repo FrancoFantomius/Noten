@@ -29,12 +29,19 @@
   <link rel="icon" href="./img/icons/icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="./img/icons/noten_x192.png">
   <link rel="manifest" href="./manifest.json">
-  <meta name="theme-color" content="#f59e0b">
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#161b22">
 
+
+  <!-- Sidebar Preload State -->
+  <script>
+    try {
+      if (localStorage.getItem('sidebar_collapsed') === 'true' && window.innerWidth > 768) {
+        document.documentElement.classList.add('sidebar-collapsed-preload');
+      }
+    } catch (e) {}
+  </script>
 
   <!-- CSS Stylesheet -->
   <link rel="stylesheet" href="css/style.css">
-
-  <!-- PouchDB -->
-  <script src="https://cdn.jsdelivr.net/npm/pouchdb@8.0.1/dist/pouchdb.min.js"></script>
 </head>

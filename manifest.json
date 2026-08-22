@@ -4,8 +4,8 @@
   "description": "Your notes private and secure accross devices",
   "start_url": "./index.html",
   "display": "fullscreen",
-  "background_color": "#ffffff",
-  "theme_color": "#fcf4eb",
+  "background_color": "#0e1117",
+  "theme_color": "#161b22",
   "categories": [
     "productivity",
     "utilities"

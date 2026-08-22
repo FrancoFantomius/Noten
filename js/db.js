@@ -2,6 +2,7 @@
  * Noten - Database and Sync Module (PouchDB wrapper with Filen replication)
  */
 
+import PouchDB from "pouchdb";
 import { FilenSDK } from "@filen/sdk";
 import { Buffer } from "buffer";
 import { Readable } from "stream";
@@ -71,7 +72,7 @@ export async function getSyncSettings() {
     return await db.get('_local/sync_settings');
   } catch (err) {
     if (err.status === 404) {
-      return { email: '', password: '', twoFactorCode: '', username: '', avatarURL: '', enabled: false };
+      return { email: '', password: '', twoFactorCode: '', username: '', avatarURL: '', storageUsed: 0, storageTotal: 0, enabled: false };
     }
     throw err;
   }
@@ -104,21 +105,55 @@ export async function saveSyncSettings(settings) {
 }
 
 /**
+ * UUID and Note ID validation patterns
+ */
+export const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+export const NOTE_ID_REGEX = /^note_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/**
+ * Checks if an ID strictly matches the standard 'note_[uuid]' format
+ */
+export function isValidNoteId(id) {
+  return typeof id === 'string' && NOTE_ID_REGEX.test(id);
+}
+
+/**
+ * Generates a standard conforming note ID
+ */
+export function generateNoteId() {
+  return `note_${crypto.randomUUID()}`;
+}
+
+/**
+ * Normalizes an arbitrary ID to standard 'note_[uuid]' format
+ */
+export function normalizeNoteId(id) {
+  if (isValidNoteId(id)) {
+    return id.toLowerCase();
+  }
+  if (typeof id === 'string' && UUID_REGEX.test(id)) {
+    return `note_${id.toLowerCase()}`;
+  }
+  return generateNoteId();
+}
+
+/**
  * Save a note in plaintext locally.
  * @param {string} id - Unique note ID
  * @param {Object} noteObj - Decrypted note object
  */
 export async function saveNote(id, noteObj) {
   try {
+    const normalizedId = normalizeNoteId(id);
     let existingDoc = null;
     try {
-      existingDoc = await db.get(id);
+      existingDoc = await db.get(normalizedId);
     } catch (err) {
       // Note is new
     }
 
     const doc = {
-      _id: id,
+      _id: normalizedId,
       type: 'note',
       updatedAt: noteObj.updatedAt || Date.now(),
       title: noteObj.title || '',
@@ -146,7 +181,7 @@ export async function saveNote(id, noteObj) {
     // Trigger sync replication
     triggerSyncReconciliation();
 
-    return response;
+    return { ...response, id: normalizedId };
   } catch (err) {
     console.error("Failed to save note:", err);
     throw err;
@@ -159,42 +194,74 @@ export async function saveNote(id, noteObj) {
  * @returns {Promise<Object>} - Plaintext note document
  */
 export async function getNote(id) {
-  return await db.get(id);
+  return await db.get(normalizeNoteId(id));
 }
 
 /**
- * Load all notes in the database.
+ * Load all notes in the database and automatically migrate non-conforming IDs.
  * @returns {Promise<Array>} - Array of plaintext note documents
  */
 export async function loadAllNotes() {
   try {
     const result = await db.allDocs({
-      include_docs: true,
-      startkey: 'note_',
-      endkey: 'note_\ufff0'
+      include_docs: true
     });
 
-    return result.rows.map(row => {
+    const notes = [];
+    for (const row of result.rows) {
       const doc = row.doc;
-      return {
-        id: doc._id,
-        _rev: doc._rev,
-        title: doc.title || '',
-        body: doc.body || '',
-        tags: doc.tags || [],
-        color: doc.color || 'default',
-        isPinned: doc.isPinned || false,
-        isArchived: doc.isArchived || false,
-        isTrashed: doc.isTrashed || false,
-        trashedAt: doc.trashedAt || null,
-        images: doc.images || [],
-        createdAt: doc.createdAt || Date.now(),
-        updatedAt: doc.updatedAt || Date.now(),
-        synced: doc.synced || false,
-        lastSynced: doc.lastSynced,
-        remoteLastModified: doc.remoteLastModified
-      };
-    });
+      if (!doc || doc._id.startsWith('_local/') || doc._id === 'sync_settings') {
+        continue;
+      }
+
+      // Check if document is a note
+      const isNote = doc.type === 'note' || doc._id.startsWith('note_') || doc.title !== undefined || doc.body !== undefined;
+      if (!isNote) continue;
+
+      let currentDoc = doc;
+
+      // Migrate non-conforming IDs to note_[uuid]
+      if (!isValidNoteId(doc._id)) {
+        const normalizedId = normalizeNoteId(doc._id);
+        console.log(`[DB] Migrating note ID from "${doc._id}" to "${normalizedId}"`);
+
+        const newDoc = {
+          ...doc,
+          _id: normalizedId,
+          type: 'note'
+        };
+        delete newDoc._rev;
+
+        try {
+          await db.put(newDoc);
+          await db.remove(doc);
+          currentDoc = newDoc;
+        } catch (migErr) {
+          console.error(`[DB] Failed to migrate note ID ${doc._id}:`, migErr);
+        }
+      }
+
+      notes.push({
+        id: currentDoc._id,
+        _rev: currentDoc._rev,
+        title: currentDoc.title || '',
+        body: currentDoc.body || '',
+        tags: currentDoc.tags || [],
+        color: currentDoc.color || 'default',
+        isPinned: currentDoc.isPinned || false,
+        isArchived: currentDoc.isArchived || false,
+        isTrashed: currentDoc.isTrashed || false,
+        trashedAt: currentDoc.trashedAt || null,
+        images: currentDoc.images || [],
+        createdAt: currentDoc.createdAt || Date.now(),
+        updatedAt: currentDoc.updatedAt || Date.now(),
+        synced: currentDoc.synced || false,
+        lastSynced: currentDoc.lastSynced,
+        remoteLastModified: currentDoc.remoteLastModified
+      });
+    }
+
+    return notes;
   } catch (err) {
     console.error("Failed to load notes:", err);
     return [];
@@ -371,15 +438,34 @@ async function removeFromDeletedNotesQueue(id) {
   }
 }
 
+let isSyncRunning = false;
+let syncQueued = false;
+
 export function triggerSyncReconciliation() {
   if (!filenClient) return;
   queueSync();
 }
 
 function queueSync() {
-  syncPromise = syncPromise.then(() => runSync()).catch(err => {
-    console.error("[Sync] Error in sync queue:", err);
-  });
+  if (isSyncRunning) {
+    syncQueued = true;
+    return;
+  }
+
+  isSyncRunning = true;
+  syncPromise = (async () => {
+    try {
+      await runSync();
+    } catch (err) {
+      console.error("[Sync] Error in sync queue:", err);
+    } finally {
+      isSyncRunning = false;
+      if (syncQueued) {
+        syncQueued = false;
+        queueSync();
+      }
+    }
+  })();
 }
 
 async function initFilenAndSync(settings) {
@@ -407,6 +493,8 @@ async function initFilenAndSync(settings) {
         if (accountInfo) {
           const nickname = accountInfo.nickName || accountInfo.displayName;
           const avatarURL = accountInfo.avatarURL || '';
+          const storageUsed = typeof accountInfo.storage === 'number' ? accountInfo.storage : 0;
+          const storageTotal = typeof accountInfo.maxStorage === 'number' ? accountInfo.maxStorage : 0;
           let changed = false;
           if (nickname && nickname !== settings.username) {
             settings.username = nickname;
@@ -414,6 +502,14 @@ async function initFilenAndSync(settings) {
           }
           if (avatarURL !== settings.avatarURL) {
             settings.avatarURL = avatarURL;
+            changed = true;
+          }
+          if (storageUsed !== settings.storageUsed) {
+            settings.storageUsed = storageUsed;
+            changed = true;
+          }
+          if (storageTotal !== settings.storageTotal) {
+            settings.storageTotal = storageTotal;
             changed = true;
           }
           if (changed) {
@@ -431,15 +527,19 @@ async function initFilenAndSync(settings) {
         twoFactorCode: settings.twoFactorCode || undefined
       });
 
-      // Fetch nickname and avatar from Filen
+      // Fetch nickname, avatar and storage from Filen
       let nickname = settings.email.split('@')[0];
       let avatarURL = '';
+      let storageUsed = 0;
+      let storageTotal = 0;
       try {
         const accountInfo = await filenClient.user().account();
         if (accountInfo) {
           if (accountInfo.nickName) nickname = accountInfo.nickName;
           else if (accountInfo.displayName) nickname = accountInfo.displayName;
           if (accountInfo.avatarURL) avatarURL = accountInfo.avatarURL;
+          if (typeof accountInfo.storage === 'number') storageUsed = accountInfo.storage;
+          if (typeof accountInfo.maxStorage === 'number') storageTotal = accountInfo.maxStorage;
         }
       } catch (e) {
         console.warn("[Sync] Failed to fetch profile info during login:", e);
@@ -449,6 +549,8 @@ async function initFilenAndSync(settings) {
         enabled: true,
         username: nickname,
         avatarURL: avatarURL,
+        storageUsed: storageUsed,
+        storageTotal: storageTotal,
         email: settings.email,
         apiKey: filenClient.config.apiKey,
         masterKeys: filenClient.config.masterKeys,
@@ -553,15 +655,57 @@ async function runSync() {
       }
     }
 
-    // Gather stats of remote files to build remoteMap
+    // Gather stats of remote files to build remoteMap & migrate non-conforming remote files
     const remoteMap = new Map();
     for (const filename of remoteFiles) {
       if (!filename.endsWith('.json')) continue;
-      const noteId = filename.substring(0, filename.length - 5);
+      const rawId = filename.substring(0, filename.length - 5);
       const filePath = `/Apps/Noten/notes/${filename}`;
+
+      // Check if remote filename deviates from standard note_[uuid].json
+      if (!isValidNoteId(rawId)) {
+        try {
+          console.log(`[Sync] Remote file "${filename}" has non-conforming ID, migrating on Filen...`);
+          const content = await filenClient.fs().readFile({ path: filePath });
+          const payload = JSON.parse(content.toString('utf-8'));
+          const normalizedId = normalizeNoteId(payload._id || rawId);
+
+          payload._id = normalizedId;
+          const jsonStr = JSON.stringify(payload);
+          const blob = new Blob([jsonStr], { type: 'application/json' });
+          const file = new File([blob], `${normalizedId}.json`, {
+            type: 'application/json',
+            lastModified: payload.updatedAt || Date.now()
+          });
+
+          const parentUUID = await filenClient.fs().pathToItemUUID({
+            path: '/Apps/Noten/notes',
+            type: 'directory'
+          });
+
+          if (parentUUID) {
+            await filenClient.cloud().uploadWebFile({
+              file,
+              parent: parentUUID,
+              name: `${normalizedId}.json`
+            });
+          }
+
+          // Delete non-conforming file from Filen
+          await filenClient.fs().rm({ path: filePath, permanent: true });
+          console.log(`[Sync] Successfully migrated remote file "${filename}" to "${normalizedId}.json"`);
+
+          const stats = await filenClient.fs().stat({ path: `/Apps/Noten/notes/${normalizedId}.json` });
+          remoteMap.set(normalizedId, { filename: `${normalizedId}.json`, filePath: `/Apps/Noten/notes/${normalizedId}.json`, stats });
+          continue;
+        } catch (migErr) {
+          console.error(`[Sync] Failed to migrate non-conforming remote file ${filename}:`, migErr);
+        }
+      }
+
       try {
         const stats = await filenClient.fs().stat({ path: filePath });
-        remoteMap.set(noteId, { filename, filePath, stats });
+        remoteMap.set(rawId, { filename, filePath, stats });
       } catch (err) {
         console.error(`[Sync] Failed to stat remote file ${filePath}:`, err);
       }
@@ -623,7 +767,8 @@ async function runSync() {
       const content = await filenClient.fs().readFile({ path: filePath });
       const payload = JSON.parse(content.toString('utf-8'));
 
-      const noteId = payload._id;
+      const rawId = payload._id || filePath.replace(/^.*[\\/]/, '').replace(/\.json$/i, '');
+      const noteId = normalizeNoteId(rawId);
       let existingDoc = null;
       try {
         existingDoc = await db.get(noteId);

@@ -1,46 +1,56 @@
   <!-- Dedicated Sign-in Modal -->
   <div id="login-modal" class="modal-overlay">
-    <div class="modal-card" style="max-width: 440px; height: auto; min-height: unset; max-height: 90vh;">
-      <div class="settings-header">
-        <h2 style="display: flex; align-items: center; gap: 8px;">
-          <span class="material-symbols-outlined" style="color: var(--accent); font-size: 24px;">bolt</span>
-          <span>Sign in to secure sync</span>
-        </h2>
-        <button id="btn-login-close" class="btn-icon" aria-label="Close modal"><span class="material-symbols-outlined">close</span></button>
+    <div class="modal-card login-modal-card">
+      <div class="modal-header login-modal-header">
+        <div class="login-modal-title-wrapper">
+          <md-icon-button id="btn-login-back" icon="arrow_back" class="modal-back-btn" aria-label="Go back" title="Go back"></md-icon-button>
+          <h2>
+            <span data-i18n="btn_login">Sign in</span>
+          </h2>
+        </div>
+        <md-icon-button id="btn-login-close" icon="close" aria-label="Close modal" title="Close"></md-icon-button>
       </div>
-      <div class="settings-body" style="padding-top: 8px; gap: 16px; width: 100%;">
-        <p class="section-help" data-i18n="settings_sync_help" style="margin-bottom: 8px;">
+      <div class="modal-body login-modal-body">
+        <p class="section-help" data-i18n="settings_sync_help">
           Configure synchronization with your personal Filen account. All notes synced will be fully encrypted
-          client-side; Filen will never see your password or plaintext notes.
+          client-side; not us nor Filen will see your password or plaintext notes.
         </p>
 
-        <div id="sync-credentials-container" style="display: flex; flex-direction: column; gap: 12px; width: 100%;">
-          <div class="input-group">
-            <label for="sync-email" data-i18n="settings_sync_email">Filen Email</label>
-            <input type="email" id="sync-email" data-i18n-placeholder="settings_sync_email_placeholder"
-              placeholder="email@example.com">
-          </div>
-          <div class="input-group">
-            <label for="sync-password" data-i18n="settings_sync_password">Filen Password</label>
-            <input type="password" id="sync-password" data-i18n-placeholder="settings_sync_password_placeholder"
-              placeholder="Enter your Filen password...">
-          </div>
-          <div class="input-group">
-            <label for="sync-twofactor" data-i18n="settings_sync_twofactor">Two-Factor Auth Code (Optional)</label>
-            <input type="text" id="sync-twofactor" data-i18n-placeholder="settings_sync_twofactor_placeholder"
-              placeholder="6-digit code if enabled...">
-          </div>
+        <div id="sync-credentials-container" class="login-credentials-container">
+          <md-text-field
+            id="sync-email"
+            variant="outlined"
+            label="Email Address"
+            type="email"
+            leading-icon="mail"
+          ></md-text-field>
+
+          <md-text-field
+            id="sync-password"
+            variant="outlined"
+            label="Password"
+            type="password"
+            leading-icon="lock"
+          ></md-text-field>
+
+          <md-text-field
+            id="sync-twofactor"
+            variant="outlined"
+            label="Two-Factor Auth Code (Optional)"
+            type="text"
+            leading-icon="security"
+          ></md-text-field>
         </div>
 
-        <span id="sync-settings-status" class="status-message"
-          style="display: block; min-height: 20px; text-align: center; margin-top: 8px; width: 100%;"></span>
+        <span id="sync-settings-status" class="status-message"></span>
 
-        <div class="settings-actions"
-          style="display: flex; flex-direction: column; gap: 8px; margin-top: 12px; width: 100%;">
-          <button id="btn-save-sync" class="btn btn-primary" data-i18n="btn_save_sync" style="width: 100%;">Save &
-            Enable Sync</button>
-          <button id="btn-login-cancel" class="btn btn-secondary"
-            style="width: 100%; border: 1px solid var(--border-color);">Cancel</button>
+        <div class="login-modal-actions">
+          <md-button id="btn-login-cancel" variant="text">
+            <span data-i18n="btn_cancel">Cancel</span>
+          </md-button>
+          <md-button id="btn-save-sync" variant="filled">
+            <span data-i18n="btn_login">Sign in</span>
+          </md-button>
         </div>
       </div>
     </div>

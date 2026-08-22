@@ -6,6 +6,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-08-22
+
+### Added
+- Complete Material Design 3 overhaul adopting custom web components from `@francofantomius/material-components` (`md-account-menu`, `md-app-drawer`, `md-search-bar`, `md-button`, `md-icon-button`, `md-chip-set`, `md-dialog`, `md-fab`, `md-snackbar`).
+- Filen Account Storage breakdown widget integrated into the account menu displaying real-time usage (Notes storage, Other files, Free storage).
+- App drawer widget (`md-app-drawer`) for switching across ecosystem web apps.
+- Integrated search tag filter chips within the search bar component.
+- Dynamic automated Material Symbols icon subsetting via `subset-font` with automatic scanning of components and templates.
+- PouchDB database migration and schema standardization for all notes.
+
+### Changed
+- Migrated UI components from bespoke HTML/CSS to standard Material Design 3 web components (`lit` & `@francofantomius/material-components`).
+- Upgraded dependencies including `pouchdb` to `^9.0.0`, `@fontsource/roboto` `^5.3.0`, and `@fontsource-variable/material-symbols-outlined` `^5.3.3`.
+- Bumped Service Worker cache version to `noten-v2.0.0`.
+- Refactored static pages and theme management system.
+- Streamlined and synchronized all 16 supported language translation files.
+
 ## [1.3.1] - 2026-08-13
 
 ### Changed
@@ -95,7 +112,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Fixed
 - Mobile responsiveness groundwork (WIP).
 
-[Unreleased]: https://github.com/FrancoFantomius/noten/compare/v1.3.1...HEAD
+[Unreleased]: https://github.com/FrancoFantomius/noten/compare/v2.0.0...HEAD
+[2.0.0]: https://github.com/FrancoFantomius/noten/releases/tag/v2.0.0
 [1.3.1]: https://github.com/FrancoFantomius/noten/releases/tag/v1.3.1
 [1.3.0]: https://github.com/FrancoFantomius/noten/releases/tag/v1.3.0
 [1.2.2]: https://github.com/FrancoFantomius/noten/releases/tag/v1.2.2

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'noten-v1.3.1';
+const CACHE_NAME = 'noten-v2.0.0';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -17,8 +17,8 @@ const ASSETS_TO_CACHE = [
   './img/icons/noten_x384.png',
   './img/icons/noten_x512.png',
   './css/style.css',
-  './js/app.js',
-  'https://cdn.jsdelivr.net/npm/pouchdb@8.0.1/dist/pouchdb.min.js'
+  './fonts/material-symbols-outlined-subset.woff2',
+  './js/app.js'
 ];
 
 // Install Event (Pre-cache static assets safely)

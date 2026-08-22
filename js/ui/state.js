@@ -41,8 +41,12 @@ export const elements = {
   btnSearchClear: null,
   syncStatus: null,
   btnSettingsOpen: null,
+  appDrawer: null,
 
-  // Navigation items
+  // Navigation items & Sidebar
+  sidebarDrawer: null,
+  sidebarRail: null,
+  navigationBar: null,
   navItems: null,
   sidebarTagsList: null,
 
@@ -67,6 +71,7 @@ export const elements = {
   creatorImagesPreview: null,
 
   // Feeds
+  contentPanel: null,
   notesViewContent: null,
   pinnedSection: null,
   pinnedGrid: null,
@@ -108,32 +113,26 @@ export const elements = {
   // Lightbox Modal
   lightboxModal: null,
   lightboxImage: null,
+  lightboxFilename: null,
   btnLightboxClose: null,
 
   // Floating Action Button
   btnFabCreate: null,
 
-  // Account Dropdown Elements
+  // Account Menu Element
+  accountMenu: null,
   btnSyncLogin: null,
   btnSyncProfile: null,
-  headerProfileAvatar: null,
-  headerProfileLetter: null,
-  headerProfileIcon: null,
-
-  accountDropdown: null,
-  dropdownEmail: null,
-  dropdownAvatar: null,
-  dropdownLetter: null,
-  dropdownIcon: null,
-  dropdownUsername: null,
-
   btnDropdownSettings: null,
   btnDropdownSignout: null,
 
   // Dedicated Login Modal
   loginModal: null,
   btnLoginClose: null,
-  btnLoginCancel: null
+  btnLoginCancel: null,
+
+  // Global Snackbar
+  appSnackbar: null
 };
 
 /**
@@ -151,9 +150,13 @@ export function initElements() {
   elements.btnSearchClear = document.getElementById('btn-search-clear');
   elements.syncStatus = document.getElementById('sync-status');
   elements.btnSettingsOpen = document.getElementById('btn-settings-open');
+  elements.appDrawer = document.getElementById('app-drawer');
 
-  // Navigation items
-  elements.navItems = document.querySelectorAll('.nav-item');
+  // Navigation items & Sidebar
+  elements.sidebarDrawer = document.getElementById('sidebar-drawer');
+  elements.sidebarRail = document.getElementById('sidebar-rail');
+  elements.navigationBar = document.getElementById('bottom-nav');
+  elements.navItems = document.querySelectorAll('.nav-item, md-navigation-drawer-item, md-navigation-rail-item, md-navigation-bar-item');
   elements.sidebarTagsList = document.getElementById('sidebar-tags-list');
 
   // Note Creator
@@ -177,6 +180,7 @@ export function initElements() {
   elements.creatorImagesPreview = document.getElementById('creator-images-preview');
 
   // Feeds
+  elements.contentPanel = document.querySelector('.content-panel');
   elements.notesViewContent = document.getElementById('notes-view-content');
   elements.pinnedSection = document.getElementById('pinned-section');
   elements.pinnedGrid = document.getElementById('pinned-grid');
@@ -213,29 +217,23 @@ export function initElements() {
   // Settings Modal
   elements.settingsModal = document.getElementById('settings-modal');
   elements.btnSettingsClose = document.getElementById('btn-settings-close');
+  elements.btnSettingsCloseIcon = document.getElementById('btn-settings-close-icon');
+  elements.btnSettingsSave = document.getElementById('btn-settings-save');
   elements.themeSelect = document.getElementById('theme-select');
 
   // Lightbox Modal
   elements.lightboxModal = document.getElementById('lightbox-modal');
   elements.lightboxImage = document.getElementById('lightbox-image');
+  elements.lightboxFilename = document.getElementById('lightbox-filename');
   elements.btnLightboxClose = document.getElementById('btn-lightbox-close');
 
   // Floating Action Button
   elements.btnFabCreate = document.getElementById('btn-fab-create');
 
-  // Account Dropdown Elements
+  // Account Menu Elements
+  elements.accountMenu = document.getElementById('account-menu');
   elements.btnSyncLogin = document.getElementById('btn-sync-login');
   elements.btnSyncProfile = document.getElementById('btn-sync-profile');
-  elements.headerProfileAvatar = document.getElementById('header-profile-avatar');
-  elements.headerProfileLetter = document.getElementById('header-profile-letter');
-  elements.headerProfileIcon = document.getElementById('header-profile-icon');
-
-  elements.accountDropdown = document.getElementById('account-dropdown');
-  elements.dropdownEmail = document.getElementById('account-dropdown-email');
-  elements.dropdownAvatar = document.getElementById('dropdown-profile-avatar');
-  elements.dropdownLetter = document.getElementById('dropdown-profile-letter');
-  elements.dropdownIcon = document.getElementById('dropdown-profile-icon');
-  elements.dropdownUsername = document.getElementById('dropdown-profile-username');
 
   elements.btnDropdownSettings = document.getElementById('btn-dropdown-settings');
   elements.btnDropdownSignout = document.getElementById('btn-dropdown-signout');
@@ -244,4 +242,7 @@ export function initElements() {
   elements.loginModal = document.getElementById('login-modal');
   elements.btnLoginClose = document.getElementById('btn-login-close');
   elements.btnLoginCancel = document.getElementById('btn-login-cancel');
+
+  // Global Snackbar
+  elements.appSnackbar = document.getElementById('app-snackbar');
 }

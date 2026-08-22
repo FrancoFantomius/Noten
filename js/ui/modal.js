@@ -42,19 +42,42 @@ export function initModalUI() {
   // Modal Pin Toggle
   elements.btnModalPin.addEventListener('click', () => {
     state.isModalPinned = !state.isModalPinned;
-    elements.btnModalPin.classList.toggle('active', state.isModalPinned);
+    updateModalPinButton();
   });
 
-  // Modal Color Picker
+  // Modal Color Picker toggle and swatch handling
+  const btnModalColor = elements.noteModal.querySelector('#btn-modal-color');
+  const modalColorWrapper = elements.noteModal.querySelector('.color-picker-wrapper');
+  if (btnModalColor && modalColorWrapper) {
+    btnModalColor.addEventListener('click', (e) => {
+      e.stopPropagation();
+      modalColorWrapper.classList.toggle('open');
+    });
+  }
+
+  // Dismiss modal color picker on outside click
+  document.addEventListener('click', (e) => {
+    if (modalColorWrapper && !modalColorWrapper.contains(e.target)) {
+      modalColorWrapper.classList.remove('open');
+    }
+  });
+
   const modalColors = elements.noteModal.querySelectorAll('.color-option');
   modalColors.forEach(opt => {
     opt.addEventListener('click', (e) => {
-      modalColors.forEach(o => o.classList.remove('active'));
-      e.target.classList.add('active');
+      e.stopPropagation();
+      const current = e.currentTarget;
+      modalColors.forEach(o => {
+        o.classList.remove('active');
+        o.setAttribute('aria-checked', 'false');
+      });
+      current.classList.add('active');
+      current.setAttribute('aria-checked', 'true');
 
-      const color = e.target.getAttribute('data-color');
+      const color = current.getAttribute('data-color') || 'default';
       state.modalActiveColor = color;
       elements.modalCard.className = `modal-card color-${color}`;
+      if (modalColorWrapper) modalColorWrapper.classList.remove('open');
     });
   });
 
@@ -107,7 +130,10 @@ export function initModalUI() {
     for (const file of files) {
       try {
         const compressed = await compressImage(file);
-        state.noteModalImages.push(compressed);
+        state.noteModalImages.push({
+          url: compressed,
+          optimized: true
+        });
       } catch (err) {
         console.error('Failed to compress image:', err);
       }
@@ -252,6 +278,25 @@ export function initModalUI() {
 }
 
 /**
+ * Updates the modal pin button UI (icon fill, active class, title/tooltip, and aria-label)
+ */
+export function updateModalPinButton() {
+  if (!elements.btnModalPin) return;
+  const isPinned = Boolean(state.isModalPinned);
+  elements.btnModalPin.classList.toggle('active', isPinned);
+  elements.btnModalPin.selected = isPinned;
+  if (isPinned) {
+    elements.btnModalPin.setAttribute('selected', '');
+    elements.btnModalPin.title = t('btn_unpin_note_title');
+    elements.btnModalPin.setAttribute('aria-label', t('btn_unpin_note_title'));
+  } else {
+    elements.btnModalPin.removeAttribute('selected');
+    elements.btnModalPin.title = t('btn_pin_note_title');
+    elements.btnModalPin.setAttribute('aria-label', t('btn_pin_note_title'));
+  }
+}
+
+/**
  * Note Modal (Edit dialog)
  */
 export function openNoteModal(noteId) {
@@ -262,15 +307,20 @@ export function openNoteModal(noteId) {
   elements.modalTitle.value = note.title || '';
   elements.modalBodyText.value = note.body || '';
   state.isModalPinned = note.isPinned || false;
-  elements.btnModalPin.classList.toggle('active', state.isModalPinned);
+  updateModalPinButton();
   state.modalActiveColor = note.color || 'default';
   elements.modalCard.className = `modal-card color-${state.modalActiveColor}`;
 
   const modalColors = elements.noteModal.querySelectorAll('.color-option');
   modalColors.forEach(opt => {
     const c = opt.getAttribute('data-color');
-    opt.classList.toggle('active', c === state.modalActiveColor);
+    const isActive = c === state.modalActiveColor;
+    opt.classList.toggle('active', isActive);
+    opt.setAttribute('aria-checked', isActive ? 'true' : 'false');
   });
+  if (elements.modalColorPickerWrapper) {
+    elements.modalColorPickerWrapper.classList.remove('open');
+  }
 
   state.noteModalTags = [...note.tags];
   renderModalTags();
@@ -280,10 +330,10 @@ export function openNoteModal(noteId) {
 
   elements.modalLastEdited.textContent = t('modal_last_edited', { time: formatDate(note.updatedAt) });
 
-  elements.btnModalArchive.innerHTML = note.isArchived ? '<span class="material-symbols-outlined">unarchive</span>' : '<span class="material-symbols-outlined">archive</span>';
+  elements.btnModalArchive.setAttribute('icon', note.isArchived ? 'unarchive' : 'archive');
   elements.btnModalArchive.title = note.isArchived ? t('btn_modal_archive_unarchive_title') : t('btn_modal_archive_title');
 
-  elements.btnModalTrash.innerHTML = note.isTrashed ? '<span class="material-symbols-outlined">restore</span>' : '<span class="material-symbols-outlined">delete</span>';
+  elements.btnModalTrash.setAttribute('icon', note.isTrashed ? 'restore' : 'delete');
   elements.btnModalTrash.title = note.isTrashed ? t('btn_modal_trash_restore_title') : t('btn_modal_trash_delete_title');
   elements.btnModalTrash.className = note.isTrashed ? 'btn-icon text-green' : 'btn-icon';
 
@@ -348,7 +398,7 @@ export function openNewNoteModal() {
   elements.modalTitle.value = '';
   elements.modalBodyText.value = '';
   state.isModalPinned = false;
-  elements.btnModalPin.classList.remove('active');
+  updateModalPinButton();
   state.modalActiveColor = 'default';
   elements.modalCard.className = `modal-card color-default`;
 
@@ -372,8 +422,13 @@ export function openNewNoteModal() {
   const modalColors = elements.noteModal.querySelectorAll('.color-option');
   modalColors.forEach(opt => {
     const c = opt.getAttribute('data-color');
-    opt.classList.toggle('active', c === 'default');
+    const isDef = c === 'default';
+    opt.classList.toggle('active', isDef);
+    opt.setAttribute('aria-checked', isDef ? 'true' : 'false');
   });
+  if (elements.modalColorPickerWrapper) {
+    elements.modalColorPickerWrapper.classList.remove('open');
+  }
 
   state.noteModalTags = [];
   renderModalTags();
@@ -383,10 +438,10 @@ export function openNewNoteModal() {
 
   elements.modalLastEdited.textContent = '';
 
-  elements.btnModalArchive.innerHTML = '<span class="material-symbols-outlined">archive</span>';
+  elements.btnModalArchive.setAttribute('icon', 'archive');
   elements.btnModalArchive.title = t('btn_modal_archive_title');
 
-  elements.btnModalTrash.innerHTML = '<span class="material-symbols-outlined">delete</span>';
+  elements.btnModalTrash.setAttribute('icon', 'delete');
   elements.btnModalTrash.title = t('btn_modal_trash_delete_title');
   elements.btnModalTrash.className = 'btn-icon';
 
@@ -470,6 +525,7 @@ export function closeModal() {
   const closedNoteId = state.editingNoteId;
 
   elements.noteModal.classList.remove('active');
+
   state.editingNoteId = null;
   state.noteModalImages = [];
   state.isModalChecklistMode = false;
@@ -493,33 +549,25 @@ export function closeModal() {
 }
 
 export function renderModalTags() {
+  if (!elements.modalTagsList) return;
   elements.modalTagsList.innerHTML = '';
   const note = state.decryptedNotes.find(n => n.id === state.editingNoteId);
   const isTrashed = note && note.isTrashed;
 
   state.noteModalTags.forEach(tag => {
-    const span = document.createElement('span');
-    span.className = 'tag-badge';
-    if (isTrashed) {
-      span.innerHTML = `#${tag}`;
-    } else {
-      span.innerHTML = `
-        #${tag}
-        <button class="btn-remove-tag" data-tag="${tag}">
-          <span class="material-symbols-outlined">close</span>
-        </button>
-      `;
-      span.querySelector('button').addEventListener('click', (e) => {
+    const chip = document.createElement('md-chip');
+    chip.setAttribute('label', tag);
+    chip.setAttribute('variant', 'input');
+    if (!isTrashed) {
+      chip.setAttribute('removable', '');
+      chip.addEventListener('remove', (e) => {
         e.stopPropagation();
-        const removeVal = e.currentTarget.getAttribute('data-tag');
-        state.noteModalTags = state.noteModalTags.filter(t => t !== removeVal);
+        state.noteModalTags = state.noteModalTags.filter(t => t !== tag);
         renderModalTags();
       });
     }
-    elements.modalTagsList.appendChild(span);
+    elements.modalTagsList.appendChild(chip);
   });
-  
-
 }
 
 export function renderModalImages() {

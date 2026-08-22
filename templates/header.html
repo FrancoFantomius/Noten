@@ -1,86 +1,106 @@
     <!-- Top Header / Navigation -->
     <header class="main-header">
       <div class="header-left">
-        <button id="btn-sidebar-toggle" class="btn-icon" aria-label="Toggle Sidebar">
-          <span class="material-symbols-outlined">menu</span>
-        </button>
+        <md-icon-button id="btn-sidebar-toggle" icon="menu" aria-label="Toggle Sidebar"></md-icon-button>
         <div class="logo-area">
-          <img src="img/icons/icon.svg" alt="Noten Logo" class="app-logo-small">
+          <md-icon name="add_notes" class="app-logo-small" size="28"></md-icon>
           <span class="app-title">Noten</span>
         </div>
       </div>
 
       <div class="header-center">
-        <div class="search-bar">
-          <span class="material-symbols-outlined search-icon">search</span>
-          <input type="text" id="search-input" data-i18n-placeholder="search_placeholder"
-            placeholder="Search notes, tags, ...">
-          <button id="btn-search-clear" class="btn-icon hidden" aria-label="Clear Search">
-            <span class="material-symbols-outlined">close</span>
-          </button>
-        </div>
+        <md-search-bar id="search-input" size="small" data-i18n-placeholder="search_placeholder" placeholder="Search notes, tags, ...">
+          <div id="search-tags-container" class="search-tags-container" style="display: none;">
+            <div class="search-tags-header">
+              <span class="search-tags-title" data-i18n="tags_section_title">Tags</span>
+            </div>
+            <md-chip-set id="search-tags-list" class="search-tags-chip-set"></md-chip-set>
+          </div>
+        </md-search-bar>
       </div>
 
       <div class="header-right">
         <!-- Sync Indicator Badge -->
-        <div id="sync-status" class="sync-badge offline" title="Sync Offline" style="cursor: pointer;">
+        <div id="sync-status" class="sync-badge offline" title="Sync Offline" style="display: none;">
           <span class="material-symbols-outlined">cloud_off</span>
           <span class="sync-text" data-i18n="sync_offline">Offline</span>
         </div>
 
-        <button id="btn-settings-open" class="btn-icon" data-i18n-title="btn_settings_open_title"
-          data-i18n-aria="btn_settings_open_title" title="Settings" aria-label="Open Settings">
-          <span class="material-symbols-outlined">settings</span>
-        </button>
+        <!-- Settings Icon Button (shown when logged out) -->
+        <md-icon-button id="btn-settings-open" icon="settings" data-i18n-title="btn_settings_open_title"
+          data-i18n-aria="btn_settings_open_title" title="Settings" aria-label="Open Settings"></md-icon-button>
+
+        <!-- App Drawer (shown when logged in) -->
+        <md-app-drawer id="app-drawer" headline="My Apps" data-i18n-headline="header.apps" alignment="end" style="display: none;">
+          <md-app-drawer-item label="Calculator" href="https://francofantomius.com/calculator/" target="_blank" src="https://francofantomius.com/calculator/img/calculator_x128.png"></md-app-drawer-item>
+          <md-app-drawer-item label="Melo" href="https://melo.francofantomius.com/" target="_blank" src="https://melo.francofantomius.com/img/icons/icon.svg"></md-app-drawer-item>
+          <md-app-drawer-item label="Noten" href="https://noten.francofantomius.com/" target="_blank" src="https://noten.francofantomius.com/noten_x512.png"></md-app-drawer-item>
+          <md-app-drawer-item label="Scriben" href="https://scriben.francofantomius.com/" target="_blank" src="https://scriben.francofantomius.com/icons/icon.svg"></md-app-drawer-item>
+          <md-app-drawer-item label="Maps" href="https://maps.francofantomius.com/" target="_blank" src="https://maps.francofantomius.com/img/icons/maps.png"></md-app-drawer-item>
+        </md-app-drawer>
 
         <!-- Login Button (shown when logged out) -->
-        <button id="btn-sync-login" class="btn btn-primary"
-          style="padding: 6px 16px; font-size: 0.85rem; border-radius: var(--radius-full);">
+        <md-button id="btn-sync-login" variant="filled">
           <span data-i18n="btn_login">Sign in</span>
-        </button>
+        </md-button>
 
-        <!-- Profile Avatar/Icon Button (shown when logged in) -->
-        <button id="btn-sync-profile" class="profile-btn" title="Profile" style="display: none;">
-          <img id="header-profile-avatar" src="" alt="Avatar" style="display: none;">
-          <div id="header-profile-letter" class="profile-avatar-letter" style="display: none;"></div>
-          <span id="header-profile-icon" class="material-symbols-outlined profile-btn-icon">account_circle</span>
-        </button>
+        <!-- Account Menu (shown when logged in) -->
+        <md-account-menu
+          id="account-menu"
+          name="Connected"
+          email=""
+          initials="U"
+          headline="Account"
+          manage-url="https://app.filen.io/#/settings/account"
+          manage-text="Manage your Filen Account"
+          alignment="end"
+          style="display: none;"
+        >
+          <div slot="overview" class="account-menu-actions">
+            <!-- Account Storage Widget -->
+            <div class="account-storage-widget">
+              <div class="account-storage-header">
+                <div class="account-storage-title">
+                  <md-icon name="cloud"></md-icon>
+                  <span data-i18n="storage_title">Account Storage</span>
+                </div>
+                <span id="account-storage-meta" class="account-storage-meta">0 B of 10 GB used</span>
+              </div>
+              
+              <div class="account-storage-bar-track">
+                <div id="account-storage-bar-notes" class="account-storage-bar-segment segment-notes" style="width: 0%;"></div>
+                <div id="account-storage-bar-other" class="account-storage-bar-segment segment-other" style="width: 0%;"></div>
+              </div>
 
-        <!-- Account Dropdown Card -->
-        <div id="account-dropdown" class="account-dropdown" style="display: none;">
-          <!-- Email -->
-          <div id="account-dropdown-email" class="account-dropdown-email">email@example.com</div>
+              <div class="account-storage-breakdown">
+                <div class="account-storage-item">
+                  <span class="account-storage-dot dot-notes"></span>
+                  <span id="account-storage-notes-text">Notes: 0 B</span>
+                </div>
+                <div class="account-storage-item">
+                  <span class="account-storage-dot dot-other"></span>
+                  <span id="account-storage-other-text">Other files: 0 B</span>
+                </div>
+                <div class="account-storage-item">
+                  <span class="account-storage-dot dot-free"></span>
+                  <span id="account-storage-free-text">Free: 10 GB</span>
+                </div>
+              </div>
+            </div>
 
-          <!-- Large Avatar Circle -->
-          <div class="dropdown-avatar-container">
-            <img id="dropdown-profile-avatar" src="" alt="Avatar" style="display: none;">
-            <div id="dropdown-profile-letter" class="dropdown-avatar-letter" style="display: none;"></div>
-            <span id="dropdown-profile-icon" class="material-symbols-outlined dropdown-avatar-icon">account_circle</span>
-          </div>
-
-          <!-- Display Name -->
-          <div id="dropdown-profile-username" class="dropdown-username">Username</div>
-
-          <!-- Actions -->
-          <div class="dropdown-actions">
-            <!-- Settings button -->
-            <button id="btn-dropdown-settings" class="dropdown-btn dropdown-btn-secondary">
-              <span class="material-symbols-outlined">settings</span>
+            <md-button id="btn-dropdown-settings" variant="tonal" icon="settings" style="width: 100%;">
               <span data-i18n="settings_header">Settings</span>
-            </button>
-
-            <button id="btn-dropdown-signout" class="dropdown-btn dropdown-btn-secondary">
-              <span class="material-symbols-outlined">logout</span>
+            </md-button>
+            <md-button id="btn-dropdown-signout" variant="tonal" icon="logout" style="width: 100%;">
               <span data-i18n="btn_signout">Sign out</span>
-            </button>
+            </md-button>
           </div>
 
-          <!-- Footer links -->
-          <div class="dropdown-footer">
+          <div slot="footer" class="dropdown-footer">
             <a href="./privacy.html" target="_blank" data-i18n="privacy_policy">Privacy Policy</a>
             <span>•</span>
             <a href="./terms.html" target="_blank" data-i18n="terms_of_service">Terms of Service</a>
           </div>
-        </div>
+        </md-account-menu>
       </div>
     </header>

@@ -1,91 +1,128 @@
   <!-- Settings & Sync Modal -->
   <div id="settings-modal" class="modal-overlay">
-    <div class="modal-card" style="height: auto; min-height: unset; max-height: 90vh;">
-      <div class="settings-header">
-        <h2 data-i18n="settings_header">Settings</h2>
-        <button id="btn-settings-close" class="btn-icon" data-i18n-aria="btn_settings_close_aria"
-          aria-label="Close settings"><span class="material-symbols-outlined">close</span></button>
+    <div class="modal-card settings-modal-card">
+      <div class="modal-header settings-modal-header">
+        <div class="settings-modal-title-wrapper">
+          <md-icon-button id="btn-settings-back" icon="arrow_back" class="modal-back-btn" aria-label="Close settings" title="Go back"></md-icon-button>
+          <h2>
+            <span class="settings-modal-title" data-i18n="settings_header">Settings</span>
+          </h2>
+        </div>
+        <md-icon-button id="btn-settings-close-icon" icon="close" aria-label="Close settings" data-i18n-aria="btn_settings_close_aria" title="Close settings"></md-icon-button>
       </div>
 
-      <div class="settings-body" style="gap: 20px;">
+      <div class="modal-body settings-modal-body">
+        <div class="settings-modal-content">
+          <!-- Section: Appearance -->
+          <section class="settings-section">
+            <h3 data-i18n="settings_section_appearance">Appearance</h3>
 
-        <!-- Tab: Appearance -->
-        <section class="settings-section">
-          <h3 data-i18n="settings_section_appearance">Appearance</h3>
-
-          <div class="settings-row">
-            <div class="settings-info">
-              <span class="settings-label" data-i18n="settings_theme_label">Theme</span>
-              <span class="settings-desc" data-i18n="settings_theme_desc">Choose your preferred theme</span>
+            <div class="settings-row-col">
+              <div class="settings-info">
+                <span class="settings-label" data-i18n="settings_theme_label">Theme</span>
+                <span class="settings-desc" data-i18n="settings_theme_desc">Choose your preferred theme</span>
+              </div>
+              <md-segmented-button-set id="theme-select" class="settings-theme-select">
+                <md-segmented-button value="light" icon="light_mode">
+                  <span data-i18n="settings_theme_light">Light</span>
+                </md-segmented-button>
+                <md-segmented-button value="system" icon="devices">
+                  <span data-i18n="settings_theme_system">Device</span>
+                </md-segmented-button>
+                <md-segmented-button value="dark" icon="dark_mode">
+                  <span data-i18n="settings_theme_dark">Dark</span>
+                </md-segmented-button>
+              </md-segmented-button-set>
             </div>
-            <select id="theme-select" class="select-premium">
-              <option value="light" data-i18n="settings_theme_light">Light Theme</option>
-              <option value="system" data-i18n="settings_theme_system">Device Theme</option>
-              <option value="dark" data-i18n="settings_theme_dark">Dark Theme</option>
-            </select>
-          </div>
 
-          <div class="settings-row">
-            <div class="settings-info">
-              <span class="settings-label" data-i18n="settings_language_label">Language</span>
-              <span class="settings-desc" data-i18n="settings_language_desc">Choose your preferred application
-                language</span>
+            <div class="settings-row-col">
+              <div class="settings-info">
+                <span class="settings-label" data-i18n="settings_language_label">Language</span>
+                <span class="settings-desc">
+                  <span data-i18n="settings_language_desc">Choose your preferred application language</span>. <span data-i18n="settings_current_language">Current:</span> <strong id="current-language-name">English</strong>
+                </span>
+              </div>
+              <div class="settings-action-row-center">
+                <md-button id="btn-open-language-dialog" variant="tonal" icon="translate">
+                  <span data-i18n="btn_change_language">Change language</span>
+                </md-button>
+              </div>
             </div>
-            <select id="language-select" class="select-premium">
-              <option value="ar">العربية (Arabic)</option>
-              <option value="de">Deutsch</option>
-              <option value="el">Ελληνικά</option>
-              <option value="en">English</option>
-              <option value="es">Español</option>
-              <option value="fr">Français</option>
-              <option value="hi">हिन्दी (Hindi)</option>
-              <option value="it">Italiano</option>
-              <option value="nl">Nederlands</option>
-              <option value="pl">Polski</option>
-              <option value="pt">Português</option>
-              <option value="ru">Русский</option>
-              <option value="sv">Svenska</option>
-              <option value="tr">Türkçe</option>
-              <option value="uk">Українська</option>
-              <option value="zh">中文 (Chinese)</option>
-            </select>
-          </div>
-        </section>
+          </section>
 
-        <!-- Tab: Import / Export Backups -->
-        <section class="settings-section">
-          <h3 data-i18n="settings_section_backups">Local Backups</h3>
-          <p class="section-help" data-i18n="settings_backups_help">Export your notes to a JSON file or import notes
-            from a previous backup.</p>
+          <!-- Section: Import / Export Backups -->
+          <section class="settings-section">
+            <h3 data-i18n="settings_section_backups">Local Backups</h3>
+            <p class="section-help" data-i18n="settings_backups_help">Export your notes to a JSON file or import notes
+              from a previous backup.</p>
 
-          <div class="backup-actions">
-            <button id="btn-export-backup" class="btn btn-secondary" data-i18n="btn_export_backup"
-              title="Export JSON notes backup">
-              <span class="material-symbols-outlined">download</span> Export Backup
-            </button>
-            <label class="btn btn-secondary file-input-label" data-i18n="btn_import_backup">
-              <span class="material-symbols-outlined">upload</span> Import Backup File
+            <div class="backup-actions">
+              <md-button id="btn-export-backup" variant="tonal" icon="download" data-i18n-title="btn_export_backup"
+                title="Export JSON notes backup">
+                <span data-i18n="btn_export_backup">Export Backup</span>
+              </md-button>
+              <md-button id="btn-import-backup-btn" variant="tonal" icon="upload">
+                <span data-i18n="btn_import_backup">Import Backup File</span>
+              </md-button>
               <input type="file" id="import-file-input" accept=".json" class="hidden">
-            </label>
-          </div>
-          <p id="import-status-text" class="status-message"></p>
-        </section>
+            </div>
+            <p id="import-status-text" class="status-message"></p>
+          </section>
 
-        <!-- Settings Footer / Attribution & License -->
-        <div class="settings-footer-attribution">
-          <p class="attribution-thanks">
-            <span class="material-symbols-outlined">favorite</span>
-            <span data-i18n-html="settings_filen_thanks">Special thanks to Filen for their <a
-                href="https://github.com/FilenCloudDienste/filen-sdk-ts" target="_blank">SDK</a>.</span>
-          </p>
-          <div class="settings-license-disclosure">
-            <span class="material-symbols-outlined">balance</span>
-            <span data-i18n-html="settings_license_notice">
-              Check us out on Github <a href="https://github.com/francofantomius/noten" target="_blank">Noten</a>
-            </span>
+          <!-- Settings Footer / Attribution & License -->
+          <div class="settings-footer-attribution">
+            <p class="attribution-thanks">
+              <md-icon name="favorite" size="18" style="color: var(--accent);"></md-icon>
+              <span data-i18n-html="settings_filen_thanks">Special thanks to Filen for their <a
+                  href="https://github.com/FilenCloudDienste/filen-sdk-ts" target="_blank">SDK</a>.</span>
+            </p>
+            <div class="settings-license-disclosure">
+              <md-icon name="balance" size="18"></md-icon>
+              <span data-i18n-html="settings_license_notice">
+                Check us out on Github <a href="https://github.com/francofantomius/noten" target="_blank">Noten</a>
+              </span>
+            </div>
           </div>
         </div>
 
+        <div class="settings-modal-actions">
+          <md-button id="btn-settings-save" variant="filled">
+            <span data-i18n="btn_save">Save</span>
+          </md-button>
+        </div>
       </div>
     </div>
   </div>
+
+  <!-- Language Selection Dialog -->
+  <md-dialog id="language-modal" headline="Select Language" data-i18n-headline="settings_language_dialog_title">
+    <div class="language-modal-content">
+      <md-radio-group id="language-radio-group" name="language">
+        <md-radio value="ar">العربية (Arabic)</md-radio>
+        <md-radio value="de">Deutsch</md-radio>
+        <md-radio value="el">Ελληνικά</md-radio>
+        <md-radio value="en">English</md-radio>
+        <md-radio value="es">Español</md-radio>
+        <md-radio value="fr">Français</md-radio>
+        <md-radio value="hi">हिन्दी (Hindi)</md-radio>
+        <md-radio value="it">Italiano</md-radio>
+        <md-radio value="nl">Nederlands</md-radio>
+        <md-radio value="pl">Polski</md-radio>
+        <md-radio value="pt">Português</md-radio>
+        <md-radio value="ru">Русский</md-radio>
+        <md-radio value="sv">Svenska</md-radio>
+        <md-radio value="tr">Türkçe</md-radio>
+        <md-radio value="uk">Українська</md-radio>
+        <md-radio value="zh">中文 (Chinese)</md-radio>
+      </md-radio-group>
+    </div>
+
+    <div slot="actions">
+      <md-button id="btn-language-cancel" variant="text">
+        <span data-i18n="btn_cancel">Cancel</span>
+      </md-button>
+      <md-button id="btn-language-select" variant="filled">
+        <span data-i18n="btn_select_language">Select language</span>
+      </md-button>
+    </div>
+  </md-dialog>

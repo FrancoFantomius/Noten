@@ -1,34 +1,33 @@
         <!-- Note Creator Component -->
-        <div id="note-creator" class="note-creator-container">
+        <div id="note-creator" class="note-creator-container color-default">
           <!-- Minimized state -->
           <div id="creator-collapsed" class="creator-collapsed">
             <span data-i18n="creator_collapsed_prompt">Take a secure note...</span>
             <div class="creator-actions-collapsed">
-              <button id="btn-quick-todo" class="btn-icon" data-i18n-title="btn_quick_todo_title"
-                title="New checklist"><span class="material-symbols-outlined">check_box</span></button>
-              <button id="btn-quick-image" class="btn-icon" data-i18n-title="btn_creator_image_title"
-                title="Add image"><span class="material-symbols-outlined">image</span></button>
+              <md-icon-button id="btn-quick-todo" icon="check_box" data-i18n-title="btn_quick_todo_title"
+                title="New checklist" aria-label="New checklist"></md-icon-button>
+              <md-icon-button id="btn-quick-image" icon="image" data-i18n-title="btn_creator_image_title"
+                title="Add image" aria-label="Add image"></md-icon-button>
             </div>
           </div>
 
           <!-- Expanded state -->
           <div id="creator-expanded" class="creator-expanded hidden">
-            <div id="creator-images-preview" class="note-images-preview hidden"></div>
-            <input type="file" id="creator-image-input" accept="image/*" multiple class="hidden">
             <div class="creator-title-row">
               <input type="text" id="creator-title" data-i18n-placeholder="creator_title_placeholder"
                 placeholder="Title" autocomplete="off">
-              <button id="btn-creator-pin" class="btn-icon" data-i18n-title="btn_creator_pin_title" title="Pin note">
-                <span class="material-symbols-outlined">keep</span>
-              </button>
+              <md-icon-button id="btn-creator-pin" icon="keep" data-i18n-title="btn_pin_note_title" title="Pin note" aria-label="Pin note"></md-icon-button>
             </div>
+
+            <input type="file" id="creator-image-input" accept="image/*" multiple class="hidden">
+            <div id="creator-images-preview" class="note-images-preview hidden"></div>
 
             <div id="creator-checklist-view" class="modal-checklist hidden"></div>
             <textarea id="creator-body" data-i18n-placeholder="creator_body_placeholder"
               placeholder="Take a secure note..." rows="3"></textarea>
 
             <!-- Dynamic tags input / list in note creator -->
-            <div id="creator-tags-list" class="note-tags-container"></div>
+            <md-chip-set id="creator-tags-list" class="note-tags-container"></md-chip-set>
             <div class="tag-input-wrapper">
               <input type="text" id="creator-tag-input" data-i18n-placeholder="creator_tag_input_placeholder"
                 placeholder="Add tag + press Enter...">
@@ -36,44 +35,53 @@
 
             <!-- Toolbar and Actions -->
             <div class="creator-footer">
-              <div class="creator-toolbar">
+              <md-toolbar id="creator-toolbar" class="creator-toolbar" aria-label="Note creator actions">
                 <!-- Color Selector Button -->
                 <div class="color-picker-wrapper">
-                  <button class="btn-icon" data-i18n-title="btn_creator_color_title" title="Change color"><span
-                      class="material-symbols-outlined">palette</span></button>
-                  <div class="color-palette-popup">
-                    <button class="color-option default active" data-color="default" data-i18n-title="color_default"
-                      title="Default"></button>
-                    <button class="color-option red" data-color="red" data-i18n-title="color_red" title="Red"></button>
-                    <button class="color-option orange" data-color="orange" data-i18n-title="color_orange"
-                      title="Orange"></button>
-                    <button class="color-option yellow" data-color="yellow" data-i18n-title="color_yellow"
-                      title="Yellow"></button>
-                    <button class="color-option green" data-color="green" data-i18n-title="color_green"
-                      title="Green"></button>
-                    <button class="color-option teal" data-color="teal" data-i18n-title="color_teal"
-                      title="Teal"></button>
-                    <button class="color-option blue" data-color="blue" data-i18n-title="color_blue"
-                      title="Blue"></button>
-                    <button class="color-option purple" data-color="purple" data-i18n-title="color_purple"
-                      title="Purple"></button>
-                    <button class="color-option pink" data-color="pink" data-i18n-title="color_pink"
-                      title="Pink"></button>
+                  <md-icon-button id="btn-creator-color" icon="palette" data-i18n-title="btn_creator_color_title" title="Change color" aria-label="Change color"></md-icon-button>
+                  <div class="color-palette-popup" role="radiogroup" aria-label="Color options">
+                    <button type="button" class="color-option default active" data-color="default" role="radio" aria-checked="true" data-i18n-title="color_default" data-i18n-aria="color_default" title="Default" aria-label="Default">
+                      <md-icon name="format_color_reset" size="18"></md-icon>
+                      <md-icon name="check" size="18" class="color-check-icon"></md-icon>
+                    </button>
+                    <button type="button" class="color-option red" data-color="red" role="radio" aria-checked="false" data-i18n-title="color_red" data-i18n-aria="color_red" title="Red" aria-label="Red">
+                      <md-icon name="check" size="18" class="color-check-icon"></md-icon>
+                    </button>
+                    <button type="button" class="color-option orange" data-color="orange" role="radio" aria-checked="false" data-i18n-title="color_orange" data-i18n-aria="color_orange" title="Orange" aria-label="Orange">
+                      <md-icon name="check" size="18" class="color-check-icon"></md-icon>
+                    </button>
+                    <button type="button" class="color-option yellow" data-color="yellow" role="radio" aria-checked="false" data-i18n-title="color_yellow" data-i18n-aria="color_yellow" title="Yellow" aria-label="Yellow">
+                      <md-icon name="check" size="18" class="color-check-icon"></md-icon>
+                    </button>
+                    <button type="button" class="color-option green" data-color="green" role="radio" aria-checked="false" data-i18n-title="color_green" data-i18n-aria="color_green" title="Green" aria-label="Green">
+                      <md-icon name="check" size="18" class="color-check-icon"></md-icon>
+                    </button>
+                    <button type="button" class="color-option teal" data-color="teal" role="radio" aria-checked="false" data-i18n-title="color_teal" data-i18n-aria="color_teal" title="Teal" aria-label="Teal">
+                      <md-icon name="check" size="18" class="color-check-icon"></md-icon>
+                    </button>
+                    <button type="button" class="color-option blue" data-color="blue" role="radio" aria-checked="false" data-i18n-title="color_blue" data-i18n-aria="color_blue" title="Blue" aria-label="Blue">
+                      <md-icon name="check" size="18" class="color-check-icon"></md-icon>
+                    </button>
+                    <button type="button" class="color-option purple" data-color="purple" role="radio" aria-checked="false" data-i18n-title="color_purple" data-i18n-aria="color_purple" title="Purple" aria-label="Purple">
+                      <md-icon name="check" size="18" class="color-check-icon"></md-icon>
+                    </button>
+                    <button type="button" class="color-option pink" data-color="pink" role="radio" aria-checked="false" data-i18n-title="color_pink" data-i18n-aria="color_pink" title="Pink" aria-label="Pink">
+                      <md-icon name="check" size="18" class="color-check-icon"></md-icon>
+                    </button>
                   </div>
                 </div>
-                <button id="btn-creator-checklist-toggle" class="btn-icon"
-                  data-i18n-title="btn_modal_checklist_toggle_title" title="Toggle checklist view"><span
-                    class="material-symbols-outlined">checklist</span></button>
-                <button id="btn-creator-image" class="btn-icon" data-i18n-title="btn_creator_image_title"
-                  title="Add image"><span class="material-symbols-outlined">image</span></button>
+                <md-icon-button id="btn-creator-checklist-toggle" icon="checklist"
+                  data-i18n-title="btn_modal_checklist_toggle_title" title="Toggle checklist view" aria-label="Toggle checklist view"></md-icon-button>
+                <md-icon-button id="btn-creator-image" icon="image" data-i18n-title="btn_creator_image_title"
+                  title="Add image" aria-label="Add image"></md-icon-button>
                 <!-- Archive/Trash helper inside creator -->
-                <button id="btn-creator-archive" class="btn-icon" data-i18n-title="btn_creator_archive_title"
-                  title="Archive note"><span class="material-symbols-outlined">archive</span></button>
-                <button id="btn-creator-trash" class="btn-icon" data-i18n-title="btn_creator_trash_title"
-                  title="Discard note"><span class="material-symbols-outlined">delete</span></button>
-              </div>
+                <md-icon-button id="btn-creator-archive" icon="archive" data-i18n-title="btn_creator_archive_title"
+                  title="Archive note" aria-label="Archive note"></md-icon-button>
+                <md-icon-button id="btn-creator-trash" icon="delete" data-i18n-title="btn_creator_trash_title"
+                  title="Discard note" aria-label="Discard note"></md-icon-button>
+              </md-toolbar>
 
-              <button id="btn-creator-close" class="btn btn-text" data-i18n="btn_creator_close">Close</button>
+              <md-button id="btn-creator-close" variant="text"><span data-i18n="btn_creator_close">Close</span></md-button>
             </div>
           </div>
         </div>

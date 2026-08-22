@@ -4,7 +4,7 @@
 
 import { t } from '../i18n.js';
 import { state, elements } from './state.js';
-import { escapeHtml, formatDate, openLightbox } from './utils.js';
+import { escapeHtml, formatDate, openLightbox, setupCarouselItemClicks, getImageSrc } from './utils.js';
 import { hasChecklistItems, buildChecklistDOM } from './checklist.js';
 import { openNoteModal, saveAndCloseModal } from './modal.js';
 import { showSettings, hideSettings } from './account.js';
@@ -13,6 +13,17 @@ import { showSettings, hideSettings } from './account.js';
  * Initializes sidebar toggling, search input listeners, sidebar navigations, and hash change event listeners
  */
 export function initCardsUI() {
+  fixSidebarSpacing();
+
+  // Restore saved sidebar collapsed state across page navigations
+  try {
+    const isSavedCollapsed = localStorage.getItem('sidebar_collapsed') === 'true';
+    if (isSavedCollapsed && window.innerWidth > 768 && elements.sidebar) {
+      elements.sidebar.classList.add('collapsed');
+    }
+  } catch (e) {}
+  document.documentElement.classList.remove('sidebar-collapsed-preload');
+
   if (elements.btnSidebarToggle) {
     elements.btnSidebarToggle.addEventListener('click', toggleSidebar);
   }
@@ -47,8 +58,6 @@ export function initCardsUI() {
 
       if (shouldPreventDefault) {
         e.preventDefault();
-        elements.navItems.forEach(i => i.classList.remove('active'));
-        btn.classList.add('active');
 
         // Clear hash and tag highlight when switching to a main category in-memory
         if (window.location.hash) {
@@ -59,22 +68,72 @@ export function initCardsUI() {
     });
   });
 
-  // Search Live Filtering
-  if (elements.searchInput) {
-    elements.searchInput.addEventListener('input', (e) => {
-      const val = e.target.value.trim().toLowerCase();
-      if (elements.btnSearchClear) {
-        elements.btnSearchClear.classList.toggle('hidden', val === '');
+  if (elements.sidebarRail) {
+    elements.sidebarRail.addEventListener('change', (e) => {
+      const val = e.detail?.value || e.detail?.item?.getAttribute('data-category');
+      if (val) {
+        const currentPath = window.location.pathname;
+        const isNotesPage = !currentPath.endsWith('archive.html') && !currentPath.endsWith('trash.html');
+        const isArchivePage = currentPath.endsWith('archive.html');
+        const isTrashPage = currentPath.endsWith('trash.html');
+
+        if ((val === 'notes' && isNotesPage) || (val === 'archive' && isArchivePage) || (val === 'trash' && isTrashPage)) {
+          if (window.location.hash) {
+            history.pushState("", document.title, window.location.pathname);
+          }
+          setCategory(val);
+        }
       }
+    });
+  }
+
+  if (elements.navigationBar) {
+    elements.navigationBar.addEventListener('change', (e) => {
+      const val = e.detail?.value || e.detail?.item?.getAttribute('data-category') || e.detail?.item?.value;
+      if (val) {
+        const currentPath = window.location.pathname;
+        const isNotesPage = !currentPath.endsWith('archive.html') && !currentPath.endsWith('trash.html');
+        const isArchivePage = currentPath.endsWith('archive.html');
+        const isTrashPage = currentPath.endsWith('trash.html');
+
+        if ((val === 'notes' && isNotesPage) || (val === 'archive' && isArchivePage) || (val === 'trash' && isTrashPage)) {
+          if (window.location.hash) {
+            history.pushState("", document.title, window.location.pathname);
+          }
+          setCategory(val);
+        }
+      }
+    });
+  }
+
+  // Initial category sync across drawer and rail
+  setCategory(state.activeCategory);
+
+  // Search Live Filtering & Suggestions
+  if (elements.searchInput) {
+    const handleSearch = () => {
       renderNotesFeed();
+      updateSearchSuggestionsAndTags();
+    };
+    elements.searchInput.addEventListener('input', handleSearch);
+    elements.searchInput.addEventListener('search', handleSearch);
+    elements.searchInput.addEventListener('clear', handleSearch);
+    elements.searchInput.addEventListener('active-change', () => {
+      updateSearchSuggestionsAndTags();
+    });
+    elements.searchInput.addEventListener('suggestion-select', (e) => {
+      const suggestion = e.detail?.suggestion;
+      if (suggestion && suggestion.id) {
+        openNoteModal(suggestion.id);
+      }
     });
   }
 
   if (elements.btnSearchClear) {
     elements.btnSearchClear.addEventListener('click', () => {
-      elements.searchInput.value = '';
-      elements.btnSearchClear.classList.add('hidden');
+      if (elements.searchInput) elements.searchInput.value = '';
       renderNotesFeed();
+      updateSearchSuggestionsAndTags();
     });
   }
 
@@ -122,6 +181,51 @@ export function initCardsUI() {
 }
 
 /**
+ * Removes extraneous top spacing inside md-navigation-drawer and md-navigation-rail
+ */
+export function fixSidebarSpacing() {
+  const applyFixes = () => {
+    if (elements.sidebarDrawer && elements.sidebarDrawer.shadowRoot) {
+      if (!elements.sidebarDrawer.shadowRoot.getElementById('drawer-spacing-fix')) {
+        const style = document.createElement('style');
+        style.id = 'drawer-spacing-fix';
+        style.textContent = `
+          .header {
+            padding: 0 !important;
+            display: none !important;
+          }
+          .content {
+            padding-top: 8px !important;
+          }
+        `;
+        elements.sidebarDrawer.shadowRoot.appendChild(style);
+      }
+    }
+
+    if (elements.sidebarRail && elements.sidebarRail.shadowRoot) {
+      if (!elements.sidebarRail.shadowRoot.getElementById('rail-spacing-fix')) {
+        const style = document.createElement('style');
+        style.id = 'rail-spacing-fix';
+        style.textContent = `
+          .header {
+            margin-bottom: 0 !important;
+            display: none !important;
+          }
+          .rail {
+            padding-top: 8px !important;
+          }
+        `;
+        elements.sidebarRail.shadowRoot.appendChild(style);
+      }
+    }
+  };
+
+  applyFixes();
+  customElements.whenDefined('md-navigation-drawer').then(applyFixes);
+  customElements.whenDefined('md-navigation-rail').then(applyFixes);
+}
+
+/**
  * Sidebar Navigation Toggling
  */
 export function toggleSidebar() {
@@ -134,7 +238,10 @@ export function toggleSidebar() {
       elements.sidebarOverlay.classList.toggle('active', isMobileOpen);
     }
   } else {
-    elements.sidebar.classList.toggle('collapsed');
+    const isCollapsed = elements.sidebar.classList.toggle('collapsed');
+    try {
+      localStorage.setItem('sidebar_collapsed', isCollapsed ? 'true' : 'false');
+    } catch (e) {}
   }
 }
 
@@ -152,25 +259,75 @@ export function setCategory(category) {
     elements.sidebarOverlay.classList.remove('active');
   }
 
-  // Highlight sidebar item if it's main category
+  const categoryToIndex = {
+    'notes': 0,
+    'archive': 1,
+    'trash': 2
+  };
+
+  // Sync md-navigation-rail activeIndex
+  if (elements.sidebarRail) {
+    if (category in categoryToIndex) {
+      const idx = categoryToIndex[category];
+      elements.sidebarRail.activeIndex = idx;
+      elements.sidebarRail.setAttribute('active-index', String(idx));
+    } else {
+      elements.sidebarRail.activeIndex = -1;
+      elements.sidebarRail.removeAttribute('active-index');
+    }
+  }
+
+  // Sync md-navigation-bar activeIndex & value
+  if (elements.navigationBar) {
+    if (category in categoryToIndex) {
+      const idx = categoryToIndex[category];
+      elements.navigationBar.activeIndex = idx;
+      elements.navigationBar.setAttribute('active-index', String(idx));
+      elements.navigationBar.value = category;
+    } else {
+      elements.navigationBar.activeIndex = -1;
+      elements.navigationBar.removeAttribute('active-index');
+      elements.navigationBar.value = '';
+    }
+  }
+
+  // Update body page classes for dynamic styling (e.g. hiding creator/FAB on archive & trash)
+  if (document.body) {
+    document.body.classList.toggle('archive-page', category === 'archive');
+    document.body.classList.toggle('trash-page', category === 'trash');
+    document.body.classList.toggle('index-page', category === 'notes' || category.startsWith('tag:'));
+  }
+
+  // Highlight all sidebar items across both drawer and rail
   elements.navItems.forEach(i => {
     const dataCat = i.getAttribute('data-category');
-    if (category === dataCat) {
-      i.classList.add('active');
+    const isMatch = category === dataCat;
+    i.classList.toggle('active', isMatch);
+    if (isMatch) {
+      i.setAttribute('active', '');
+      i.setAttribute('selected', '');
+      if ('active' in i) i.active = true;
+      if ('selected' in i) i.selected = true;
     } else {
-      i.classList.remove('active');
+      i.removeAttribute('active');
+      i.removeAttribute('selected');
+      if ('active' in i) i.active = false;
+      if ('selected' in i) i.selected = false;
     }
   });
 
-  // Highlights tag lists
+  // Highlights tag chip in sidebar
   if (elements.sidebarTagsList) {
-    const tagBtns = elements.sidebarTagsList.querySelectorAll('.tag-btn');
-    tagBtns.forEach(btn => {
-      const tagVal = btn.getAttribute('data-tag');
-      if (`tag:${tagVal}` === category) {
-        btn.classList.add('active');
+    const tagChips = elements.sidebarTagsList.querySelectorAll('md-chip');
+    tagChips.forEach(chip => {
+      const tagVal = chip.getAttribute('label');
+      const isSelected = `tag:${tagVal}` === category;
+      if (isSelected) {
+        chip.setAttribute('selected', '');
+        if ('selected' in chip) chip.selected = true;
       } else {
-        btn.classList.remove('active');
+        chip.removeAttribute('selected');
+        if ('selected' in chip) chip.selected = false;
       }
     });
   }
@@ -232,12 +389,32 @@ export function renderNotesFeed() {
       }
     }
 
-    // 2. Search Query Matching
+    // 2. Search Query Matching (support #tags and text terms)
     if (searchQuery) {
-      const matchTitle = note.title.toLowerCase().includes(searchQuery);
-      const matchBody = note.body.toLowerCase().includes(searchQuery);
-      const matchTags = note.tags.some(tag => tag.toLowerCase().includes(searchQuery));
-      return matchTitle || matchBody || matchTags;
+      const tokens = searchQuery.split(/\s+/).filter(Boolean);
+      const tagTokens = tokens.filter(t => t.startsWith('#')).map(t => t.substring(1).toLowerCase());
+      const textTokens = tokens.filter(t => !t.startsWith('#'));
+
+      // All #tag tokens must match note tags
+      if (tagTokens.length > 0) {
+        const noteTagsLower = (note.tags || []).map(t => t.toLowerCase());
+        const hasAllTags = tagTokens.every(tag => noteTagsLower.includes(tag));
+        if (!hasAllTags) return false;
+      }
+
+      // All text tokens must match title, body, or tags
+      if (textTokens.length > 0) {
+        const matchTitle = (note.title || '').toLowerCase();
+        const matchBody = (note.body || '').toLowerCase();
+        const matchTags = (note.tags || []).map(t => t.toLowerCase());
+        return textTokens.every(term =>
+          matchTitle.includes(term) ||
+          matchBody.includes(term) ||
+          matchTags.some(t => t.includes(term))
+        );
+      }
+
+      return true;
     }
 
     return true;
@@ -309,9 +486,9 @@ export function renderCardsToGrid(notes, gridElement) {
     let tagsHtml = '';
     if (note.tags && note.tags.length > 0) {
       tagsHtml = `
-        <div class="card-tags">
-          ${note.tags.map(t => `<span class="card-tag">#${t}</span>`).join('')}
-        </div>
+        <md-chip-set class="card-tags">
+          ${note.tags.map(t => `<md-chip label="${escapeHtml(t)}" variant="suggestion"></md-chip>`).join('')}
+        </md-chip-set>
       `;
     }
 
@@ -328,9 +505,7 @@ export function renderCardsToGrid(notes, gridElement) {
     card.innerHTML = `
       ${coverHtml}
       ${!note.isTrashed ? `
-      <button class="btn-icon note-card-pin ${note.isPinned ? 'active' : ''}" title="${note.isPinned ? t('btn_unpin_note_title') : t('btn_pin_note_title')}">
-        <span class="material-symbols-outlined">keep</span>
-      </button>
+      <md-icon-button class="btn-icon note-card-pin ${note.isPinned ? 'active' : ''}" ${note.isPinned ? 'selected' : ''} icon="keep" title="${note.isPinned ? t('btn_unpin_note_title') : t('btn_pin_note_title')}" aria-label="${note.isPinned ? t('btn_unpin_note_title') : t('btn_pin_note_title')}"></md-icon-button>
       ` : ''}
       ${note.title ? `<h3 class="note-card-title">${escapeHtml(note.title)}</h3>` : ''}
       ${note.body && !isChecklist ? `<div class="note-card-body ${isTruncated ? 'truncated' : ''}">${escapeHtml(bodyText)}</div>` : ''}
@@ -339,19 +514,15 @@ export function renderCardsToGrid(notes, gridElement) {
         <span>${formatDate(note.updatedAt)}</span>
         ${note.isTrashed ? `
           <div class="note-card-trash-actions">
-            <button class="btn-icon btn-card-restore" title="${t('btn_modal_trash_restore_title')}">
-              <span class="material-symbols-outlined">restore</span>
-            </button>
-            <button class="btn-icon btn-card-delete-forever" title="${t('btn_modal_trash_delete_forever_title')}">
-              <span class="material-symbols-outlined">delete</span>
-            </button>
+            <md-icon-button class="btn-icon btn-card-restore" icon="restore" title="${t('btn_modal_trash_restore_title')}" aria-label="Restore"></md-icon-button>
+            <md-icon-button class="btn-icon btn-card-delete-forever" icon="delete" title="${t('btn_modal_trash_delete_forever_title')}" aria-label="Delete Forever"></md-icon-button>
           </div>
         ` : ''}
       </div>
     `;
 
     if (note.body && isChecklist) {
-      const checklistContainer = buildChecklistDOM(bodyText, note.id, isTruncated);
+      const checklistContainer = buildChecklistDOM(bodyText, note.id, isTruncated, note.isTrashed);
       const titleEl = card.querySelector('.note-card-title');
       const pinBtn = card.querySelector('.note-card-pin');
       const insertAfter = titleEl || pinBtn;
@@ -364,25 +535,40 @@ export function renderCardsToGrid(notes, gridElement) {
       }
     }
 
+    const carousel = card.querySelector('md-carousel');
+    if (carousel) {
+      setupCarouselItemClicks(carousel, (src, item, name) => {
+        openLightbox(src, name);
+      });
+    }
+
     card.addEventListener('click', (e) => {
+      const path = e.composedPath ? e.composedPath() : [e.target];
       const pinBtn = card.querySelector('.note-card-pin');
       const restoreBtn = card.querySelector('.btn-card-restore');
       const deleteForeverBtn = card.querySelector('.btn-card-delete-forever');
-      const gridImg = e.target.closest('.grid-image-wrapper img');
-      const checklistClick = e.target.closest('.checklist-item');
+      const carouselItem = path.find(el => el && el.tagName === 'MD-CAROUSEL-ITEM') || e.target.closest('md-carousel-item');
+      const carouselEl = path.find(el => el && el.tagName === 'MD-CAROUSEL') || e.target.closest('md-carousel');
+      const checklistClick = path.find(el => el && el.classList && el.classList.contains('checklist-item')) || e.target.closest('.checklist-item');
 
-      if (pinBtn && (e.target === pinBtn || pinBtn.contains(e.target))) {
+      if (pinBtn && (e.target === pinBtn || pinBtn.contains(e.target) || path.includes(pinBtn))) {
         e.stopPropagation();
         toggleNotePin(note.id);
-      } else if (restoreBtn && (e.target === restoreBtn || restoreBtn.contains(e.target))) {
+      } else if (restoreBtn && (e.target === restoreBtn || restoreBtn.contains(e.target) || path.includes(restoreBtn))) {
         e.stopPropagation();
         restoreNote(note.id);
-      } else if (deleteForeverBtn && (e.target === deleteForeverBtn || deleteForeverBtn.contains(e.target))) {
+      } else if (deleteForeverBtn && (e.target === deleteForeverBtn || deleteForeverBtn.contains(e.target) || path.includes(deleteForeverBtn))) {
         e.stopPropagation();
         deleteNoteForever(note.id);
-      } else if (gridImg) {
+      } else if (carouselItem) {
         e.stopPropagation();
-        openLightbox(gridImg.src);
+        const src = carouselItem.getAttribute('src') || carouselItem.src;
+        const name = carouselItem.getAttribute('alt') || carouselItem.getAttribute('name') || '';
+        if (src) {
+          openLightbox(src, name);
+        }
+      } else if (carouselEl) {
+        e.stopPropagation();
       } else if (checklistClick) {
         e.stopPropagation();
       } else {
@@ -429,31 +615,34 @@ export async function deleteNoteForever(noteId) {
 }
 
 /**
- * Generates responsive image grid HTML string for note cards.
+ * Generates responsive image carousel HTML string for note cards.
  */
-export function generateImageGridHtml(images) {
+export function generateImageCarouselHtml(images) {
   if (!images || images.length === 0) return '';
 
-  const numCols = Math.min(images.length, 2);
-  const colsHtml = Array.from({ length: numCols }, () => []);
-  const displayImages = images.slice(0, 4);
+  const validImages = images.filter(img => Boolean(getImageSrc(img)));
+  if (validImages.length === 0) return '';
 
-  displayImages.forEach((imgSrc, index) => {
-    colsHtml[index % numCols].push(`
-      <div class="grid-image-wrapper">
-        <img src="${imgSrc}" alt="Attached image ${index + 1}">
-      </div>
-    `);
-  });
+  const isSingle = validImages.length === 1;
+  const itemsHtml = validImages.map((img, index) => {
+    const src = getImageSrc(img);
+    return `
+    <md-carousel-item
+      src="${src}"
+      alt="image-${index + 1}.jpg"
+      interactive
+    ></md-carousel-item>
+  `;
+  }).join('');
 
-  const colsFormatted = colsHtml.map(colImgs => `
-    <div class="image-grid-column">
-      ${colImgs.join('')}
-    </div>
-  `).join('');
-
-  return `<div class="image-grid-row">${colsFormatted}</div>`;
+  return `
+    <md-carousel layout="${isSingle ? 'full-width' : 'multi-browse'}" item-height="180px" hide-indicators aria-label="Note images">
+      ${itemsHtml}
+    </md-carousel>
+  `;
 }
+
+export const generateImageGridHtml = generateImageCarouselHtml;
 
 /**
  * Render tags in Sidebar List
@@ -473,24 +662,21 @@ export function renderSidebarTags() {
   const tags = Array.from(tagsSet).sort();
 
   if (tags.length === 0) {
-    elements.sidebarTagsList.innerHTML = `<li class="sidebar-help-text" style="padding: 8px 12px; font-size: 0.8rem; color: var(--text-secondary);">${t('sidebar_no_tags')}</li>`;
+    elements.sidebarTagsList.innerHTML = `<span class="sidebar-help-text" style="padding: 8px 12px; font-size: 0.8rem; color: var(--text-secondary);">${t('sidebar_no_tags')}</span>`;
     return;
   }
 
   tags.forEach(tag => {
-    const li = document.createElement('li');
-    const isActive = state.activeCategory === `tag:${tag}` ? 'active' : '';
+    const chip = document.createElement('md-chip');
+    chip.setAttribute('label', tag);
+    chip.setAttribute('icon', 'tag');
+    chip.setAttribute('variant', 'filter');
+    if (state.activeCategory === `tag:${tag}`) {
+      chip.setAttribute('selected', '');
+    }
 
-    li.innerHTML = `
-      <button class="tag-btn ${isActive}" data-tag="${tag}">
-        <div style="display: flex; align-items: center; gap: 12px;">
-          <span class="material-symbols-outlined" style="font-size: 18px;">tag</span>
-          <span>${escapeHtml(tag)}</span>
-        </div>
-      </button>
-    `;
-
-    li.querySelector('button').addEventListener('click', (e) => {
+    chip.addEventListener('click', (e) => {
+      e.preventDefault();
       const currentPath = window.location.pathname;
       const isNotesPage = !currentPath.endsWith('archive.html') && !currentPath.endsWith('trash.html');
 
@@ -501,8 +687,138 @@ export function renderSidebarTags() {
         window.location.href = `index.html#tag-${encodeURIComponent(tag)}`;
       }
     });
-    elements.sidebarTagsList.appendChild(li);
+
+    elements.sidebarTagsList.appendChild(chip);
+  });
+}
+
+function escapeRegex(str) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/**
+ * Update search bar suggestions with matching notes and render filter tags beneath
+ */
+export function updateSearchSuggestionsAndTags() {
+  if (!elements.searchInput) return;
+
+  const searchQuery = elements.searchInput.value ? elements.searchInput.value.trim().toLowerCase() : '';
+  const availableNotes = state.decryptedNotes.filter(n => !n.isTrashed);
+
+  const tokens = searchQuery ? searchQuery.split(/\s+/).filter(Boolean) : [];
+  const tagTokens = tokens.filter(t => t.startsWith('#')).map(t => t.substring(1).toLowerCase());
+  const textTokens = tokens.filter(t => !t.startsWith('#'));
+
+  // 1. Calculate matching notes for suggestions
+  let matchingNotes = [];
+  if (searchQuery) {
+    matchingNotes = availableNotes.filter(note => {
+      if (tagTokens.length > 0) {
+        const noteTagsLower = (note.tags || []).map(t => t.toLowerCase());
+        const hasAllTags = tagTokens.every(tag => noteTagsLower.includes(tag));
+        if (!hasAllTags) return false;
+      }
+      if (textTokens.length > 0) {
+        const matchTitle = (note.title || '').toLowerCase();
+        const matchBody = (note.body || '').toLowerCase();
+        const matchTags = (note.tags || []).map(t => t.toLowerCase());
+        return textTokens.every(term =>
+          matchTitle.includes(term) ||
+          matchBody.includes(term) ||
+          matchTags.some(t => t.includes(term))
+        );
+      }
+      return true;
+    });
+  } else {
+    // Show top recent notes when query is empty
+    matchingNotes = availableNotes.slice().sort((a, b) => b.updatedAt - a.updatedAt);
+  }
+
+  // Populate search suggestions (up to 4)
+  const topNotes = matchingNotes.slice(0, 4);
+  elements.searchInput.suggestions = topNotes.map(note => {
+    const rawTitle = (note.title || '').trim();
+    let snippet = '';
+    if (note.body) {
+      snippet = note.body.replace(/\n+/g, ' ').trim().substring(0, 60);
+    }
+    const label = rawTitle || snippet || t('section_header_notes') || 'Note';
+
+    let trailing = '';
+    if (note.tags && note.tags.length > 0) {
+      trailing = '#' + note.tags.slice(0, 2).join(' #');
+    }
+
+    return {
+      id: note.id,
+      label: label,
+      supportingText: snippet && rawTitle ? snippet : (formatDate(note.updatedAt) || ''),
+      trailingSupportingText: trailing,
+      icon: note.isPinned ? 'push_pin' : (note.isArchived ? 'archive' : 'description'),
+      value: rawTitle || note.id
+    };
   });
 
+  // 2. Render tags below suggestions
+  const tagsList = document.getElementById('search-tags-list');
+  const tagsContainer = document.getElementById('search-tags-container');
+  if (tagsList && tagsContainer) {
+    const allTags = new Set();
+    availableNotes.forEach(n => {
+      if (n.tags) n.tags.forEach(t => allTags.add(t));
+    });
 
+    const sortedTags = Array.from(allTags).sort();
+    if (sortedTags.length === 0) {
+      tagsContainer.style.display = 'none';
+      tagsList.innerHTML = '';
+    } else {
+      tagsContainer.style.display = 'flex';
+      tagsList.innerHTML = '';
+
+      sortedTags.forEach(tag => {
+        const isSelected = tagTokens.includes(tag.toLowerCase());
+        const chip = document.createElement('md-chip');
+        chip.setAttribute('label', tag);
+        chip.setAttribute('icon', 'tag');
+        chip.setAttribute('variant', 'filter');
+        if (isSelected) {
+          chip.setAttribute('selected', '');
+        }
+
+        chip.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          toggleSearchTag(tag);
+        });
+
+        tagsList.appendChild(chip);
+      });
+    }
+  }
+}
+
+/**
+ * Toggle a tag in the search query to narrow results
+ */
+function toggleSearchTag(tag) {
+  if (!elements.searchInput) return;
+
+  const currentVal = elements.searchInput.value ? elements.searchInput.value.trim() : '';
+  const tagStr = `#${tag}`;
+  const tagRegex = new RegExp(`(^|\\s)#${escapeRegex(tag)}(?=\\s|$)`, 'gi');
+
+  let newVal = '';
+  if (tagRegex.test(currentVal)) {
+    newVal = currentVal.replace(tagRegex, '').replace(/\s+/g, ' ').trim();
+  } else {
+    newVal = currentVal ? `${currentVal} ${tagStr}` : tagStr;
+  }
+
+  elements.searchInput.value = newVal;
+
+  renderNotesFeed();
+  updateSearchSuggestionsAndTags();
+  elements.searchInput.focus();
 }

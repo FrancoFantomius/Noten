@@ -1,24 +1,21 @@
   <!-- Note Editor Modal -->
   <div id="note-modal" class="modal-overlay">
     <div class="modal-card" id="modal-card-element">
-      <div id="modal-images-preview" class="note-images-preview hidden"></div>
-      <input type="file" id="modal-image-input" accept="image/*" multiple class="hidden">
       <div class="modal-header">
-        <button id="btn-modal-back" class="btn-icon modal-back-btn" aria-label="Go back" title="Save and close">
-          <span class="material-symbols-outlined">arrow_back</span>
-        </button>
+        <md-icon-button id="btn-modal-back" icon="arrow_back" class="modal-back-btn" aria-label="Go back" title="Save and close"></md-icon-button>
         <input type="text" id="modal-title" data-i18n-placeholder="modal_title_placeholder" placeholder="Title">
-        <button id="btn-modal-pin" class="btn-icon" data-i18n-title="btn_modal_pin_title" title="Pin note">
-          <span class="material-symbols-outlined">keep</span>
-        </button>
+        <md-icon-button id="btn-modal-pin" icon="keep" data-i18n-title="btn_pin_note_title" title="Pin note" aria-label="Pin note"></md-icon-button>
       </div>
+
+      <input type="file" id="modal-image-input" accept="image/*" multiple class="hidden">
+      <div id="modal-images-preview" class="note-images-preview hidden"></div>
 
       <div class="modal-body">
         <div id="modal-checklist-view" class="modal-checklist hidden"></div>
         <textarea id="modal-body-text" data-i18n-placeholder="modal_body_placeholder" placeholder="Note"
           rows="6"></textarea>
 
-        <div id="modal-tags-list" class="note-tags-container"></div>
+        <md-chip-set id="modal-tags-list" class="note-tags-container"></md-chip-set>
         <div class="tag-input-wrapper">
           <input type="text" id="modal-tag-input" data-i18n-placeholder="modal_tag_input_placeholder"
             placeholder="Add tag + press Enter...">
@@ -26,47 +23,56 @@
       </div>
 
       <div class="modal-footer">
-        <div class="modal-toolbar">
-          <div class="modal-toolbar-buttons">
-            <!-- Modal Color Picker -->
-            <div class="color-picker-wrapper">
-              <button class="btn-icon" data-i18n-title="btn_creator_color_title" title="Change color"><span
-                  class="material-symbols-outlined">palette</span></button>
-              <div class="color-palette-popup">
-                <button class="color-option default" data-color="default" data-i18n-title="color_default"
-                  title="Default"></button>
-                <button class="color-option red" data-color="red" data-i18n-title="color_red" title="Red"></button>
-                <button class="color-option orange" data-color="orange" data-i18n-title="color_orange"
-                  title="Orange"></button>
-                <button class="color-option yellow" data-color="yellow" data-i18n-title="color_yellow"
-                  title="Yellow"></button>
-                <button class="color-option green" data-color="green" data-i18n-title="color_green"
-                  title="Green"></button>
-                <button class="color-option teal" data-color="teal" data-i18n-title="color_teal" title="Teal"></button>
-                <button class="color-option blue" data-color="blue" data-i18n-title="color_blue" title="Blue"></button>
-                <button class="color-option purple" data-color="purple" data-i18n-title="color_purple"
-                  title="Purple"></button>
-                <button class="color-option pink" data-color="pink" data-i18n-title="color_pink" title="Pink"></button>
-              </div>
+        <md-toolbar id="modal-toolbar" class="modal-toolbar" aria-label="Note actions">
+          <!-- Modal Color Picker -->
+          <div class="color-picker-wrapper">
+            <md-icon-button id="btn-modal-color" icon="palette" data-i18n-title="btn_creator_color_title" title="Change color" aria-label="Change color"></md-icon-button>
+            <div class="color-palette-popup" role="radiogroup" aria-label="Color options">
+              <button type="button" class="color-option default" data-color="default" role="radio" aria-checked="false" data-i18n-title="color_default" data-i18n-aria="color_default" title="Default" aria-label="Default">
+                <md-icon name="format_color_reset" size="18"></md-icon>
+                <md-icon name="check" size="18" class="color-check-icon"></md-icon>
+              </button>
+              <button type="button" class="color-option red" data-color="red" role="radio" aria-checked="false" data-i18n-title="color_red" data-i18n-aria="color_red" title="Red" aria-label="Red">
+                <md-icon name="check" size="18" class="color-check-icon"></md-icon>
+              </button>
+              <button type="button" class="color-option orange" data-color="orange" role="radio" aria-checked="false" data-i18n-title="color_orange" data-i18n-aria="color_orange" title="Orange" aria-label="Orange">
+                <md-icon name="check" size="18" class="color-check-icon"></md-icon>
+              </button>
+              <button type="button" class="color-option yellow" data-color="yellow" role="radio" aria-checked="false" data-i18n-title="color_yellow" data-i18n-aria="color_yellow" title="Yellow" aria-label="Yellow">
+                <md-icon name="check" size="18" class="color-check-icon"></md-icon>
+              </button>
+              <button type="button" class="color-option green" data-color="green" role="radio" aria-checked="false" data-i18n-title="color_green" data-i18n-aria="color_green" title="Green" aria-label="Green">
+                <md-icon name="check" size="18" class="color-check-icon"></md-icon>
+              </button>
+              <button type="button" class="color-option teal" data-color="teal" role="radio" aria-checked="false" data-i18n-title="color_teal" data-i18n-aria="color_teal" title="Teal" aria-label="Teal">
+                <md-icon name="check" size="18" class="color-check-icon"></md-icon>
+              </button>
+              <button type="button" class="color-option blue" data-color="blue" role="radio" aria-checked="false" data-i18n-title="color_blue" data-i18n-aria="color_blue" title="Blue" aria-label="Blue">
+                <md-icon name="check" size="18" class="color-check-icon"></md-icon>
+              </button>
+              <button type="button" class="color-option purple" data-color="purple" role="radio" aria-checked="false" data-i18n-title="color_purple" data-i18n-aria="color_purple" title="Purple" aria-label="Purple">
+                <md-icon name="check" size="18" class="color-check-icon"></md-icon>
+              </button>
+              <button type="button" class="color-option pink" data-color="pink" role="radio" aria-checked="false" data-i18n-title="color_pink" data-i18n-aria="color_pink" title="Pink" aria-label="Pink">
+                <md-icon name="check" size="18" class="color-check-icon"></md-icon>
+              </button>
             </div>
-            <button id="btn-modal-checklist-toggle" class="btn-icon hidden"
-              data-i18n-title="btn_modal_checklist_toggle_title" title="Toggle checklist view"><span
-                class="material-symbols-outlined">checklist</span></button>
-            <button id="btn-modal-image" class="btn-icon" data-i18n-title="btn_modal_image_title"
-              title="Add image"><span class="material-symbols-outlined">image</span></button>
-            <button id="btn-modal-copy" class="btn-icon" data-i18n-title="btn_modal_copy_title"
-              title="Make a copy"><span class="material-symbols-outlined">content_copy</span></button>
-            <button id="btn-modal-archive" class="btn-icon" data-i18n-title="btn_modal_archive_title"
-              title="Archive"><span class="material-symbols-outlined">archive</span></button>
-            <button id="btn-modal-trash" class="btn-icon" data-i18n-title="btn_modal_trash_delete_title"
-              title="Delete"><span class="material-symbols-outlined">delete</span></button>
-            <button id="btn-modal-delete-forever" class="btn-icon hidden"
-              data-i18n-title="btn_modal_trash_delete_forever_title" title="Delete forever"><span
-                class="material-symbols-outlined">delete</span></button>
           </div>
-          <span class="last-edited-label" id="modal-last-edited" data-i18n="modal_last_edited">Edited 2 mins ago</span>
-        </div>
-        <button id="btn-modal-close" class="btn btn-primary" data-i18n="btn_modal_close">Close</button>
+          <md-icon-button id="btn-modal-checklist-toggle" icon="checklist" class="hidden"
+            data-i18n-title="btn_modal_checklist_toggle_title" title="Toggle checklist view" aria-label="Toggle checklist view"></md-icon-button>
+          <md-icon-button id="btn-modal-image" icon="image" data-i18n-title="btn_modal_image_title"
+            title="Add image" aria-label="Add image"></md-icon-button>
+          <md-icon-button id="btn-modal-copy" icon="content_copy" data-i18n-title="btn_modal_copy_title"
+            title="Make a copy" aria-label="Make a copy"></md-icon-button>
+          <md-icon-button id="btn-modal-archive" icon="archive" data-i18n-title="btn_modal_archive_title"
+            title="Archive" aria-label="Archive"></md-icon-button>
+          <md-icon-button id="btn-modal-trash" icon="delete" data-i18n-title="btn_modal_trash_delete_title"
+            title="Delete" aria-label="Delete"></md-icon-button>
+          <md-icon-button id="btn-modal-delete-forever" icon="delete" class="hidden"
+            data-i18n-title="btn_modal_trash_delete_forever_title" title="Delete forever" aria-label="Delete forever"></md-icon-button>
+        </md-toolbar>
+        <span class="last-edited-label" id="modal-last-edited" data-i18n="modal_last_edited">Edited 2 mins ago</span>
+        <md-button id="btn-modal-close" variant="filled"><span data-i18n="btn_modal_close">Close</span></md-button>
       </div>
     </div>
   </div>
