@@ -231,6 +231,71 @@ md-dialog {
    transform: scale(1) translateY(0);
 }
 
+/* Login Modal */
+.login-modal-card {
+   max-width: 440px;
+   height: auto;
+   min-height: unset;
+   max-height: 90vh;
+}
+
+.login-modal-header {
+   padding: 16px 20px;
+   display: flex;
+   align-items: center;
+   justify-content: space-between;
+   border-bottom: 1px solid var(--border-color);
+}
+
+.login-modal-header::after {
+   display: none;
+}
+
+.login-modal-title-wrapper {
+   display: flex;
+   align-items: center;
+   gap: 8px;
+}
+
+.login-modal-header h2 {
+   font-size: 1.25rem;
+   font-weight: 700;
+   color: var(--text-primary);
+   margin: 0;
+   display: flex;
+   align-items: center;
+   gap: 8px;
+}
+
+.login-modal-body {
+   padding: 20px 24px 24px;
+   overflow-y: auto;
+   display: flex;
+   flex-direction: column;
+   gap: 16px;
+}
+
+.login-credentials-container {
+   display: flex;
+   flex-direction: column;
+   gap: 12px;
+   width: 100%;
+}
+
+.login-credentials-container md-text-field {
+   width: 100%;
+}
+
+.login-modal-actions {
+   display: flex;
+   flex-direction: row;
+   justify-content: flex-end;
+   gap: 8px;
+   margin-top: 8px;
+   width: 100%;
+}
+
+
 .modal-header {
    padding: 20px 24px;
    display: flex;
@@ -299,10 +364,18 @@ md-dialog {
    background-color: var(--border-color);
 }
 
-.modal-toolbar {
+.modal-toolbar,
+#modal-toolbar {
    display: flex;
    align-items: center;
    gap: 8px;
+   --md-toolbar-container-color: transparent;
+   --md-toolbar-elevation: none;
+   --md-toolbar-padding: 0;
+   --md-toolbar-gap: 4px;
+   background: transparent;
+   box-shadow: none;
+   border: none;
 }
 
 .last-edited-label {
@@ -312,11 +385,34 @@ md-dialog {
 }
 
 /* Settings Modal Specifics */
+.settings-modal-card {
+   max-width: 560px;
+   height: auto;
+   min-height: unset;
+   max-height: 90vh;
+}
+
 .settings-modal-header {
    display: flex;
    align-items: center;
    justify-content: space-between;
    width: 100%;
+   padding: 16px 20px;
+   border-bottom: 1px solid var(--border-color);
+}
+
+.settings-modal-header::after {
+   display: none;
+}
+
+.settings-modal-title-wrapper {
+   display: flex;
+   align-items: center;
+   gap: 8px;
+}
+
+.settings-modal-title-wrapper h2 {
+   margin: 0;
 }
 
 .settings-modal-title {
@@ -326,12 +422,28 @@ md-dialog {
    color: var(--md-sys-color-on-surface, #1D1B20);
 }
 
+.settings-modal-body {
+   padding: 20px 24px 24px;
+   overflow-y: auto;
+   display: flex;
+   flex-direction: column;
+   gap: 20px;
+}
+
 .settings-modal-content {
    display: flex;
    flex-direction: column;
    gap: 24px;
    width: 100%;
    box-sizing: border-box;
+}
+
+.settings-modal-actions {
+   display: flex;
+   flex-direction: row;
+   justify-content: flex-end;
+   margin-top: 4px;
+   width: 100%;
 }
 
 .settings-footer-attribution {
@@ -478,11 +590,14 @@ md-dialog {
 .settings-theme-select {
    display: flex;
    width: 100%;
+   box-sizing: border-box;
 }
 
 .settings-theme-select md-segmented-button {
-   flex: 1;
+   flex: 1 1 0;
+   min-width: 0;
    justify-content: center;
+   padding: 0 10px;
 }
 
 .settings-info {
@@ -696,14 +811,18 @@ input:checked+.slider:before {
    .password-change-fields {
       flex-direction: column;
    }
-}
 
-@media (max-width: 480px) {
-   .backup-actions {
-      flex-direction: column;
-      align-items: stretch;
+   .modal-overlay {
+      padding: 0;
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
    }
+
    .modal-card {
+      width: 100vw;
+      width: 100dvw;
+      max-width: 100vw;
+      max-width: 100dvw;
       height: 100vh;
       height: 100dvh;
       min-height: 100vh;
@@ -711,23 +830,23 @@ input:checked+.slider:before {
       max-height: 100vh;
       max-height: 100dvh;
       border-radius: 0;
+      border: none;
+      transform: none;
+      box-shadow: none;
    }
-}
 
-@media (max-width: 576px) {
+   .modal-overlay.active .modal-card {
+      transform: none;
+   }
+
+   .modal-header {
+      padding: 12px 16px;
+      gap: 8px;
+   }
+
    .modal-header .modal-back-btn {
       display: inline-flex;
-      margin-right: 8px;
-   }
-
-   .modal-card {
-      height: 100vh;
-      height: 100dvh;
-      min-height: 100vh;
-      min-height: 100dvh;
-      max-height: 100vh;
-      max-height: 100dvh;
-      border-radius: 0;
+      margin-right: 4px;
    }
 
    .modal-header::after,
@@ -736,34 +855,147 @@ input:checked+.slider:before {
       right: 16px;
    }
 
-   #btn-modal-close {
-      display: none !important;
+   .modal-body {
+      padding: 16px;
    }
 
    .modal-footer {
-      padding: 12px 16px;
+      padding: 8px 16px;
+      justify-content: flex-start;
    }
 
-   .modal-toolbar {
+   .modal-toolbar,
+   #modal-toolbar {
       width: 100%;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      --md-toolbar-gap: 2px;
+      overflow-x: auto;
+      scrollbar-width: none;
    }
 
-   .modal-toolbar-buttons {
-      display: flex;
-      gap: 4px;
-   }
-
-   .modal-toolbar .btn-icon {
-      width: 36px;
-      height: 36px;
+   .modal-toolbar::-webkit-scrollbar,
+   #modal-toolbar::-webkit-scrollbar {
+      display: none;
    }
 
    .last-edited-label {
-      margin-left: 0;
-      font-size: 0.7rem;
+      display: none !important;
+   }
+
+   #btn-modal-close,
+   #btn-settings-close-icon,
+   #btn-login-close {
+      display: none !important;
+   }
+
+   .settings-theme-select {
+      width: 100%;
+   }
+
+   .settings-theme-select md-segmented-button {
+      flex: 1 1 0;
+      min-width: 0;
+      padding: 0 6px;
+      font-size: 0.85rem;
+   }
+
+   /* Login Modal Mobile Fullscreen */
+   .login-modal-card {
+      width: 100vw;
+      width: 100dvw;
+      max-width: 100vw;
+      max-width: 100dvw;
+      height: 100vh;
+      height: 100dvh;
+      min-height: 100vh;
+      min-height: 100dvh;
+      max-height: 100vh;
+      max-height: 100dvh;
+      border-radius: 0;
+      border: none;
+      box-shadow: none;
+      transform: none;
+      display: flex;
+      flex-direction: column;
+   }
+
+   .login-modal-header {
+      padding: 12px 16px;
+   }
+
+   .login-modal-header .modal-back-btn {
+      display: inline-flex;
+      margin-right: 4px;
+   }
+
+   .login-modal-body {
+      padding: 20px 16px;
+      flex: 1;
+      justify-content: flex-start;
+   }
+
+   .login-modal-actions {
+      margin-top: auto;
+      padding-top: 16px;
+      display: flex;
+      flex-direction: column-reverse;
+      gap: 10px;
+   }
+
+   .login-modal-actions md-button {
+      width: 100%;
+   }
+
+   /* Settings Modal Mobile Fullscreen */
+   .settings-modal-card {
+      width: 100vw;
+      width: 100dvw;
+      max-width: 100vw;
+      max-width: 100dvw;
+      height: 100vh;
+      height: 100dvh;
+      min-height: 100vh;
+      min-height: 100dvh;
+      max-height: 100vh;
+      max-height: 100dvh;
+      border-radius: 0;
+      border: none;
+      box-shadow: none;
+      transform: none;
+      display: flex;
+      flex-direction: column;
+   }
+
+   .settings-modal-header {
+      padding: 12px 16px;
+   }
+
+   .settings-modal-header .modal-back-btn {
+      display: inline-flex;
+      margin-right: 4px;
+   }
+
+   .settings-modal-body {
+      padding: 20px 16px;
+      flex: 1;
+      justify-content: flex-start;
+   }
+
+   .settings-modal-actions {
+      margin-top: auto;
+      padding-top: 16px;
+      display: flex;
+      flex-direction: column;
+   }
+
+   .settings-modal-actions md-button {
+      width: 100%;
+   }
+}
+
+@media (max-width: 480px) {
+   .backup-actions {
+      flex-direction: column;
+      align-items: stretch;
    }
 }
 

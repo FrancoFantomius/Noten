@@ -46,6 +46,7 @@ export const elements = {
   // Navigation items & Sidebar
   sidebarDrawer: null,
   sidebarRail: null,
+  navigationBar: null,
   navItems: null,
   sidebarTagsList: null,
 
@@ -70,6 +71,7 @@ export const elements = {
   creatorImagesPreview: null,
 
   // Feeds
+  contentPanel: null,
   notesViewContent: null,
   pinnedSection: null,
   pinnedGrid: null,
@@ -150,7 +152,8 @@ export function initElements() {
   // Navigation items & Sidebar
   elements.sidebarDrawer = document.getElementById('sidebar-drawer');
   elements.sidebarRail = document.getElementById('sidebar-rail');
-  elements.navItems = document.querySelectorAll('.nav-item, md-navigation-drawer-item, md-navigation-rail-item');
+  elements.navigationBar = document.getElementById('bottom-nav');
+  elements.navItems = document.querySelectorAll('.nav-item, md-navigation-drawer-item, md-navigation-rail-item, md-navigation-bar-item');
   elements.sidebarTagsList = document.getElementById('sidebar-tags-list');
 
   // Note Creator
@@ -174,6 +177,7 @@ export function initElements() {
   elements.creatorImagesPreview = document.getElementById('creator-images-preview');
 
   // Feeds
+  elements.contentPanel = document.querySelector('.content-panel');
   elements.notesViewContent = document.getElementById('notes-view-content');
   elements.pinnedSection = document.getElementById('pinned-section');
   elements.pinnedGrid = document.getElementById('pinned-grid');

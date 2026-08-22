@@ -13,13 +13,14 @@
 
           <!-- Expanded state -->
           <div id="creator-expanded" class="creator-expanded hidden">
-            <div id="creator-images-preview" class="note-images-preview hidden"></div>
-            <input type="file" id="creator-image-input" accept="image/*" multiple class="hidden">
             <div class="creator-title-row">
               <input type="text" id="creator-title" data-i18n-placeholder="creator_title_placeholder"
                 placeholder="Title" autocomplete="off">
               <md-icon-button id="btn-creator-pin" icon="keep" data-i18n-title="btn_pin_note_title" title="Pin note" aria-label="Pin note"></md-icon-button>
             </div>
+
+            <input type="file" id="creator-image-input" accept="image/*" multiple class="hidden">
+            <div id="creator-images-preview" class="note-images-preview hidden"></div>
 
             <div id="creator-checklist-view" class="modal-checklist hidden"></div>
             <textarea id="creator-body" data-i18n-placeholder="creator_body_placeholder"
@@ -34,7 +35,7 @@
 
             <!-- Toolbar and Actions -->
             <div class="creator-footer">
-              <div class="creator-toolbar">
+              <md-toolbar id="creator-toolbar" class="creator-toolbar" aria-label="Note creator actions">
                 <!-- Color Selector Button -->
                 <div class="color-picker-wrapper">
                   <md-icon-button id="btn-creator-color" icon="palette" data-i18n-title="btn_creator_color_title" title="Change color" aria-label="Change color"></md-icon-button>
@@ -78,7 +79,7 @@
                   title="Archive note" aria-label="Archive note"></md-icon-button>
                 <md-icon-button id="btn-creator-trash" icon="delete" data-i18n-title="btn_creator_trash_title"
                   title="Discard note" aria-label="Discard note"></md-icon-button>
-              </div>
+              </md-toolbar>
 
               <md-button id="btn-creator-close" variant="text"><span data-i18n="btn_creator_close">Close</span></md-button>
             </div>

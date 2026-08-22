@@ -87,6 +87,25 @@ export function initCardsUI() {
     });
   }
 
+  if (elements.navigationBar) {
+    elements.navigationBar.addEventListener('change', (e) => {
+      const val = e.detail?.value || e.detail?.item?.getAttribute('data-category') || e.detail?.item?.value;
+      if (val) {
+        const currentPath = window.location.pathname;
+        const isNotesPage = !currentPath.endsWith('archive.html') && !currentPath.endsWith('trash.html');
+        const isArchivePage = currentPath.endsWith('archive.html');
+        const isTrashPage = currentPath.endsWith('trash.html');
+
+        if ((val === 'notes' && isNotesPage) || (val === 'archive' && isArchivePage) || (val === 'trash' && isTrashPage)) {
+          if (window.location.hash) {
+            history.pushState("", document.title, window.location.pathname);
+          }
+          setCategory(val);
+        }
+      }
+    });
+  }
+
   // Initial category sync across drawer and rail
   setCategory(state.activeCategory);
 
@@ -256,6 +275,27 @@ export function setCategory(category) {
       elements.sidebarRail.activeIndex = -1;
       elements.sidebarRail.removeAttribute('active-index');
     }
+  }
+
+  // Sync md-navigation-bar activeIndex & value
+  if (elements.navigationBar) {
+    if (category in categoryToIndex) {
+      const idx = categoryToIndex[category];
+      elements.navigationBar.activeIndex = idx;
+      elements.navigationBar.setAttribute('active-index', String(idx));
+      elements.navigationBar.value = category;
+    } else {
+      elements.navigationBar.activeIndex = -1;
+      elements.navigationBar.removeAttribute('active-index');
+      elements.navigationBar.value = '';
+    }
+  }
+
+  // Update body page classes for dynamic styling (e.g. hiding creator/FAB on archive & trash)
+  if (document.body) {
+    document.body.classList.toggle('archive-page', category === 'archive');
+    document.body.classList.toggle('trash-page', category === 'trash');
+    document.body.classList.toggle('index-page', category === 'notes' || category.startsWith('tag:'));
   }
 
   // Highlight all sidebar items across both drawer and rail

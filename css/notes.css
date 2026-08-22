@@ -136,10 +136,18 @@
    background-color: var(--border-color);
 }
 
-.creator-toolbar {
+.creator-toolbar,
+#creator-toolbar {
    display: flex;
    align-items: center;
    gap: 4px;
+   --md-toolbar-container-color: transparent;
+   --md-toolbar-elevation: none;
+   --md-toolbar-padding: 0;
+   --md-toolbar-gap: 4px;
+   background: transparent;
+   box-shadow: none;
+   border: none;
 }
 
 /* Color Palette Popup - Material Design 3 */
@@ -687,35 +695,11 @@
 
    /* Show FAB and hide creator */
    .btn-fab {
-      display: flex;
+      display: inline-flex;
       position: fixed;
-      bottom: 24px;
-      right: 24px;
-      width: 56px;
-      height: 56px;
-      border-radius: var(--radius-full);
-      background-color: var(--accent);
-      color: #0f172a;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
+      bottom: calc(var(--md-navigation-bar-container-height, 80px) + 16px);
+      right: 16px;
       z-index: 80;
-      transition: transform var(--transition-speed), background-color var(--transition-speed), box-shadow var(--transition-speed);
-   }
-
-   .btn-fab:hover {
-      background-color: var(--accent-hover);
-      transform: scale(1.05);
-   }
-
-   .btn-fab:active {
-      transform: scale(0.95);
-   }
-
-   .btn-fab i {
-      width: 24px;
-      height: 24px;
    }
 
    #note-creator {

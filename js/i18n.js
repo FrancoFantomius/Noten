@@ -178,6 +178,18 @@ export function applyTranslations(root = document) {
     }
   });
 
+  // Translate element labels (e.g. md-fab)
+  root.querySelectorAll('[data-i18n-label]').forEach(el => {
+    const key = el.getAttribute('data-i18n-label');
+    const text = t(key);
+    if (text) {
+      el.setAttribute('label', text);
+      if (el.label !== undefined) {
+        el.label = text;
+      }
+    }
+  });
+
   // Update current language name label
   const activeLang = getLanguage();
   const currentLangLabel = root.querySelector('#current-language-name');

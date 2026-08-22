@@ -1,0 +1,48 @@
+<!-- Bottom Navigation Bar (Mobile Only) -->
+<md-navigation-bar
+  id="bottom-nav"
+  class="mobile-nav-bar"
+  {{#if navNotes}}active-index="0" value="notes"{{/if}}
+  {{#if navArchive}}active-index="1" value="archive"{{/if}}
+  {{#if navTrash}}active-index="2" value="trash"{{/if}}
+>
+  <md-navigation-bar-item
+    icon="note_stack"
+    label="Notes"
+    value="notes"
+    href="index.html"
+    class="nav-item {{#if navNotes}}active{{/if}}"
+    data-category="notes"
+    data-i18n-label="nav_notes"
+    {{#if navNotes}}active selected{{/if}}
+  >
+    <span class="nav-label" data-i18n="nav_notes">Notes</span>
+  </md-navigation-bar-item>
+
+  <md-navigation-bar-item
+    icon="archive"
+    label="Archive"
+    value="archive"
+    href="archive.html"
+    class="nav-item {{#if navArchive}}active{{/if}}"
+    data-category="archive"
+    data-i18n-label="nav_archive"
+    {{#if navArchive}}active selected{{/if}}
+  >
+    <span class="nav-label" data-i18n="nav_archive">Archive</span>
+  </md-navigation-bar-item>
+
+  <md-navigation-bar-item
+    icon="delete"
+    label="Trash"
+    value="trash"
+    href="trash.html"
+    class="nav-item {{#if navTrash}}active{{/if}}"
+    data-category="trash"
+    data-i18n-label="nav_trash"
+    {{#if navTrash}}active selected{{/if}}
+  >
+    <span class="nav-label" data-i18n="nav_trash">Trash</span>
+  </md-navigation-bar-item>
+</md-navigation-bar>
+

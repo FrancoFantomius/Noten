@@ -24,15 +24,32 @@ export function initAccountUI() {
     elements.btnSettingsCloseIcon.addEventListener('click', hideSettings);
   }
 
+  const btnSettingsBack = document.getElementById('btn-settings-back');
+  if (btnSettingsBack) {
+    btnSettingsBack.addEventListener('click', hideSettings);
+  }
+
   if (elements.btnSettingsSave) {
     elements.btnSettingsSave.addEventListener('click', hideSettings);
   }
 
   if (elements.settingsModal) {
+    elements.settingsModal.addEventListener('click', (e) => {
+      if (e.target === elements.settingsModal) {
+        hideSettings();
+      }
+    });
     elements.settingsModal.addEventListener('close', () => {
       cleanupSettingsHash();
     });
   }
+
+  // Dismiss settings modal on Escape key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && elements.settingsModal && elements.settingsModal.classList.contains('active')) {
+      hideSettings();
+    }
+  });
 
   // Open Settings initially if hash is #settings
   if (window.location.hash === '#settings') {
@@ -68,15 +85,31 @@ export function initAccountUI() {
   if (elements.btnLoginClose) {
     elements.btnLoginClose.addEventListener('click', hideLoginModal);
   }
+  const btnLoginBack = document.getElementById('btn-login-back');
+  if (btnLoginBack) {
+    btnLoginBack.addEventListener('click', hideLoginModal);
+  }
   if (elements.btnLoginCancel) {
     elements.btnLoginCancel.addEventListener('click', hideLoginModal);
   }
   if (elements.loginModal) {
+    elements.loginModal.addEventListener('click', (e) => {
+      if (e.target === elements.loginModal) {
+        hideLoginModal();
+      }
+    });
     elements.loginModal.addEventListener('close', () => {
       const syncStatusMsg = document.getElementById('sync-settings-status');
       if (syncStatusMsg) syncStatusMsg.textContent = '';
     });
   }
+
+  // Dismiss login modal on Escape key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && elements.loginModal && elements.loginModal.classList.contains('active')) {
+      hideLoginModal();
+    }
+  });
 
   if (elements.accountMenu) {
     elements.accountMenu.addEventListener('manage-click', (e) => {
@@ -120,9 +153,8 @@ export function showSettings() {
   if (elements.settingsModal) {
     if (typeof elements.settingsModal.showModal === 'function') {
       elements.settingsModal.showModal();
-    } else {
-      elements.settingsModal.open = true;
     }
+    elements.settingsModal.classList.add('active');
     if (window.location.hash !== '#settings') {
       state.isSettingsModalHashPushed = true;
       window.location.hash = 'settings';
@@ -134,9 +166,8 @@ export function hideSettings() {
   if (elements.settingsModal) {
     if (typeof elements.settingsModal.close === 'function') {
       elements.settingsModal.close();
-    } else {
-      elements.settingsModal.open = false;
     }
+    elements.settingsModal.classList.remove('active');
   }
   cleanupSettingsHash();
 }
@@ -306,9 +337,8 @@ export function showLoginModal() {
   if (elements.loginModal) {
     if (typeof elements.loginModal.showModal === 'function') {
       elements.loginModal.showModal();
-    } else {
-      elements.loginModal.open = true;
     }
+    elements.loginModal.classList.add('active');
   }
 }
 
@@ -319,9 +349,8 @@ export function hideLoginModal() {
   if (elements.loginModal) {
     if (typeof elements.loginModal.close === 'function') {
       elements.loginModal.close();
-    } else {
-      elements.loginModal.open = false;
     }
+    elements.loginModal.classList.remove('active');
     const syncStatusMsg = document.getElementById('sync-settings-status');
     if (syncStatusMsg) syncStatusMsg.textContent = '';
   }
