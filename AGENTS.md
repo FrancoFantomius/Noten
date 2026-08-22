@@ -1,0 +1,1 @@
+read "node_modules\@francofantomius\material-components\llms.txt" for the component explanation and how to implement it
