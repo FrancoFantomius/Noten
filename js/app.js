@@ -478,6 +478,7 @@ function handleExportBackup() {
         isArchived: n.isArchived,
         isTrashed: n.isTrashed,
         trashedAt: n.trashedAt || null,
+        images: n.images || [],
         createdAt: n.createdAt,
         updatedAt: n.updatedAt
       }))

@@ -18,6 +18,13 @@ function applyTheme(dark) {
     document.body.classList.remove('dark-theme');
     document.body.classList.add('light-theme');
   }
+
+  // Update theme-color meta tags dynamically from --md-sys-color-surface
+  const themeColor = getComputedStyle(document.documentElement).getPropertyValue('--md-sys-color-surface').trim() || (dark ? '#161b22' : '#ffffff');
+  const metaThemeColors = document.querySelectorAll('meta[name="theme-color"]');
+  metaThemeColors.forEach(meta => {
+    meta.setAttribute('content', themeColor);
+  });
 }
 
 /**

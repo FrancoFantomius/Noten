@@ -37,6 +37,9 @@
 .app-logo-small {
    width: 28px;
    height: 28px;
+   --md-icon-size: 28px;
+   font-size: 28px;
+   color: inherit;
 }
 
 .app-title {
@@ -519,7 +522,7 @@ html.sidebar-collapsed-preload .sidebar .sidebar-rail {
       gap: 4px;
    }
 
-   .logo-area span {
+   .main-header .app-logo-small {
       display: none;
    }
 }

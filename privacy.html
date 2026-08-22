@@ -28,55 +28,79 @@
   <div class="static-container">
     <div class="static-card">
       <header class="static-header">
-        <div class="logo-area" style="justify-content: center; margin-bottom: 16px;">
-          <img src="img/icons/icon.svg" alt="Noten Logo" class="app-logo-small">
+        <a href="index.html" class="logo-area" aria-label="Go to Noten Home">
+          <md-icon name="add_notes" class="app-logo-small" size="32"></md-icon>
           <span class="app-title">Noten</span>
-        </div>
+        </a>
         <h1 class="static-title">Privacy Policy</h1>
         <p class="static-subtitle">Last updated: July 2026</p>
       </header>
 
-      <section class="static-content">
+      <div class="static-intro-card">
+        <md-icon name="security" size="24"></md-icon>
         <p>Noten is designed as a local-first, client-side application. We do not operate server infrastructure to
           collect, store, or sell your personal details or notes.</p>
+      </div>
 
-        <h2>1. Local Storage & Client-Side Encryption</h2>
-        <p>All notes, tags, and formatting data are stored locally in your browser's database (IndexedDB via PouchDB).
-          All data synchronized to the cloud is encrypted client-side using industry-standard cryptography before it
-          leaves your device. Neither we nor third parties have access to your decryption keys or plaintext notes.</p>
+      <section class="static-content">
+        <div class="static-section">
+          <div class="static-section-header">
+            <md-icon name="lock" class="static-section-icon"></md-icon>
+            <h2>1. Local Storage & Client-Side Encryption</h2>
+          </div>
+          <p>All notes, tags, and formatting data are stored locally in your browser's database (IndexedDB via PouchDB).
+            All data synchronized to the cloud is encrypted client-side using industry-standard cryptography before it
+            leaves your device. Neither we nor third parties have access to your decryption keys or plaintext notes.</p>
+        </div>
 
-        <h2>2. Third-Party Synchronization (Filen)</h2>
-        <p>If you choose to enable cloud synchronization, Noten connects directly to the secure storage APIs provided by
-          <strong>Filen</strong> (Filen Cloud Dienste). Your email, password, and two-factor authentication codes are
-          used strictly to establish an encrypted session directly with Filen. We do not store or transmit your login
-          credentials to any servers other than Filen's official API endpoints.</p>
+        <md-divider></md-divider>
 
-        <h2>3. Data Collection</h2>
-        <p>We do not collect diagnostics, crash reports, analytics, or behavioral data. The application operates in
-          complete anonymity.</p>
+        <div class="static-section">
+          <div class="static-section-header">
+            <md-icon name="cloud_sync" class="static-section-icon"></md-icon>
+            <h2>2. Third-Party Synchronization (Filen)</h2>
+          </div>
+          <p>If you choose to enable cloud synchronization, Noten connects directly to the secure storage APIs provided by
+            <strong>Filen</strong> (Filen Cloud Dienste). Your email, password, and two-factor authentication codes are
+            used strictly to establish an encrypted session directly with Filen. We do not store or transmit your login
+            credentials to any servers other than Filen's official API endpoints.</p>
+        </div>
 
-        <h2>4. Contact & Support</h2>
-        <p>Since this project is open-source, you can audit the source code, open issues, or contribute directly on our
-          official repository.</p>
+        <md-divider></md-divider>
+
+        <div class="static-section">
+          <div class="static-section-header">
+            <md-icon name="security" class="static-section-icon"></md-icon>
+            <h2>3. Data Collection</h2>
+          </div>
+          <p>We do not collect diagnostics, crash reports, analytics, or behavioral data. The application operates in
+            complete anonymity.</p>
+        </div>
+
+        <md-divider></md-divider>
+
+        <div class="static-section">
+          <div class="static-section-header">
+            <md-icon name="description" class="static-section-icon"></md-icon>
+            <h2>4. Contact & Support</h2>
+          </div>
+          <p>Since this project is open-source, you can audit the source code, open issues, or contribute directly on our
+            official repository.</p>
+        </div>
       </section>
 
       <footer class="static-footer">
-        <md-button variant="outlined" href="index.html" icon="arrow_back">
+        <md-button variant="filled" href="index.html" icon="arrow_back">
           <span>Back to App</span>
+        </md-button>
+        <md-button variant="tonal" href="terms.html" trailing-icon="arrow_forward">
+          <span>Terms of Service</span>
         </md-button>
       </footer>
     </div>
   </div>
 
-  <script>
-
-    // Set theme based on local storage
-    const savedTheme = localStorage.getItem('theme') || 'dark';
-    if (savedTheme === 'light') {
-      document.body.classList.remove('dark-theme');
-      document.body.classList.add('light-theme');
-    }
-  </script>
+  <script type="module" src="js/static.js"></script>
 </body>
 
 </html>

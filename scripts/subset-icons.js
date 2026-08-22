@@ -10,6 +10,7 @@ const rootDir = path.resolve(__dirname, '..');
 // Default fallback set of known icons in Noten to guarantee safety
 const DEFAULT_ICONS = [
   'add',
+  'add_notes',
   'archive',
   'unarchive',
   'arrow_back',

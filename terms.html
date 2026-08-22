@@ -26,47 +26,71 @@
   <div class="static-container">
     <div class="static-card">
       <header class="static-header">
-        <div class="logo-area" style="justify-content: center; margin-bottom: 16px;">
-          <img src="img/icons/icon.svg" alt="Noten Logo" class="app-logo-small">
+        <a href="index.html" class="logo-area" aria-label="Go to Noten Home">
+          <md-icon name="add_notes" class="app-logo-small" size="32"></md-icon>
           <span class="app-title">Noten</span>
-        </div>
+        </a>
         <h1 class="static-title">Terms of Service</h1>
         <p class="static-subtitle">Last updated: July 2026</p>
       </header>
 
-      <section class="static-content">
+      <div class="static-intro-card">
+        <md-icon name="balance" size="24"></md-icon>
         <p>Welcome to Noten! By using this application, you agree to comply with and be bound by the following Terms of Service.</p>
+      </div>
 
-        <h2>1. License & Open Source</h2>
-        <p>Noten is open-source software licensed under the GNU Affero General Public License version 3 (AGPL-3.0). You are free to inspect, modify, and distribute the application under the terms of this license.</p>
+      <section class="static-content">
+        <div class="static-section">
+          <div class="static-section-header">
+            <md-icon name="description" class="static-section-icon"></md-icon>
+            <h2>1. License & Open Source</h2>
+          </div>
+          <p>Noten is open-source software licensed under the GNU Affero General Public License version 3 (AGPL-3.0). You are free to inspect, modify, and distribute the application under the terms of this license.</p>
+        </div>
 
-        <h2>2. Disclaimer of Warranties</h2>
-        <p>The application is provided "as is" and "as available", without warranty of any kind, express or implied. In no event shall the authors or copyright holders be liable for any claim, damages, or other liability arising from, out of, or in connection with the software or the use of the software.</p>
+        <md-divider></md-divider>
 
-        <h2>3. Local Data & Backups</h2>
-        <p>Since your notes are stored locally in your browser's IndexedDB, clearing your browser's data, cache, or using private browsing mode may delete your notes. It is your sole responsibility to perform regular local backups (via the Export feature) or enable Filen Cloud Sync to safeguard your data.</p>
+        <div class="static-section">
+          <div class="static-section-header">
+            <md-icon name="security" class="static-section-icon"></md-icon>
+            <h2>2. Disclaimer of Warranties</h2>
+          </div>
+          <p>The application is provided "as is" and "as available", without warranty of any kind, express or implied. In no event shall the authors or copyright holders be liable for any claim, damages, or other liability arising from, out of, or in connection with the software or the use of the software.</p>
+        </div>
 
-        <h2>4. Cloud Sync Integration</h2>
-        <p>By enabling Filen Cloud Sync, you agree to comply with Filen's own Terms of Service and Privacy Policy. We do not control Filen's servers, storage systems, or availability, and are not responsible for any sync failures, service interruptions, or data losses associated with your Filen account.</p>
+        <md-divider></md-divider>
+
+        <div class="static-section">
+          <div class="static-section-header">
+            <md-icon name="download" class="static-section-icon"></md-icon>
+            <h2>3. Local Data & Backups</h2>
+          </div>
+          <p>Since your notes are stored locally in your browser's IndexedDB, clearing your browser's data, cache, or using private browsing mode may delete your notes. It is your sole responsibility to perform regular local backups (via the Export feature) or enable Filen Cloud Sync to safeguard your data.</p>
+        </div>
+
+        <md-divider></md-divider>
+
+        <div class="static-section">
+          <div class="static-section-header">
+            <md-icon name="cloud_sync" class="static-section-icon"></md-icon>
+            <h2>4. Cloud Sync Integration</h2>
+          </div>
+          <p>By enabling Filen Cloud Sync, you agree to comply with Filen's own Terms of Service and Privacy Policy. We do not control Filen's servers, storage systems, or availability, and are not responsible for any sync failures, service interruptions, or data losses associated with your Filen account.</p>
+        </div>
       </section>
 
       <footer class="static-footer">
-        <md-button variant="outlined" href="index.html" icon="arrow_back">
+        <md-button variant="filled" href="index.html" icon="arrow_back">
           <span>Back to App</span>
+        </md-button>
+        <md-button variant="tonal" href="privacy.html" trailing-icon="arrow_forward">
+          <span>Privacy Policy</span>
         </md-button>
       </footer>
     </div>
   </div>
 
-  <script>
-
-    // Set theme based on local storage
-    const savedTheme = localStorage.getItem('theme') || 'dark';
-    if (savedTheme === 'light') {
-      document.body.classList.remove('dark-theme');
-      document.body.classList.add('light-theme');
-    }
-  </script>
+  <script type="module" src="js/static.js"></script>
 </body>
 
 </html>
