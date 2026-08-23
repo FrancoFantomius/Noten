@@ -1,6 +1,6 @@
 # Noten
 
-[![Version 2.1.0](https://img.shields.io/badge/Version-2.1.0-blue.svg)](https://github.com/FrancoFantomius/noten/releases)
+[![Version 2.1.1](https://img.shields.io/badge/Version-2.1.1-blue.svg)](https://github.com/FrancoFantomius/noten/releases)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 [![PWA Support](https://img.shields.io/badge/PWA-Supported-orange.svg)](#key-features)
 [![Local-First](https://img.shields.io/badge/Architecture-Local--First-green.svg)](#sync-setup-filen)
@@ -126,20 +126,25 @@ You can synchronize your notes across multiple devices (desktops, phones, tablet
 │   ├── head.html        # App head meta, fonts setup
 │   ├── header.html      # Main app navigation header & profile dropdown
 │   ├── sidebar.html     # Sidebar navigation menu
+│   ├── navigation-bar.html # Mobile bottom navigation bar
 │   ├── note-creator.html# Note creator component
 │   ├── notes-grid.html  # Pinned/unpinned note grid container
 │   ├── note-modal.html   # Note editor modal overlay
 │   ├── settings-modal.html# Settings & sync configuration modal
 │   ├── login-modal.html # Filen sync login modal
 │   ├── lightbox.html    # Fullscreen image viewer modal
+│   ├── snackbar.html    # Global snackbar notification component
 │   ├── fab.html         # Mobile floating action button
 │   └── head-static.html # Head boilerplate for static pages
 ├── vite.config.js       # Vite configuration
 ├── package.json         # Node dependencies and scripts
+├── scripts/             # Build and utility scripts
+│   └── subset-icons.js  # Material Symbols font subsetting generator
 ├── sw.js                # Service Worker for offline PWA support
 ├── manifest.json        # PWA manifest configurations
 ├── css/                 # Application styles
 │   ├── variables.css    # CSS Variables (colors, fonts, sizes)
+│   ├── fonts.css        # Self-hosted font-face declarations
 │   ├── reset.css        # Basic reset stylesheet
 │   ├── layout.css       # Layout grids, sidebar, and container styles
 │   ├── notes.css        # Note grids and specific note card layouts

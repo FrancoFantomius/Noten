@@ -228,60 +228,68 @@ export function updateDynamicManifest(root = document) {
   const manifestLink = root.querySelector('link[rel="manifest"]');
   if (!manifestLink) return;
 
+  const toAbsoluteUrl = (relPath) => {
+    try {
+      return new URL(relPath, document.baseURI || window.location.href).href;
+    } catch {
+      return relPath;
+    }
+  };
+
   const manifestData = {
     name: t('app_title') || 'Noten',
     short_name: t('app_title') || 'Noten',
     description: t('app_description') || 'Your notes private and secure accross devices',
-    start_url: './index.html',
+    start_url: toAbsoluteUrl('./index.html'),
     display: 'fullscreen',
     background_color: '#0e1117',
     theme_color: '#161b22',
     categories: ['productivity', 'utilities'],
     icons: [
-      { src: './img/icons/noten_x48.png', sizes: '48x48', type: 'image/png' },
-      { src: './img/icons/noten_x72.png', sizes: '72x72', type: 'image/png' },
-      { src: './img/icons/noten_x96.png', sizes: '96x96', type: 'image/png' },
-      { src: './img/icons/noten_x128.png', sizes: '128x128', type: 'image/png' },
-      { src: './img/icons/noten_x192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
-      { src: './img/icons/noten_x384.png', sizes: '384x384', type: 'image/png' },
-      { src: './img/icons/noten_x512.png', sizes: '512x512', type: 'image/png', purpose: 'any' }
+      { src: toAbsoluteUrl('./img/icons/noten_x48.png'), sizes: '48x48', type: 'image/png' },
+      { src: toAbsoluteUrl('./img/icons/noten_x72.png'), sizes: '72x72', type: 'image/png' },
+      { src: toAbsoluteUrl('./img/icons/noten_x96.png'), sizes: '96x96', type: 'image/png' },
+      { src: toAbsoluteUrl('./img/icons/noten_x128.png'), sizes: '128x128', type: 'image/png' },
+      { src: toAbsoluteUrl('./img/icons/noten_x192.png'), sizes: '192x192', type: 'image/png', purpose: 'any' },
+      { src: toAbsoluteUrl('./img/icons/noten_x384.png'), sizes: '384x384', type: 'image/png' },
+      { src: toAbsoluteUrl('./img/icons/noten_x512.png'), sizes: '512x512', type: 'image/png', purpose: 'any' }
     ],
     shortcuts: [
       {
         name: t('btn_new_note') || 'New Note',
         short_name: t('btn_new_note') || 'New',
         description: t('btn_new_note') || 'Create a new note',
-        url: './index.html#new',
+        url: toAbsoluteUrl('./index.html#new'),
         icons: [
-          { src: './img/icons/noten_x96.png', sizes: '96x96', type: 'image/png' },
-          { src: './img/icons/noten_x192.png', sizes: '192x192', type: 'image/png' }
+          { src: toAbsoluteUrl('./img/icons/noten_x96.png'), sizes: '96x96', type: 'image/png' },
+          { src: toAbsoluteUrl('./img/icons/noten_x192.png'), sizes: '192x192', type: 'image/png' }
         ]
       },
       {
         name: t('nav_archive') || 'Archive',
         short_name: t('nav_archive') || 'Archive',
         description: t('nav_archive') || 'View archived notes',
-        url: './archive.html',
+        url: toAbsoluteUrl('./archive.html'),
         icons: [
-          { src: './img/ArchiveIcon.png', sizes: '30x30', type: 'image/png' }
+          { src: toAbsoluteUrl('./img/ArchiveIcon.png'), sizes: '30x30', type: 'image/png' }
         ]
       },
       {
         name: t('nav_trash') || 'Trash',
         short_name: t('nav_trash') || 'Trash',
         description: t('nav_trash') || 'View trashed notes',
-        url: './trash.html',
+        url: toAbsoluteUrl('./trash.html'),
         icons: [
-          { src: './img/TrashIcon.png', sizes: '30x30', type: 'image/png' }
+          { src: toAbsoluteUrl('./img/TrashIcon.png'), sizes: '30x30', type: 'image/png' }
         ]
       },
       {
         name: t('settings_header') || t('btn_settings_open_title') || 'Settings',
         short_name: t('settings_header') || t('btn_settings_open_title') || 'Settings',
         description: t('settings_header') || t('btn_settings_open_title') || 'Open application settings',
-        url: './index.html#settings',
+        url: toAbsoluteUrl('./index.html#settings'),
         icons: [
-          { src: './img/SettingsIcon.png', sizes: '30x30', type: 'image/png' }
+          { src: toAbsoluteUrl('./img/SettingsIcon.png'), sizes: '30x30', type: 'image/png' }
         ]
       }
     ]

@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [2.1.1] - 2026-08-23
+
+### Changed
+- Bumped package version and Service Worker cache version to `noten-v2.1.1`.
+
+### Fixed
+- Fixed dynamic manifest URL resolution in `updateDynamicManifest` to use absolute URLs for `start_url`, `icons`, and `shortcuts`, ensuring reliable PWA installation and shortcut execution across base paths.
+
 ## [2.1.0] - 2026-08-22
 
 ### Added
@@ -21,6 +29,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Fixed
 - Fixed mobile bottom navigation bar layout with fixed viewport positioning and adjusted content panel bottom padding to avoid overlapping note cards.
 - Prevented reserved URL hash routes (`#settings`, `#new`, `#new-note`) from triggering invalid note ID lookups on page load.
+
+## [2.0.0] - 2026-08-22
 
 ### Added
 - Complete Material Design 3 overhaul adopting custom web components from `@francofantomius/material-components` (`md-account-menu`, `md-app-drawer`, `md-search-bar`, `md-button`, `md-icon-button`, `md-chip-set`, `md-dialog`, `md-fab`, `md-snackbar`).
@@ -126,7 +136,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Fixed
 - Mobile responsiveness groundwork (WIP).
 
-[Unreleased]: https://github.com/FrancoFantomius/noten/compare/v2.1.0...HEAD
+[Unreleased]: https://github.com/FrancoFantomius/noten/compare/v2.1.1...HEAD
+[2.1.1]: https://github.com/FrancoFantomius/noten/compare/v2.1.0...v2.1.1
 [2.1.0]: https://github.com/FrancoFantomius/noten/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/FrancoFantomius/noten/releases/tag/v2.0.0
 [1.3.1]: https://github.com/FrancoFantomius/noten/releases/tag/v1.3.1
