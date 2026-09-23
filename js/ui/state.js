@@ -53,6 +53,7 @@ export const elements = {
   // Note Creator
   noteCreator: null,
   creatorCollapsed: null,
+  creatorPromptText: null,
   creatorExpanded: null,
   creatorTitle: null,
   creatorBody: null,
@@ -162,6 +163,7 @@ export function initElements() {
   // Note Creator
   elements.noteCreator = document.getElementById('note-creator');
   elements.creatorCollapsed = document.getElementById('creator-collapsed');
+  elements.creatorPromptText = document.getElementById('creator-prompt-text');
   elements.creatorExpanded = document.getElementById('creator-expanded');
   elements.creatorTitle = document.getElementById('creator-title');
   elements.creatorBody = document.getElementById('creator-body');

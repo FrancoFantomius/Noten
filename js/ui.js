@@ -17,7 +17,7 @@ import {
   showLoginModal,
   hideLoginModal
 } from './ui/account.js';
-import { initCreatorUI } from './ui/creator.js';
+import { initCreatorUI, updateCreatorPrompt } from './ui/creator.js';
 import { initModalUI, openNoteModal, openNewNoteModal } from './ui/modal.js';
 import {
   initCardsUI,
@@ -38,7 +38,8 @@ export {
   renderNotesFeed,
   updateSearchSuggestionsAndTags,
   setCategory,
-  showSnackbar
+  showSnackbar,
+  updateCreatorPrompt
 };
 
 /**
@@ -240,6 +241,7 @@ export function updateNotesData(notes) {
  * Re-render all dynamic UI components when the language is changed.
  */
 export function retranslateDynamicUI() {
+  updateCreatorPrompt();
   renderNotesFeed();
   renderSidebarTags();
   updateSearchSuggestionsAndTags();

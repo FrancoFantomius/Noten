@@ -2,7 +2,7 @@
         <div id="note-creator" class="note-creator-container color-default">
           <!-- Minimized state -->
           <div id="creator-collapsed" class="creator-collapsed">
-            <span data-i18n="creator_collapsed_prompt">Take a secure note...</span>
+            <span id="creator-prompt-text" class="creator-prompt-text" data-i18n="creator_collapsed_prompt">Write your notes</span>
             <div class="creator-actions-collapsed">
               <md-icon-button id="btn-quick-todo" icon="check_box" data-i18n-title="btn_quick_todo_title"
                 title="New checklist" aria-label="New checklist"></md-icon-button>
@@ -24,7 +24,7 @@
 
             <div id="creator-checklist-view" class="modal-checklist hidden"></div>
             <textarea id="creator-body" data-i18n-placeholder="creator_body_placeholder"
-              placeholder="Take a secure note..." rows="3"></textarea>
+              placeholder="Write your notes" rows="3"></textarea>
 
             <!-- Dynamic tags input / list in note creator -->
             <md-chip-set id="creator-tags-list" class="note-tags-container"></md-chip-set>

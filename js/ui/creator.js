@@ -13,11 +13,45 @@ import {
   serializeCreatorChecklist
 } from './checklist.js';
 
+let currentPromptIndex = 0;
+
+/**
+ * Returns the pool of rotating placeholder prompts
+ */
+export function getCreatorPrompts() {
+  return [
+    t('creator_prompt_1'),
+    t('creator_prompt_2'),
+    t('creator_prompt_3'),
+    t('creator_prompt_4')
+  ];
+}
+
+/**
+ * Updates the prompt text element and creator body placeholder
+ */
+export function updateCreatorPrompt() {
+  const prompts = getCreatorPrompts();
+  const promptText = prompts[currentPromptIndex % prompts.length];
+
+  if (elements.creatorPromptText) {
+    elements.creatorPromptText.textContent = promptText;
+  }
+  if (elements.creatorBody) {
+    elements.creatorBody.placeholder = promptText;
+  }
+}
+
 /**
  * Initializes Note Creator event listeners
  */
 export function initCreatorUI() {
   if (!elements.noteCreator) return;
+
+  // Pick a random prompt on reload
+  const prompts = getCreatorPrompts();
+  currentPromptIndex = Math.floor(Math.random() * prompts.length);
+  updateCreatorPrompt();
 
   elements.creatorCollapsed.addEventListener('click', expandNoteCreator);
   elements.btnCreatorClose.addEventListener('click', closeNoteCreator);

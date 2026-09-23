@@ -5,4 +5,4 @@ The following are the rules on how to write this application. They take preceden
 - always prefer local assets instead of ones you get from cdns.
 - when exploring a project do not run ```npm run build```.
 - do not run ```npm run subset:icons``` it does it automatically when needed.
-- when implementing changes do not bother to update all the translations.
+- when implementing changes do not bother to update all the translations and write it only in english.

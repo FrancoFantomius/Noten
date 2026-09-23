@@ -29,6 +29,16 @@
    height: 48px;
 }
 
+.creator-prompt-text {
+   display: inline-block;
+   color: var(--text-secondary);
+   font-weight: 500;
+   white-space: nowrap;
+   overflow: hidden;
+   text-overflow: ellipsis;
+   user-select: none;
+}
+
 .creator-actions-collapsed {
    display: flex;
    gap: 4px;
