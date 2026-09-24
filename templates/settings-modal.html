@@ -3,12 +3,12 @@
     <div class="modal-card settings-modal-card">
       <div class="modal-header settings-modal-header">
         <div class="settings-modal-title-wrapper">
-          <md-icon-button id="btn-settings-back" icon="arrow_back" class="modal-back-btn" aria-label="Close settings" title="Go back"></md-icon-button>
+          <md-icon-button id="btn-settings-back" icon="arrow_back" class="modal-back-btn" aria-label="Close settings"></md-icon-button>
           <h2>
             <span class="settings-modal-title" data-i18n="settings_header">Settings</span>
           </h2>
         </div>
-        <md-icon-button id="btn-settings-close-icon" icon="close" aria-label="Close settings" data-i18n-aria="btn_settings_close_aria" title="Close settings"></md-icon-button>
+        <md-icon-button id="btn-settings-close-icon" icon="close" aria-label="Close settings" data-i18n-aria="btn_settings_close_aria"></md-icon-button>
       </div>
 
       <div class="modal-body settings-modal-body">
@@ -57,8 +57,7 @@
               from a previous backup.</p>
 
             <div class="backup-actions">
-              <md-button id="btn-export-backup" variant="tonal" icon="download" data-i18n-title="btn_export_backup"
-                title="Export JSON notes backup">
+              <md-button id="btn-export-backup" variant="tonal" icon="download">
                 <span data-i18n="btn_export_backup">Export Backup</span>
               </md-button>
               <md-button id="btn-import-backup-btn" variant="tonal" icon="upload">
@@ -92,6 +91,11 @@
         </div>
       </div>
     </div>
+
+    <!-- Settings Modal Tooltips positioned outside transformed settings-modal-card -->
+    <md-tooltip for="btn-settings-back" show-delay="200">Go back</md-tooltip>
+    <md-tooltip for="btn-settings-close-icon" show-delay="200" data-i18n="btn_settings_close_aria">Close settings</md-tooltip>
+    <md-tooltip for="btn-export-backup" show-delay="200" data-i18n="btn_export_backup">Export JSON notes backup</md-tooltip>
   </div>
 
   <!-- Language Selection Dialog -->

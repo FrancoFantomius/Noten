@@ -39,8 +39,10 @@ export function initAccountUI() {
         hideSettings();
       }
     });
-    elements.settingsModal.addEventListener('close', () => {
-      cleanupSettingsHash();
+    elements.settingsModal.addEventListener('close', (e) => {
+      if (e.target === elements.settingsModal) {
+        cleanupSettingsHash();
+      }
     });
   }
 
@@ -98,9 +100,11 @@ export function initAccountUI() {
         hideLoginModal();
       }
     });
-    elements.loginModal.addEventListener('close', () => {
-      const syncStatusMsg = document.getElementById('sync-settings-status');
-      if (syncStatusMsg) syncStatusMsg.textContent = '';
+    elements.loginModal.addEventListener('close', (e) => {
+      if (e.target === elements.loginModal) {
+        const syncStatusMsg = document.getElementById('sync-settings-status');
+        if (syncStatusMsg) syncStatusMsg.textContent = '';
+      }
     });
   }
 
@@ -200,7 +204,13 @@ export function updateSyncStatusUI(status) {
     <span class="material-symbols-outlined">${icon}</span>
     ${text ? `<span class="sync-text">${text}</span>` : ''}
   `;
-  badge.title = text ? t('sync_status_title', { status: text }) : 'Filen Sync';
+  badge.removeAttribute('title');
+  const syncTooltip = document.getElementById('tooltip-sync-status');
+  if (syncTooltip) {
+    const tooltipText = text ? t('sync_status_title', { status: text }) : 'Filen Sync';
+    syncTooltip.textContent = tooltipText;
+    syncTooltip.value = tooltipText;
+  }
 }
 
 export function formatBytes(bytes) {

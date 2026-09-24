@@ -2,6 +2,7 @@
     <header class="main-header">
       <div class="header-left">
         <md-icon-button id="btn-sidebar-toggle" icon="menu" aria-label="Toggle Sidebar"></md-icon-button>
+        <md-tooltip for="btn-sidebar-toggle" data-i18n="btn_sidebar_toggle_aria">Toggle Sidebar</md-tooltip>
         <div class="logo-area">
           <md-icon name="add_notes" class="app-logo-small" size="28"></md-icon>
           <span class="app-title">Noten</span>
@@ -21,14 +22,16 @@
 
       <div class="header-right">
         <!-- Sync Indicator Badge -->
-        <div id="sync-status" class="sync-badge offline" title="Sync Offline" style="display: none;">
+        <div id="sync-status" class="sync-badge offline" style="display: none;">
           <span class="material-symbols-outlined">cloud_off</span>
           <span class="sync-text" data-i18n="sync_offline">Offline</span>
         </div>
+        <md-tooltip id="tooltip-sync-status" for="sync-status" data-i18n="sync_offline">Offline</md-tooltip>
 
         <!-- Settings Icon Button (shown when logged out) -->
-        <md-icon-button id="btn-settings-open" icon="settings" data-i18n-title="btn_settings_open_title"
-          data-i18n-aria="btn_settings_open_title" title="Settings" aria-label="Open Settings"></md-icon-button>
+        <md-icon-button id="btn-settings-open" icon="settings"
+          data-i18n-aria="btn_settings_open_title" aria-label="Open Settings"></md-icon-button>
+        <md-tooltip for="btn-settings-open" data-i18n="btn_settings_open_title">Settings</md-tooltip>
 
         <!-- App Drawer (shown when logged in) -->
         <md-app-drawer id="app-drawer" headline="My Apps" data-i18n-headline="header.apps" alignment="end" style="display: none;">

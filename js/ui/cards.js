@@ -5,6 +5,7 @@
 import { t } from '../i18n.js';
 import { state, elements } from './state.js';
 import { escapeHtml, formatDate, openLightbox, setupCarouselItemClicks, getImageSrc } from './utils.js';
+import { renderTextWithLinks } from './link-utils.js';
 import { hasChecklistItems, buildChecklistDOM } from './checklist.js';
 import { openNoteModal, saveAndCloseModal } from './modal.js';
 import { showSettings, hideSettings } from './account.js';
@@ -453,6 +454,10 @@ export function renderNotesFeed() {
     if (elements.sectionTitleFeed) elements.sectionTitleFeed.classList.add('hidden');
   }
 
+  // Clear card tooltips container on re-render
+  const cardTooltipsContainer = document.getElementById('card-tooltips-container');
+  if (cardTooltipsContainer) cardTooltipsContainer.innerHTML = '';
+
   // Handle Empty State display
   if (filtered.length === 0) {
     if (searchQuery) {
@@ -474,6 +479,7 @@ export function renderNotesFeed() {
 export function renderCardsToGrid(notes, gridElement) {
   if (!gridElement) return;
   gridElement.innerHTML = '';
+  const cardTooltipsContainer = document.getElementById('card-tooltips-container');
 
   notes.forEach(note => {
     const card = document.createElement('div');
@@ -505,21 +511,43 @@ export function renderCardsToGrid(notes, gridElement) {
     card.innerHTML = `
       ${coverHtml}
       ${!note.isTrashed ? `
-      <md-icon-button class="btn-icon note-card-pin ${note.isPinned ? 'active' : ''}" ${note.isPinned ? 'selected' : ''} icon="keep" title="${note.isPinned ? t('btn_unpin_note_title') : t('btn_pin_note_title')}" aria-label="${note.isPinned ? t('btn_unpin_note_title') : t('btn_pin_note_title')}"></md-icon-button>
+      <md-icon-button id="card-pin-${note.id}" class="btn-icon note-card-pin ${note.isPinned ? 'active' : ''}" ${note.isPinned ? 'selected' : ''} icon="keep" aria-label="${note.isPinned ? t('btn_unpin_note_title') : t('btn_pin_note_title')}"></md-icon-button>
       ` : ''}
       ${note.title ? `<h3 class="note-card-title">${escapeHtml(note.title)}</h3>` : ''}
-      ${note.body && !isChecklist ? `<div class="note-card-body ${isTruncated ? 'truncated' : ''}">${escapeHtml(bodyText)}</div>` : ''}
+      ${note.body && !isChecklist ? `<div class="note-card-body ${isTruncated ? 'truncated' : ''}">${renderTextWithLinks(bodyText)}</div>` : ''}
       ${tagsHtml}
       <div class="note-card-footer">
         <span>${formatDate(note.updatedAt)}</span>
         ${note.isTrashed ? `
           <div class="note-card-trash-actions">
-            <md-icon-button class="btn-icon btn-card-restore" icon="restore" title="${t('btn_modal_trash_restore_title')}" aria-label="Restore"></md-icon-button>
-            <md-icon-button class="btn-icon btn-card-delete-forever" icon="delete" title="${t('btn_modal_trash_delete_forever_title')}" aria-label="Delete Forever"></md-icon-button>
+            <md-icon-button id="card-restore-${note.id}" class="btn-icon btn-card-restore" icon="restore" aria-label="Restore"></md-icon-button>
+            <md-icon-button id="card-delete-${note.id}" class="btn-icon btn-card-delete-forever" icon="delete" aria-label="Delete Forever"></md-icon-button>
           </div>
         ` : ''}
       </div>
     `;
+
+    if (cardTooltipsContainer) {
+      if (!note.isTrashed) {
+        const pinTooltip = document.createElement('md-tooltip');
+        pinTooltip.setAttribute('for', `card-pin-${note.id}`);
+        pinTooltip.setAttribute('show-delay', '200');
+        pinTooltip.textContent = note.isPinned ? t('btn_unpin_note_title') : t('btn_pin_note_title');
+        cardTooltipsContainer.appendChild(pinTooltip);
+      } else {
+        const restoreTooltip = document.createElement('md-tooltip');
+        restoreTooltip.setAttribute('for', `card-restore-${note.id}`);
+        restoreTooltip.setAttribute('show-delay', '200');
+        restoreTooltip.textContent = t('btn_modal_trash_restore_title');
+        cardTooltipsContainer.appendChild(restoreTooltip);
+
+        const deleteTooltip = document.createElement('md-tooltip');
+        deleteTooltip.setAttribute('for', `card-delete-${note.id}`);
+        deleteTooltip.setAttribute('show-delay', '200');
+        deleteTooltip.textContent = t('btn_modal_trash_delete_forever_title');
+        cardTooltipsContainer.appendChild(deleteTooltip);
+      }
+    }
 
     if (note.body && isChecklist) {
       const checklistContainer = buildChecklistDOM(bodyText, note.id, isTruncated, note.isTrashed);
@@ -538,7 +566,20 @@ export function renderCardsToGrid(notes, gridElement) {
     const carousel = card.querySelector('md-carousel');
     if (carousel) {
       setupCarouselItemClicks(carousel, (src, item, name) => {
-        openLightbox(src, name);
+        const validImages = (note.images || []).filter(img => Boolean(getImageSrc(img)));
+        const clickedIndex = validImages.findIndex(img => getImageSrc(img) === src);
+        const onDelete = !note.isTrashed ? async (delIndex) => {
+          const targetIndex = delIndex !== undefined ? delIndex : clickedIndex;
+          if (targetIndex >= 0 && targetIndex < note.images.length) {
+            note.images.splice(targetIndex, 1);
+            note.updatedAt = Date.now();
+            if (state.onSaveNoteCallback) {
+              await state.onSaveNoteCallback(note.id, note);
+            }
+            renderNotesFeed();
+          }
+        } : null;
+        openLightbox(src, name, onDelete, validImages, clickedIndex >= 0 ? clickedIndex : 0);
       });
     }
 
@@ -547,11 +588,14 @@ export function renderCardsToGrid(notes, gridElement) {
       const pinBtn = card.querySelector('.note-card-pin');
       const restoreBtn = card.querySelector('.btn-card-restore');
       const deleteForeverBtn = card.querySelector('.btn-card-delete-forever');
+      const linkClick = path.find(el => el && el.tagName === 'A' && el.classList && el.classList.contains('note-link')) || e.target.closest('a.note-link');
       const carouselItem = path.find(el => el && el.tagName === 'MD-CAROUSEL-ITEM') || e.target.closest('md-carousel-item');
       const carouselEl = path.find(el => el && el.tagName === 'MD-CAROUSEL') || e.target.closest('md-carousel');
       const checklistClick = path.find(el => el && el.classList && el.classList.contains('checklist-item')) || e.target.closest('.checklist-item');
 
-      if (pinBtn && (e.target === pinBtn || pinBtn.contains(e.target) || path.includes(pinBtn))) {
+      if (linkClick) {
+        e.stopPropagation();
+      } else if (pinBtn && (e.target === pinBtn || pinBtn.contains(e.target) || path.includes(pinBtn))) {
         e.stopPropagation();
         toggleNotePin(note.id);
       } else if (restoreBtn && (e.target === restoreBtn || restoreBtn.contains(e.target) || path.includes(restoreBtn))) {
@@ -562,10 +606,24 @@ export function renderCardsToGrid(notes, gridElement) {
         deleteNoteForever(note.id);
       } else if (carouselItem) {
         e.stopPropagation();
-        const src = carouselItem.getAttribute('src') || carouselItem.src;
-        const name = carouselItem.getAttribute('alt') || carouselItem.getAttribute('name') || '';
+        const imgEl = carouselItem.querySelector('img');
+        const src = carouselItem.getAttribute('src') || carouselItem.src || imgEl?.src || imgEl?.getAttribute('src');
+        const name = carouselItem.getAttribute('alt') || carouselItem.getAttribute('name') || imgEl?.getAttribute('alt') || '';
         if (src) {
-          openLightbox(src, name);
+          const validImages = (note.images || []).filter(img => Boolean(getImageSrc(img)));
+          const clickedIndex = validImages.findIndex(img => getImageSrc(img) === src);
+          const onDelete = !note.isTrashed ? async (delIndex) => {
+            const targetIndex = delIndex !== undefined ? delIndex : clickedIndex;
+            if (targetIndex >= 0 && targetIndex < note.images.length) {
+              note.images.splice(targetIndex, 1);
+              note.updatedAt = Date.now();
+              if (state.onSaveNoteCallback) {
+                await state.onSaveNoteCallback(note.id, note);
+              }
+              renderNotesFeed();
+            }
+          } : null;
+          openLightbox(src, name, onDelete, validImages, clickedIndex >= 0 ? clickedIndex : 0);
         }
       } else if (carouselEl) {
         e.stopPropagation();
@@ -588,6 +646,7 @@ export async function toggleNotePin(noteId) {
     if (state.onSaveNoteCallback) {
       await state.onSaveNoteCallback(note.id, note);
     }
+    renderNotesFeed();
   }
 }
 
@@ -600,6 +659,7 @@ export async function restoreNote(noteId) {
     if (state.onSaveNoteCallback) {
       await state.onSaveNoteCallback(note.id, note);
     }
+    renderNotesFeed();
   }
 }
 
@@ -627,16 +687,14 @@ export function generateImageCarouselHtml(images) {
   const itemsHtml = validImages.map((img, index) => {
     const src = getImageSrc(img);
     return `
-    <md-carousel-item
-      src="${src}"
-      alt="image-${index + 1}.jpg"
-      interactive
-    ></md-carousel-item>
+    <md-carousel-item interactive>
+      <img slot="media" src="${src}" alt="image-${index + 1}.jpg" loading="lazy" />
+    </md-carousel-item>
   `;
   }).join('');
 
   return `
-    <md-carousel layout="${isSingle ? 'full-width' : 'multi-browse'}" item-height="180px" hide-indicators aria-label="Note images">
+    <md-carousel layout="uncontained" item-height="180px" hide-indicators aria-label="Note images">
       ${itemsHtml}
     </md-carousel>
   `;

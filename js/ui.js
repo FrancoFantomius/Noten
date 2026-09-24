@@ -5,7 +5,14 @@
 import { t } from './i18n.js';
 import { state, elements, initElements } from './ui/state.js';
 import { initTheme } from './ui/theme.js';
-import { closeLightbox, showSnackbar } from './ui/utils.js';
+import {
+  closeLightbox,
+  triggerLightboxDelete,
+  downloadLightboxImage,
+  nextLightboxImage,
+  prevLightboxImage,
+  showSnackbar
+} from './ui/utils.js';
 import { getDragAfterElement } from './ui/checklist.js';
 import {
   initAccountUI,
@@ -171,9 +178,39 @@ export function initUI(callbacks) {
     window.addEventListener('scroll', onScrollThrottled, { passive: true });
   }
 
-  // Lightbox Modal closing event listeners
+  // Lightbox Modal closing and action event listeners
+  if (elements.btnLightboxPrev) {
+    elements.btnLightboxPrev.addEventListener('click', (e) => {
+      e.stopPropagation();
+      prevLightboxImage();
+    });
+  }
+  if (elements.btnLightboxNext) {
+    elements.btnLightboxNext.addEventListener('click', (e) => {
+      e.stopPropagation();
+      nextLightboxImage();
+    });
+  }
+  if (elements.btnLightboxDownload) {
+    elements.btnLightboxDownload.addEventListener('click', (e) => {
+      e.stopPropagation();
+      elements.btnLightboxDownload.selected = false;
+      downloadLightboxImage();
+    });
+  }
+  if (elements.btnLightboxDelete) {
+    elements.btnLightboxDelete.addEventListener('click', (e) => {
+      e.stopPropagation();
+      elements.btnLightboxDelete.selected = false;
+      triggerLightboxDelete();
+    });
+  }
   if (elements.btnLightboxClose) {
-    elements.btnLightboxClose.addEventListener('click', closeLightbox);
+    elements.btnLightboxClose.addEventListener('click', (e) => {
+      e.stopPropagation();
+      elements.btnLightboxClose.selected = false;
+      closeLightbox();
+    });
   }
   if (elements.lightboxModal) {
     elements.lightboxModal.addEventListener('click', (e) => {
@@ -183,8 +220,16 @@ export function initUI(callbacks) {
     });
   }
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && elements.lightboxModal && elements.lightboxModal.classList.contains('active')) {
-      closeLightbox();
+    if (elements.lightboxModal && elements.lightboxModal.classList.contains('active')) {
+      if (e.key === 'Escape') {
+        closeLightbox();
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        prevLightboxImage();
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        nextLightboxImage();
+      }
     }
   });
 

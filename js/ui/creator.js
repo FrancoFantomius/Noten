@@ -5,6 +5,7 @@
 import { t } from '../i18n.js';
 import { state, elements } from './state.js';
 import { compressImage, renderImageGrid } from './utils.js';
+import { attachRichLinkEditor } from './link-utils.js';
 import {
   hasChecklistItems,
   convertTextToChecklist,
@@ -39,6 +40,7 @@ export function updateCreatorPrompt() {
   }
   if (elements.creatorBody) {
     elements.creatorBody.placeholder = promptText;
+    elements.creatorBody.setAttribute('data-placeholder', promptText);
   }
 }
 
@@ -47,6 +49,10 @@ export function updateCreatorPrompt() {
  */
 export function initCreatorUI() {
   if (!elements.noteCreator) return;
+
+  if (elements.creatorBody) {
+    attachRichLinkEditor(elements.creatorBody);
+  }
 
   // Pick a random prompt on reload
   const prompts = getCreatorPrompts();
@@ -242,14 +248,22 @@ export function updateCreatorPinButton() {
   const isPinned = Boolean(state.isCreatorPinned);
   elements.btnCreatorPin.classList.toggle('active', isPinned);
   elements.btnCreatorPin.selected = isPinned;
+  elements.btnCreatorPin.removeAttribute('title');
+  const tooltip = document.getElementById('tooltip-creator-pin');
   if (isPinned) {
     elements.btnCreatorPin.setAttribute('selected', '');
-    elements.btnCreatorPin.title = t('btn_unpin_note_title');
     elements.btnCreatorPin.setAttribute('aria-label', t('btn_unpin_note_title'));
+    if (tooltip) {
+      tooltip.textContent = t('btn_unpin_note_title');
+      tooltip.value = t('btn_unpin_note_title');
+    }
   } else {
     elements.btnCreatorPin.removeAttribute('selected');
-    elements.btnCreatorPin.title = t('btn_pin_note_title');
     elements.btnCreatorPin.setAttribute('aria-label', t('btn_pin_note_title'));
+    if (tooltip) {
+      tooltip.textContent = t('btn_pin_note_title');
+      tooltip.value = t('btn_pin_note_title');
+    }
   }
 }
 

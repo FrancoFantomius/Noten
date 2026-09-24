@@ -120,6 +120,9 @@ export function applyTranslations(root = document) {
     const key = el.getAttribute('data-i18n');
     const text = t(key);
     if (text) {
+      if (el.tagName === 'MD-TOOLTIP') {
+        el.value = text;
+      }
       // Find first non-whitespace text node to replace, or append new if none exists
       let textNode = Array.from(el.childNodes).find(n => n.nodeType === Node.TEXT_NODE && n.textContent.trim() !== '');
       if (!textNode) {

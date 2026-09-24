@@ -115,6 +115,11 @@ export const elements = {
   lightboxModal: null,
   lightboxImage: null,
   lightboxFilename: null,
+  lightboxIndicators: null,
+  btnLightboxPrev: null,
+  btnLightboxNext: null,
+  btnLightboxDownload: null,
+  btnLightboxDelete: null,
   btnLightboxClose: null,
 
   // Floating Action Button
@@ -227,6 +232,11 @@ export function initElements() {
   elements.lightboxModal = document.getElementById('lightbox-modal');
   elements.lightboxImage = document.getElementById('lightbox-image');
   elements.lightboxFilename = document.getElementById('lightbox-filename');
+  elements.lightboxIndicators = document.getElementById('lightbox-indicators');
+  elements.btnLightboxPrev = document.getElementById('btn-lightbox-prev');
+  elements.btnLightboxNext = document.getElementById('btn-lightbox-next');
+  elements.btnLightboxDownload = document.getElementById('btn-lightbox-download');
+  elements.btnLightboxDelete = document.getElementById('btn-lightbox-delete');
   elements.btnLightboxClose = document.getElementById('btn-lightbox-close');
 
   // Floating Action Button

@@ -3,12 +3,12 @@
     <div class="modal-card login-modal-card">
       <div class="modal-header login-modal-header">
         <div class="login-modal-title-wrapper">
-          <md-icon-button id="btn-login-back" icon="arrow_back" class="modal-back-btn" aria-label="Go back" title="Go back"></md-icon-button>
+          <md-icon-button id="btn-login-back" icon="arrow_back" class="modal-back-btn" aria-label="Go back"></md-icon-button>
           <h2>
             <span data-i18n="btn_login">Sign in</span>
           </h2>
         </div>
-        <md-icon-button id="btn-login-close" icon="close" aria-label="Close modal" title="Close"></md-icon-button>
+        <md-icon-button id="btn-login-close" icon="close" aria-label="Close modal"></md-icon-button>
       </div>
       <div class="modal-body login-modal-body">
         <p class="section-help" data-i18n="settings_sync_help">
@@ -54,4 +54,8 @@
         </div>
       </div>
     </div>
+
+    <!-- Login Modal Tooltips positioned outside transformed login-modal-card -->
+    <md-tooltip for="btn-login-back" show-delay="200">Go back</md-tooltip>
+    <md-tooltip for="btn-login-close" show-delay="200">Close</md-tooltip>
   </div>

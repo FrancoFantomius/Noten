@@ -89,6 +89,8 @@
   "settings_backups_help": "Export your notes to a JSON file or import notes from a previous backup.",
   "btn_export_backup": "Export Backup",
   "btn_import_backup": "Import Backup File",
+  "btn_lightbox_download_title": "Download image",
+  "btn_lightbox_delete_title": "Delete image",
   "btn_lightbox_close_title": "Close fullscreen view",
   "btn_remove_image_title": "Remove image",
   "btn_remove_tag_title": "Remove tag",

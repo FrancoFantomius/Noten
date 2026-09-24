@@ -1,9 +1,31 @@
   <!-- Fullscreen Lightbox Modal -->
   <div id="lightbox-modal" class="lightbox-overlay hidden" role="dialog" aria-modal="true" aria-label="Fullscreen Image View">
     <div id="lightbox-filename" class="lightbox-filename"></div>
-    <md-icon-button id="btn-lightbox-close" variant="filled" icon="close" class="lightbox-close" data-i18n-title="btn_lightbox_close_title"
-      title="Close fullscreen view" aria-label="Close fullscreen view"></md-icon-button>
+    <div class="lightbox-actions">
+      <md-segmented-button-set class="lightbox-segmented-set" multiselect>
+        <md-segmented-button id="btn-lightbox-download" icon="download" label="Download" no-checkmark aria-label="Download image"></md-segmented-button>
+        <md-segmented-button id="btn-lightbox-delete" icon="delete" label="Delete" no-checkmark aria-label="Delete image"></md-segmented-button>
+        <md-segmented-button id="btn-lightbox-close" icon="close" no-checkmark aria-label="Close fullscreen view"></md-segmented-button>
+      </md-segmented-button-set>
+    </div>
+
+    <!-- Navigation arrow buttons -->
+    <md-icon-button id="btn-lightbox-prev" variant="filled" class="lightbox-nav-btn lightbox-prev hidden" icon="chevron_left"
+      aria-label="Previous image"></md-icon-button>
+    <md-icon-button id="btn-lightbox-next" variant="filled" class="lightbox-nav-btn lightbox-next hidden" icon="chevron_right"
+      aria-label="Next image"></md-icon-button>
+
     <div class="lightbox-content">
       <img id="lightbox-image" src="" alt="Fullscreen view">
     </div>
+
+    <!-- Pagination indicators (Image 2 style) -->
+    <div id="lightbox-indicators" class="lightbox-indicators hidden"></div>
+
+    <!-- Lightbox Tooltips positioned at overlay root -->
+    <md-tooltip for="btn-lightbox-download" show-delay="200" data-i18n="btn_lightbox_download_title">Download image</md-tooltip>
+    <md-tooltip for="btn-lightbox-delete" show-delay="200" data-i18n="btn_lightbox_delete_title">Delete image</md-tooltip>
+    <md-tooltip for="btn-lightbox-close" show-delay="200" data-i18n="btn_lightbox_close_title">Close fullscreen view</md-tooltip>
+    <md-tooltip for="btn-lightbox-prev" show-delay="200">Previous image</md-tooltip>
+    <md-tooltip for="btn-lightbox-next" show-delay="200">Next image</md-tooltip>
   </div>
