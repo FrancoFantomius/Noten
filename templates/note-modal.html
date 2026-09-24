@@ -104,3 +104,16 @@
     <md-tooltip id="tooltip-modal-trash" for="btn-modal-trash" show-delay="200" data-i18n="btn_modal_trash_delete_title">Delete note</md-tooltip>
     <md-tooltip for="btn-modal-delete-forever" show-delay="200" data-i18n="btn_modal_trash_delete_forever_title">Delete forever</md-tooltip>
   </div>
+
+  <!-- Permanently Delete Note Confirmation Dialog -->
+  <md-dialog id="delete-confirm-dialog" headline="Delete note?" icon="delete" data-i18n-headline="dialog_delete_note_title">
+    <span data-i18n="confirm_delete_note">Permanently delete this note? This cannot be undone.</span>
+    <div slot="actions">
+      <md-button id="btn-delete-confirm-cancel" variant="text">
+        <span data-i18n="btn_cancel">Cancel</span>
+      </md-button>
+      <md-button id="btn-delete-confirm-accept" variant="filled">
+        <span data-i18n="btn_modal_trash_delete_forever_title">Delete forever</span>
+      </md-button>
+    </div>
+  </md-dialog>

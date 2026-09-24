@@ -100,6 +100,7 @@
   "checklist_indent_title": "Indent (Tab)",
   "checklist_outdent_title": "Outdent (Shift+Tab)",
   "checklist_drag_title": "Drag to reorder",
+  "dialog_delete_note_title": "Delete note?",
   "confirm_delete_note": "Permanently delete this note? This cannot be undone.",
   "confirm_import_notes": "Do you want to import {count} notes into your database?",
   "status_connecting": "Connecting to Filen and starting sync...",

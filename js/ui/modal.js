@@ -4,7 +4,7 @@
 
 import { t } from '../i18n.js';
 import { state, elements } from './state.js';
-import { formatDate, compressImage, renderImageGrid } from './utils.js';
+import { formatDate, compressImage, renderImageGrid, showDeleteConfirmDialog } from './utils.js';
 import { attachRichLinkEditor } from './link-utils.js';
 import {
   hasChecklistItems,
@@ -37,6 +37,8 @@ export function initModalUI() {
   // Close open note modal on Escape key
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
+      const deleteDialog = elements.deleteConfirmDialog || document.getElementById('delete-confirm-dialog');
+      if (deleteDialog && deleteDialog.open) return;
       if (state.editingNoteId) {
         e.preventDefault();
         saveAndCloseModal();
@@ -273,7 +275,8 @@ export function initModalUI() {
     if (state.editingNoteId) {
       const note = state.decryptedNotes.find(n => n.id === state.editingNoteId);
       if (note && note.isTrashed) {
-        if (confirm(t('confirm_delete_note'))) {
+        const confirmed = await showDeleteConfirmDialog();
+        if (confirmed) {
           await state.onDeleteNoteCallback(note.id);
           closeModal();
         }

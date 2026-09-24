@@ -482,3 +482,55 @@ export function showSnackbar(message, options = {}) {
 
   snackbar.show();
 }
+
+/**
+ * Prompts the user with a confirmation md-dialog before permanently deleting a note
+ * @returns {Promise<boolean>} Resolves to true if user confirmed, false otherwise
+ */
+export function showDeleteConfirmDialog() {
+  return new Promise((resolve) => {
+    const dialog = elements.deleteConfirmDialog || document.getElementById('delete-confirm-dialog');
+    if (!dialog) {
+      resolve(false);
+      return;
+    }
+
+    const cancelBtn = elements.btnDeleteConfirmCancel || document.getElementById('btn-delete-confirm-cancel');
+    const acceptBtn = elements.btnDeleteConfirmAccept || document.getElementById('btn-delete-confirm-accept');
+
+    let isResolved = false;
+
+    const cleanup = () => {
+      if (acceptBtn) acceptBtn.removeEventListener('click', onAccept);
+      if (cancelBtn) cancelBtn.removeEventListener('click', onCancel);
+      dialog.removeEventListener('close', onClose);
+    };
+
+    const finish = (result) => {
+      if (isResolved) return;
+      isResolved = true;
+      cleanup();
+      resolve(result);
+    };
+
+    const onAccept = () => {
+      dialog.close('accept');
+      finish(true);
+    };
+
+    const onCancel = () => {
+      dialog.close('cancel');
+      finish(false);
+    };
+
+    const onClose = (e) => {
+      finish(e.detail?.returnValue === 'accept');
+    };
+
+    if (acceptBtn) acceptBtn.addEventListener('click', onAccept);
+    if (cancelBtn) cancelBtn.addEventListener('click', onCancel);
+    dialog.addEventListener('close', onClose);
+
+    dialog.showModal();
+  });
+}

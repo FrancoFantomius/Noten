@@ -4,7 +4,7 @@
 
 import { t } from '../i18n.js';
 import { state, elements } from './state.js';
-import { escapeHtml, formatDate, openLightbox, setupCarouselItemClicks, getImageSrc } from './utils.js';
+import { escapeHtml, formatDate, openLightbox, setupCarouselItemClicks, getImageSrc, showDeleteConfirmDialog } from './utils.js';
 import { renderTextWithLinks } from './link-utils.js';
 import { hasChecklistItems, buildChecklistDOM } from './checklist.js';
 import { openNoteModal, saveAndCloseModal } from './modal.js';
@@ -666,7 +666,8 @@ export async function restoreNote(noteId) {
 export async function deleteNoteForever(noteId) {
   const note = state.decryptedNotes.find(n => n.id === noteId);
   if (note) {
-    if (confirm(t('confirm_delete_note'))) {
+    const confirmed = await showDeleteConfirmDialog();
+    if (confirmed) {
       if (state.onDeleteNoteCallback) {
         await state.onDeleteNoteCallback(note.id);
       }

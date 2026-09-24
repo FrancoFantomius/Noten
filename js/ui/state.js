@@ -95,6 +95,9 @@ export const elements = {
   btnModalArchive: null,
   btnModalTrash: null,
   btnModalDeleteForever: null,
+  deleteConfirmDialog: null,
+  btnDeleteConfirmCancel: null,
+  btnDeleteConfirmAccept: null,
   modalColorPickerWrapper: null,
   btnModalClose: null,
   modalLastEdited: null,
@@ -210,6 +213,9 @@ export function initElements() {
   elements.btnModalArchive = document.getElementById('btn-modal-archive');
   elements.btnModalTrash = document.getElementById('btn-modal-trash');
   elements.btnModalDeleteForever = document.getElementById('btn-modal-delete-forever');
+  elements.deleteConfirmDialog = document.getElementById('delete-confirm-dialog');
+  elements.btnDeleteConfirmCancel = document.getElementById('btn-delete-confirm-cancel');
+  elements.btnDeleteConfirmAccept = document.getElementById('btn-delete-confirm-accept');
   elements.modalColorPickerWrapper = document.querySelector('#note-modal .color-picker-wrapper');
   elements.btnModalClose = document.getElementById('btn-modal-close');
   elements.modalLastEdited = document.getElementById('modal-last-edited');
