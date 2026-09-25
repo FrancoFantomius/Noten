@@ -182,6 +182,206 @@ export function setEditorPlainText(container, text) {
   });
 }
 
+let linkPillContainer = null;
+let linkPillChip = null;
+let currentActiveLink = null;
+
+/**
+ * Ensures the singleton floating 'Open link' pill element exists in the DOM.
+ */
+export function ensureLinkPill() {
+  if (linkPillContainer && document.body.contains(linkPillContainer)) {
+    return { container: linkPillContainer, chip: linkPillChip };
+  }
+
+  linkPillContainer = document.createElement('div');
+  linkPillContainer.className = 'link-open-pill';
+  linkPillContainer.setAttribute('role', 'tooltip');
+  linkPillContainer.setAttribute('aria-hidden', 'true');
+
+  linkPillChip = document.createElement('md-chip');
+  linkPillChip.className = 'link-pill-chip';
+  linkPillChip.setAttribute('variant', 'assist');
+  linkPillChip.setAttribute('icon', 'open_in_new');
+  linkPillChip.setAttribute('label', 'Open link');
+  linkPillChip.setAttribute('title', 'Open link in new tab');
+
+  // Prevent mousedown from stealing focus or moving caret inside contenteditable
+  linkPillContainer.addEventListener('mousedown', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  });
+
+  const handleOpenLink = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (currentActiveLink) {
+      let url = currentActiveLink.getAttribute('data-url') || currentActiveLink.textContent.trim() || currentActiveLink.href;
+      if (url) {
+        if (!/^https?:\/\//i.test(url)) {
+          url = 'https://' + url;
+        }
+        window.open(url, '_blank', 'noopener,noreferrer');
+      }
+    }
+  };
+
+  linkPillChip.addEventListener('click', handleOpenLink);
+  linkPillContainer.addEventListener('click', handleOpenLink);
+
+  linkPillContainer.appendChild(linkPillChip);
+  document.body.appendChild(linkPillContainer);
+
+  return { container: linkPillContainer, chip: linkPillChip };
+}
+
+/**
+ * Updates the floating pill position directly underneath the active expanded link.
+ */
+export function updateLinkPillPosition() {
+  if (!currentActiveLink || !linkPillContainer || !linkPillContainer.classList.contains('visible')) {
+    return;
+  }
+
+  if (!currentActiveLink.isConnected || !document.body.contains(currentActiveLink)) {
+    hideLinkPill();
+    return;
+  }
+
+  const rects = currentActiveLink.getClientRects();
+  const rect = rects && rects.length > 0 ? rects[rects.length - 1] : currentActiveLink.getBoundingClientRect();
+
+  // Check if link is outside viewport
+  if (rect.bottom < 0 || rect.top > window.innerHeight || rect.right < 0 || rect.left > window.innerWidth) {
+    hideLinkPill();
+    return;
+  }
+
+  const pillRect = linkPillContainer.getBoundingClientRect();
+  const pillHeight = pillRect.height || 36;
+  const pillWidth = pillRect.width || 120;
+
+  let top = rect.bottom + 6;
+  // If overflowing bottom of window, flip to above the link
+  if (top + pillHeight > window.innerHeight - 8) {
+    top = Math.max(8, rect.top - pillHeight - 6);
+  }
+
+  let left = rect.left;
+  // Keep within screen horizontally
+  if (left + pillWidth > window.innerWidth - 12) {
+    left = Math.max(12, window.innerWidth - pillWidth - 12);
+  }
+  if (left < 12) {
+    left = 12;
+  }
+
+  linkPillContainer.style.top = `${Math.round(top)}px`;
+  linkPillContainer.style.left = `${Math.round(left)}px`;
+}
+
+/**
+ * Shows the 'Open link' pill underneath the specified expanded link element.
+ */
+export function showLinkPill(linkEl) {
+  if (!linkEl) {
+    hideLinkPill();
+    return;
+  }
+
+  currentActiveLink = linkEl;
+  const { container } = ensureLinkPill();
+
+  container.setAttribute('aria-hidden', 'false');
+  container.classList.add('visible');
+
+  updateLinkPillPosition();
+  requestAnimationFrame(updateLinkPillPosition);
+}
+
+/**
+ * Hides the 'Open link' pill.
+ */
+export function hideLinkPill() {
+  currentActiveLink = null;
+  if (linkPillContainer) {
+    linkPillContainer.classList.remove('visible');
+    linkPillContainer.setAttribute('aria-hidden', 'true');
+  }
+}
+
+// Global window event listeners for smooth pill tracking
+if (typeof window !== 'undefined') {
+  window.addEventListener('scroll', updateLinkPillPosition, { capture: true, passive: true });
+  window.addEventListener('resize', updateLinkPillPosition, { passive: true });
+}
+
+/**
+ * Collapses all expanded links, optionally excluding an active link being expanded.
+ */
+function collapseExpandedLinks(activeLink = null) {
+  const sel = window.getSelection();
+  const expandedLinks = document.querySelectorAll('a.expanded-link');
+  for (let linkEl of expandedLinks) {
+    if (linkEl === activeLink) continue;
+    if (activeLink || !isSelectionTouchingNode(sel, linkEl)) {
+      const currentText = linkEl.textContent.trim();
+      if (/^https?:\/\/[^\s<>"'`]+/i.test(currentText)) {
+        linkEl.href = currentText;
+        linkEl.setAttribute('data-url', currentText);
+        linkEl.textContent = shortenUrl(currentText);
+        linkEl.contentEditable = 'false';
+        linkEl.classList.remove('expanded-link');
+        linkEl.classList.add('shortened-link');
+        linkEl.title = currentText;
+      } else {
+        // No longer a valid URL -> convert to text node
+        const textNode = document.createTextNode(linkEl.textContent);
+        if (linkEl.parentNode) {
+          linkEl.parentNode.replaceChild(textNode, linkEl);
+        }
+      }
+      if (linkEl === currentActiveLink) {
+        hideLinkPill();
+      }
+    }
+  }
+}
+
+/**
+ * Helper to check if selection is inside or adjacent to a given node
+ */
+function isSelectionTouchingNode(sel, targetNode) {
+  if (!sel || sel.rangeCount === 0 || !targetNode) return false;
+  const range = sel.getRangeAt(0);
+
+  // Direct match
+  if (range.startContainer === targetNode || range.endContainer === targetNode) return true;
+  if (targetNode.contains(range.startContainer) || targetNode.contains(range.endContainer)) return true;
+
+  // Check sibling adjacency in parent
+  const parent = targetNode.parentNode;
+  if (parent && (range.startContainer === parent || range.endContainer === parent)) {
+    const idx = Array.prototype.indexOf.call(parent.childNodes, targetNode);
+    if (range.startContainer === parent && (range.startOffset === idx || range.startOffset === idx + 1)) return true;
+    if (range.endContainer === parent && (range.endOffset === idx || range.endOffset === idx + 1)) return true;
+  }
+
+  // Check boundary adjacency for text node siblings
+  if (targetNode.previousSibling && targetNode.previousSibling.nodeType === Node.TEXT_NODE) {
+    if (range.startContainer === targetNode.previousSibling && range.startOffset === targetNode.previousSibling.length) {
+      return true;
+    }
+  }
+  if (targetNode.nextSibling && targetNode.nextSibling.nodeType === Node.TEXT_NODE) {
+    if (range.startContainer === targetNode.nextSibling && range.startOffset === 0) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 /**
  * Attaches rich link expansion/collapse handling to a contenteditable note editor container.
  */
@@ -228,69 +428,6 @@ export function attachRichLinkEditor(editorElement) {
   });
 
   /**
-   * Helper to check if selection is inside or adjacent to a given node
-   */
-  function isSelectionTouchingNode(sel, targetNode) {
-    if (!sel || sel.rangeCount === 0 || !targetNode) return false;
-    const range = sel.getRangeAt(0);
-
-    // Direct match
-    if (range.startContainer === targetNode || range.endContainer === targetNode) return true;
-    if (targetNode.contains(range.startContainer) || targetNode.contains(range.endContainer)) return true;
-
-    // Check sibling adjacency in parent
-    const parent = targetNode.parentNode;
-    if (parent && (range.startContainer === parent || range.endContainer === parent)) {
-      const idx = Array.prototype.indexOf.call(parent.childNodes, targetNode);
-      if (range.startContainer === parent && (range.startOffset === idx || range.startOffset === idx + 1)) return true;
-      if (range.endContainer === parent && (range.endOffset === idx || range.endOffset === idx + 1)) return true;
-    }
-
-    // Check boundary adjacency for text node siblings
-    if (targetNode.previousSibling && targetNode.previousSibling.nodeType === Node.TEXT_NODE) {
-      if (range.startContainer === targetNode.previousSibling && range.startOffset === targetNode.previousSibling.length) {
-        return true;
-      }
-    }
-    if (targetNode.nextSibling && targetNode.nextSibling.nodeType === Node.TEXT_NODE) {
-      if (range.startContainer === targetNode.nextSibling && range.startOffset === 0) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-  /**
-   * Collapses all expanded links, optionally excluding an active link being expanded.
-   */
-  function collapseExpandedLinks(activeLink = null) {
-    const sel = window.getSelection();
-    const expandedLinks = editorElement.querySelectorAll('a.expanded-link');
-    for (let linkEl of expandedLinks) {
-      if (linkEl === activeLink) continue;
-      if (activeLink || !isSelectionTouchingNode(sel, linkEl)) {
-        const currentText = linkEl.textContent.trim();
-        if (/^https?:\/\/[^\s<>"'`]+/i.test(currentText)) {
-          linkEl.href = currentText;
-          linkEl.setAttribute('data-url', currentText);
-          linkEl.textContent = shortenUrl(currentText);
-          linkEl.contentEditable = 'false';
-          linkEl.classList.remove('expanded-link');
-          linkEl.classList.add('shortened-link');
-          linkEl.title = currentText;
-        } else {
-          // No longer a valid URL -> convert to text node
-          const textNode = document.createTextNode(linkEl.textContent);
-          if (linkEl.parentNode) {
-            linkEl.parentNode.replaceChild(textNode, linkEl);
-          }
-        }
-      }
-    }
-  }
-
-  /**
    * Expands an <a> link element so its text becomes the full URL while remaining an <a> tag.
    */
   function expandLink(linkEl, cursorOffset = null) {
@@ -317,6 +454,8 @@ export function attachRichLinkEditor(editorElement) {
         sel.addRange(newRange);
       }
     }
+
+    showLinkPill(linkEl);
   }
 
   /**
@@ -411,7 +550,22 @@ export function attachRichLinkEditor(editorElement) {
       }
     }
 
-    // 2. Collapse any URLs not being edited
+    // 2. Check if an expanded link is currently active
+    const expandedLinks = editorElement.querySelectorAll('a.expanded-link');
+    let hasActiveExpandedLink = false;
+    for (let linkEl of expandedLinks) {
+      if (isSelectionTouchingNode(sel, linkEl)) {
+        hasActiveExpandedLink = true;
+        showLinkPill(linkEl);
+        break;
+      }
+    }
+
+    if (!hasActiveExpandedLink && currentActiveLink && editorElement.contains(currentActiveLink)) {
+      hideLinkPill();
+    }
+
+    // 3. Collapse any URLs not being edited
     collapseInactiveLinks();
   }
 
@@ -426,6 +580,7 @@ export function attachRichLinkEditor(editorElement) {
         linkEl.href = text;
         linkEl.setAttribute('data-url', text);
         linkEl.title = text;
+        updateLinkPillPosition();
       }
     }
   });
@@ -461,6 +616,13 @@ export function attachRichLinkEditor(editorElement) {
 
   editorElement.addEventListener('blur', () => {
     collapseInactiveLinks();
+    setTimeout(() => {
+      if (document.activeElement !== editorElement && !editorElement.contains(document.activeElement)) {
+        if (!linkPillContainer || !linkPillContainer.contains(document.activeElement)) {
+          hideLinkPill();
+        }
+      }
+    }, 150);
   });
 
   // Handle Paste
@@ -487,6 +649,8 @@ export function attachRichLinkEditor(editorElement) {
         range.collapse(true);
         sel.removeAllRanges();
         sel.addRange(range);
+
+        showLinkPill(a);
       } else {
         const textNode = document.createTextNode(pastedText);
         range.insertNode(textNode);
@@ -502,3 +666,4 @@ export function attachRichLinkEditor(editorElement) {
     }
   });
 }
+

@@ -5,7 +5,7 @@
 import { t } from '../i18n.js';
 import { state, elements } from './state.js';
 import { compressImage, renderImageGrid } from './utils.js';
-import { attachRichLinkEditor } from './link-utils.js';
+import { attachRichLinkEditor, hideLinkPill } from './link-utils.js';
 import {
   hasChecklistItems,
   convertTextToChecklist,
@@ -352,6 +352,7 @@ export async function closeNoteCreator() {
   renderCreatorImages();
 
   // Collapse UI
+  hideLinkPill();
   elements.creatorCollapsed.classList.remove('hidden');
   elements.creatorExpanded.classList.add('hidden');
 }
@@ -372,6 +373,7 @@ export function discardNoteCreator() {
   renderCreatorImages();
 
   // Collapse UI
+  hideLinkPill();
   elements.creatorCollapsed.classList.remove('hidden');
   elements.creatorExpanded.classList.add('hidden');
 }

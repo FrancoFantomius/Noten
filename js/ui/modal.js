@@ -5,7 +5,7 @@
 import { t } from '../i18n.js';
 import { state, elements } from './state.js';
 import { formatDate, compressImage, renderImageGrid, showDeleteConfirmDialog } from './utils.js';
-import { attachRichLinkEditor } from './link-utils.js';
+import { attachRichLinkEditor, hideLinkPill } from './link-utils.js';
 import {
   hasChecklistItems,
   convertTextToChecklist,
@@ -575,6 +575,7 @@ export async function saveAndCloseModal() {
 }
 
 export function closeModal() {
+  hideLinkPill();
   const closedNoteId = state.editingNoteId;
 
   elements.noteModal.classList.remove('active');

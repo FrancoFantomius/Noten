@@ -109,6 +109,65 @@
    margin: 0 -1px;
 }
 
+/* Link Open Pill Popup - Material Design 3 */
+.link-open-pill {
+   position: fixed;
+   z-index: 9999;
+   display: inline-flex;
+   align-items: center;
+   opacity: 0;
+   visibility: hidden;
+   transform: translateY(-4px) scale(0.96);
+   transform-origin: top left;
+   transition: opacity 0.15s cubic-bezier(0.05, 0.7, 0.1, 1),
+               transform 0.15s cubic-bezier(0.05, 0.7, 0.1, 1),
+               visibility 0.15s;
+   pointer-events: none;
+   user-select: none;
+}
+
+.link-open-pill.visible {
+   opacity: 1;
+   visibility: visible;
+   transform: translateY(0) scale(1);
+   pointer-events: auto;
+}
+
+.link-open-pill md-chip,
+.link-open-pill .link-pill-chip {
+   --md-sys-shape-corner-small: var(--radius-full, 9999px);
+   border-radius: var(--radius-full, 9999px);
+   background-color: var(--md-sys-color-surface-container-high, #21262d);
+   border: 1px solid var(--md-sys-color-outline-variant, rgba(240, 246, 252, 0.18));
+   color: var(--md-sys-color-primary, var(--accent, #ffb951));
+   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35), 0 2px 6px rgba(0, 0, 0, 0.2);
+   cursor: pointer;
+   height: 32px;
+   font-size: 0.82rem;
+   font-weight: 500;
+}
+
+.link-open-pill md-chip:hover,
+.link-open-pill .link-pill-chip:hover {
+   background-color: var(--md-sys-color-surface-container-highest, #30363d);
+}
+
+[data-theme='light'] .link-open-pill md-chip,
+.light-theme .link-open-pill md-chip,
+body.light-theme .link-open-pill md-chip {
+   background-color: #ffffff;
+   border: 1px solid var(--md-sys-color-outline-variant, rgba(0, 0, 0, 0.15));
+   color: var(--md-sys-color-primary, var(--accent, #7b5800));
+   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15), 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+[data-theme='light'] .link-open-pill md-chip:hover,
+.light-theme .link-open-pill md-chip:hover,
+body.light-theme .link-open-pill md-chip:hover {
+   background-color: var(--md-sys-color-surface-container-high, #f0f4f9);
+}
+
+
 /* Tags in note card creator */
 .note-tags-container {
    display: flex;
