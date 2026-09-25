@@ -331,19 +331,22 @@ md-dialog {
    flex: 1;
 }
 
-.modal-body textarea {
+.modal-body textarea,
+.modal-body .note-editor-body {
    resize: none;
    font-size: 1rem;
    line-height: 1.6;
    width: 100%;
    color: var(--text-primary);
+   outline: none;
+   white-space: pre-wrap;
+   word-break: break-word;
 }
 
 #modal-body-text {
-   flex-grow: 1;
-   flex-shrink: 1;
-   flex-basis: auto;
-   min-height: 150px;
+   flex-grow: 0;
+   flex-shrink: 0;
+   min-height: 72px;
 }
 
 .modal-footer {
@@ -1079,12 +1082,136 @@ input:checked+.slider:before {
    display: none;
 }
 
-.lightbox-close {
+.lightbox-actions {
    position: absolute;
    top: 24px;
    right: 24px;
    z-index: 10002;
+   display: flex;
+   align-items: center;
+}
+
+.lightbox-segmented-set {
+   background-color: rgba(0, 0, 0, 0.45);
+   backdrop-filter: blur(8px);
+   -webkit-backdrop-filter: blur(8px);
+   border: 1px solid rgba(255, 255, 255, 0.18);
+   border-radius: var(--radius-full, 9999px);
+   --md-sys-color-outline: rgba(255, 255, 255, 0.18);
+   box-shadow: var(--shadow-sm, 0 2px 6px rgba(0, 0, 0, 0.2));
+}
+
+.lightbox-segmented-set md-segmented-button {
+   color: #ffffff;
+   --md-sys-color-on-surface: #ffffff;
+   --md-icon-size: 18px;
+   padding: 0 16px;
+   height: 40px;
+   font-size: 0.85rem;
+   font-weight: 500;
    cursor: pointer;
-   --md-sys-color-primary: rgba(255, 255, 255, 0.18);
+   display: inline-flex;
+   align-items: center;
+   justify-content: center;
+   transition: background-color var(--transition-speed), color var(--transition-speed);
+}
+
+.lightbox-segmented-set md-segmented-button[icon="close"] {
+   padding: 0 12px;
+   min-width: 40px;
+}
+
+.lightbox-segmented-set md-segmented-button:hover:not([disabled]) {
+   background-color: rgba(255, 255, 255, 0.15);
+}
+
+.lightbox-segmented-set md-segmented-button.hidden {
+   display: none !important;
+}
+
+/* Lightbox Navigation Buttons (Sides) */
+.lightbox-nav-btn {
+   position: absolute;
+   top: 50%;
+   transform: translateY(-50%);
+   z-index: 10002;
+   --md-icon-button-size: 48px;
+   --md-icon-button-icon-size: 28px;
+   --md-sys-color-primary: rgba(0, 0, 0, 0.45);
    --md-sys-color-on-primary: #ffffff;
+   --md-sys-color-on-surface: #ffffff;
+   --md-sys-color-on-surface-variant: #ffffff;
+   color: #ffffff;
+   background-color: rgba(0, 0, 0, 0.45);
+   backdrop-filter: blur(8px);
+   -webkit-backdrop-filter: blur(8px);
+   border: 1px solid rgba(255, 255, 255, 0.18);
+   border-radius: var(--radius-full, 9999px);
+   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+   cursor: pointer;
+   transition: background-color var(--transition-speed), transform var(--transition-speed), opacity var(--transition-speed);
+}
+
+.lightbox-nav-btn:hover:not([disabled]) {
+   --md-sys-color-primary: rgba(255, 255, 255, 0.2);
+   --md-sys-color-on-primary: #ffffff;
+   --md-sys-color-on-surface: #ffffff;
+   --md-sys-color-on-surface-variant: #ffffff;
+   background-color: rgba(255, 255, 255, 0.2);
+   transform: translateY(-50%) scale(1.05);
+}
+
+.lightbox-nav-btn:active:not([disabled]) {
+   transform: translateY(-50%) scale(0.95);
+}
+
+.lightbox-nav-btn.lightbox-prev {
+   left: 24px;
+}
+
+.lightbox-nav-btn.lightbox-next {
+   right: 24px;
+}
+
+/* Lightbox Indicators at Bottom */
+.lightbox-indicators {
+   position: absolute;
+   bottom: 24px;
+   left: 50%;
+   transform: translateX(-50%);
+   z-index: 10002;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   gap: 8px;
+   padding: 8px 16px;
+   background-color: rgba(0, 0, 0, 0.45);
+   backdrop-filter: blur(8px);
+   -webkit-backdrop-filter: blur(8px);
+   border: 1px solid rgba(255, 255, 255, 0.18);
+   border-radius: var(--radius-full, 9999px);
+   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.lightbox-indicator-dot {
+   width: 8px;
+   height: 8px;
+   border-radius: var(--radius-full, 9999px);
+   background-color: rgba(255, 255, 255, 0.4);
+   border: none;
+   padding: 0;
+   cursor: pointer;
+   transition: width 0.3s cubic-bezier(0.2, 0, 0, 1),
+               background-color 0.3s cubic-bezier(0.2, 0, 0, 1),
+               border-radius 0.3s;
+}
+
+.lightbox-indicator-dot:hover {
+   background-color: rgba(255, 255, 255, 0.7);
+}
+
+.lightbox-indicator-dot.active {
+   width: 24px;
+   border-radius: 4px;
+   background-color: #ffffff;
 }

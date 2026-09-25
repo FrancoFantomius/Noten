@@ -6,6 +6,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [2.2.0] - 2026-09-25
+
+### Added
+- Rich interactive URL link parsing, shortening, and editing utilities (`link-utils.js`) with preview popover actions (open link, copy URL, edit URL, and remove link).
+- Interactive hashtag autocompletion popup (`tag-suggestions.js`) when typing `#` inside note descriptions and modal editor.
+- Confirmation dialog for permanent note deletion from trash to prevent accidental data loss.
+- Settings preference to include or exclude archived notes when filtering by tag.
+- Randomized note creation placeholder prompts rotating between four distinct suggestions.
+- Lightbox action enhancements with dedicated download and delete image options.
+- Automated translation checking tool (`scripts/check-translations.js`) to validate key synchronization across all supported languages.
+
+### Changed
+- Bumped package version and Service Worker cache version to `noten-v2.2.0`.
+- Migrated note creator and note edit modal from plain `textarea` to `contenteditable` divs for rich text and interactive link editing.
+- Comprehensive Material Design 3 tooltip integration across icon buttons and interactive controls.
+- Optimized and subsetted Material Symbols icon font bundle for enhanced performance.
+- Synchronized all 16 supported language translation files with new feature strings.
+
 ## [2.1.1] - 2026-08-23
 
 ### Changed
@@ -136,7 +154,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Fixed
 - Mobile responsiveness groundwork (WIP).
 
-[Unreleased]: https://github.com/FrancoFantomius/noten/compare/v2.1.1...HEAD
+[Unreleased]: https://github.com/FrancoFantomius/noten/compare/v2.2.0...HEAD
+[2.2.0]: https://github.com/FrancoFantomius/noten/compare/v2.1.1...v2.2.0
 [2.1.1]: https://github.com/FrancoFantomius/noten/compare/v2.1.0...v2.1.1
 [2.1.0]: https://github.com/FrancoFantomius/noten/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/FrancoFantomius/noten/releases/tag/v2.0.0

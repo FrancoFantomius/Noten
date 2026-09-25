@@ -29,6 +29,16 @@
    height: 48px;
 }
 
+.creator-prompt-text {
+   display: inline-block;
+   color: var(--text-secondary);
+   font-weight: 500;
+   white-space: nowrap;
+   overflow: hidden;
+   text-overflow: ellipsis;
+   user-select: none;
+}
+
 .creator-actions-collapsed {
    display: flex;
    gap: 4px;
@@ -55,13 +65,108 @@
    color: var(--text-primary);
 }
 
-.creator-expanded textarea {
+.creator-expanded textarea,
+.creator-expanded .note-editor-body {
    resize: none;
    font-size: 0.95rem;
    line-height: 1.5;
    width: 100%;
    color: var(--text-primary);
+   min-height: 72px;
+   white-space: pre-wrap;
+   word-break: break-word;
+   outline: none;
 }
+
+.note-editor-body:empty::before,
+.note-editor-body[data-placeholder]:empty::before {
+   content: attr(data-placeholder);
+   color: var(--text-secondary);
+   pointer-events: none;
+   display: block;
+}
+
+/* Material Design 3 Links */
+.note-link {
+   color: var(--md-sys-color-primary, var(--accent, #ffb951));
+   text-decoration: underline;
+   text-underline-offset: 3px;
+   text-decoration-thickness: 1px;
+   cursor: pointer;
+   word-break: break-all;
+   transition: color var(--transition-speed), text-decoration-color var(--transition-speed);
+}
+
+.note-link:hover {
+   color: var(--md-sys-color-primary, var(--accent, #ffb951));
+   text-decoration-thickness: 1.5px;
+}
+
+.note-link.expanded-link {
+   background-color: var(--bg-hover-item, rgba(255, 255, 255, 0.06));
+   border-radius: 4px;
+   padding: 1px 3px;
+   margin: 0 -1px;
+}
+
+/* Link Open Pill Popup - Material Design 3 */
+.link-open-pill {
+   position: fixed;
+   z-index: 9999;
+   display: inline-flex;
+   align-items: center;
+   opacity: 0;
+   visibility: hidden;
+   transform: translateY(-4px) scale(0.96);
+   transform-origin: top left;
+   transition: opacity 0.15s cubic-bezier(0.05, 0.7, 0.1, 1),
+               transform 0.15s cubic-bezier(0.05, 0.7, 0.1, 1),
+               visibility 0.15s;
+   pointer-events: none;
+   user-select: none;
+}
+
+.link-open-pill.visible {
+   opacity: 1;
+   visibility: visible;
+   transform: translateY(0) scale(1);
+   pointer-events: auto;
+}
+
+.link-open-pill md-chip,
+.link-open-pill .link-pill-chip {
+   --md-sys-shape-corner-small: var(--radius-full, 9999px);
+   border-radius: var(--radius-full, 9999px);
+   background-color: var(--md-sys-color-surface-container-high, #21262d);
+   border: 1px solid var(--md-sys-color-outline-variant, rgba(240, 246, 252, 0.18));
+   color: var(--md-sys-color-primary, var(--accent, #ffb951));
+   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35), 0 2px 6px rgba(0, 0, 0, 0.2);
+   cursor: pointer;
+   height: 32px;
+   font-size: 0.82rem;
+   font-weight: 500;
+}
+
+.link-open-pill md-chip:hover,
+.link-open-pill .link-pill-chip:hover {
+   background-color: var(--md-sys-color-surface-container-highest, #30363d);
+}
+
+[data-theme='light'] .link-open-pill md-chip,
+.light-theme .link-open-pill md-chip,
+body.light-theme .link-open-pill md-chip {
+   background-color: #ffffff;
+   border: 1px solid var(--md-sys-color-outline-variant, rgba(0, 0, 0, 0.15));
+   color: var(--md-sys-color-primary, var(--accent, #7b5800));
+   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15), 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+[data-theme='light'] .link-open-pill md-chip:hover,
+.light-theme .link-open-pill md-chip:hover,
+body.light-theme .link-open-pill md-chip:hover {
+   background-color: var(--md-sys-color-surface-container-high, #f0f4f9);
+}
+
 
 /* Tags in note card creator */
 .note-tags-container {
@@ -101,6 +206,15 @@
    height: 10px;
 }
 
+.tag-input-wrapper {
+   position: relative;
+   display: flex;
+   flex-direction: column;
+   align-items: flex-start;
+   margin-top: 4px;
+   width: 100%;
+}
+
 .tag-input-wrapper input {
    font-size: 0.78rem;
    color: var(--text-secondary);
@@ -114,6 +228,29 @@
    width: 200px;
    color: var(--text-primary);
    border-color: var(--accent);
+}
+
+.tag-suggestions-container {
+   margin-top: 6px;
+   display: flex;
+   flex-direction: column;
+   gap: 4px;
+   width: 100%;
+   animation: fadeIn 0.15s ease-out;
+}
+
+.tag-suggestions-container.hidden {
+   display: none;
+}
+
+.tag-suggestions-chip-set {
+   display: flex;
+   flex-wrap: wrap;
+   gap: 6px;
+}
+
+.tag-suggestions-chip-set md-chip {
+   cursor: pointer;
 }
 
 /* Toolbars */
@@ -733,6 +870,17 @@
    width: 100%;
 }
 
+.note-card-image md-carousel-item {
+   background-color: transparent;
+   width: auto;
+   min-height: unset;
+   max-width: 100%;
+}
+
+[data-theme='dark'] .note-card-image md-carousel-item {
+   background-color: transparent;
+}
+
 /* Creator and Modal Preview image carousel specific styling */
 #modal-images-preview,
 #creator-images-preview {
@@ -748,6 +896,29 @@
    --md-carousel-item-shape: var(--radius-md, 12px);
    --md-carousel-spacing: 8px;
    width: 100%;
+}
+
+#modal-images-preview md-carousel-item,
+#creator-images-preview md-carousel-item {
+   background-color: transparent;
+   width: auto;
+   min-height: unset;
+   max-width: 100%;
+}
+
+/* Ensure note images and carousel items are sized to the image without square box letterboxing */
+md-carousel-item {
+   width: auto;
+   min-height: unset;
+}
+
+md-carousel-item img,
+md-carousel-item img[slot="media"] {
+   width: auto;
+   height: 100%;
+   max-width: 100%;
+   object-fit: cover;
+   display: block;
 }
 
 #modal-images-preview::after {
@@ -768,36 +939,6 @@
    right: 12px;
    height: 1px;
    background-color: var(--border-color);
-}
-
-/* Image remove button inside interactive carousel item */
-md-carousel-item .btn-remove-image {
-   position: absolute;
-   top: 8px;
-   right: 8px;
-   z-index: 10;
-   --md-icon-button-size: 32px;
-   --md-icon-button-icon-size: 18px;
-   --md-sys-color-primary: rgba(14, 17, 23, 0.85);
-   --md-sys-color-on-primary: #ffffff;
-   opacity: 0;
-   transition: opacity var(--transition-speed), transform var(--transition-speed);
-}
-
-md-carousel-item:hover .btn-remove-image,
-md-carousel-item:focus-within .btn-remove-image {
-   opacity: 1;
-}
-
-md-carousel-item .btn-remove-image:hover {
-   transform: scale(1.08);
-   --md-sys-color-primary: var(--danger, #dc2626);
-}
-
-@media (hover: none), (max-width: 600px) {
-   md-carousel-item .btn-remove-image {
-      opacity: 1;
-   }
 }
 
 /* Trash and Restore Elements styles */

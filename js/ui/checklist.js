@@ -5,6 +5,7 @@
 import { t } from '../i18n.js';
 import { state, elements } from './state.js';
 import { escapeHtml } from './utils.js';
+import { renderTextWithLinks } from './link-utils.js';
 
 export const CHECKLIST_REGEX = /^(\s*)- \[([ xX])\] (.*)$/;
 
@@ -58,7 +59,7 @@ export function buildChecklistDOM(bodyText, noteId, isTruncated, isTrashed = fal
     if (consecutiveText.length > 0) {
       const textEl = document.createElement('div');
       textEl.className = 'checklist-text-line';
-      textEl.textContent = consecutiveText.join('\n');
+      textEl.innerHTML = renderTextWithLinks(consecutiveText.join('\n'));
       container.appendChild(textEl);
       consecutiveText = [];
     }
@@ -78,7 +79,7 @@ export function buildChecklistDOM(bodyText, noteId, isTruncated, isTrashed = fal
 
       item.innerHTML = `
         <md-checkbox ${isChecked ? 'checked' : ''} ${isTrashed ? 'disabled' : ''} data-note-id="${noteId}" data-line-index="${lineIndex}"></md-checkbox>
-        <span class="checklist-label">${escapeHtml(labelText)}</span>
+        <span class="checklist-label">${renderTextWithLinks(labelText)}</span>
       `;
 
       const checkbox = item.querySelector('md-checkbox');
@@ -93,6 +94,10 @@ export function buildChecklistDOM(bodyText, noteId, isTruncated, isTrashed = fal
 
         // Prevent the label click from bubbling to open the modal
         item.addEventListener('click', (e) => {
+          if (e.target.closest('a.note-link')) {
+            e.stopPropagation();
+            return;
+          }
           e.stopPropagation();
           if (!e.target.closest('md-checkbox')) {
             checkbox.checked = !checkbox.checked;
@@ -144,6 +149,9 @@ export async function toggleChecklistItem(noteId, lineIndex, isChecked) {
  * Renders an editable checklist view inside the modal.
  */
 export function renderModalChecklist(bodyText) {
+  if (elements.noteModal) {
+    elements.noteModal.querySelectorAll('md-tooltip[for^="chk-"]').forEach(el => el.remove());
+  }
   elements.modalChecklistView.innerHTML = '';
   const lines = bodyText.split('\n');
   let consecutiveText = [];
@@ -271,21 +279,23 @@ export function createChecklistItemElement(text, isChecked, indent, isModal, isT
     item.setAttribute('draggable', 'true');
   }
 
+  const idPrefix = 'chk-' + Math.random().toString(36).substring(2, 9);
+
   const dragHandleHtml = isTrashed ? '' : `
-    <div class="checklist-drag-handle" title="${t('checklist_drag_title')}">
+    <div id="${idPrefix}-drag" class="checklist-drag-handle" aria-label="${t('checklist_drag_title')}">
       <span class="material-symbols-outlined">drag_indicator</span>
     </div>
   `;
 
   const actionsHtml = isTrashed ? '' : `
     <div class="checklist-actions">
-      <button class="btn-icon checklist-outdent" title="${t('checklist_outdent_title')}">
+      <button id="${idPrefix}-outdent" class="btn-icon checklist-outdent" aria-label="${t('checklist_outdent_title')}">
         <span class="material-symbols-outlined">chevron_left</span>
       </button>
-      <button class="btn-icon checklist-indent" title="${t('checklist_indent_title')}">
+      <button id="${idPrefix}-indent" class="btn-icon checklist-indent" aria-label="${t('checklist_indent_title')}">
         <span class="material-symbols-outlined">chevron_right</span>
       </button>
-      <button class="modal-checklist-delete btn-icon" title="${t('checklist_remove_item_title')}">
+      <button id="${idPrefix}-del" class="modal-checklist-delete btn-icon" aria-label="${t('checklist_remove_item_title')}">
         <span class="material-symbols-outlined">close</span>
       </button>
     </div>
@@ -301,6 +311,30 @@ export function createChecklistItemElement(text, isChecked, indent, isModal, isT
   const textInput = item.querySelector('.modal-checklist-input');
   textInput.value = text;
 
+  // Append tooltips to root container (noteModal or noteCreator) to avoid transform containing-block displacement
+  const tooltipContainer = isModal ? elements.noteModal : elements.noteCreator;
+  const createdTooltips = [];
+  if (tooltipContainer && !isTrashed) {
+    const addTooltip = (targetId, tooltipText) => {
+      const tt = document.createElement('md-tooltip');
+      tt.setAttribute('for', targetId);
+      tt.setAttribute('show-delay', '200');
+      tt.textContent = tooltipText;
+      tooltipContainer.appendChild(tt);
+      createdTooltips.push(tt);
+    };
+
+    addTooltip(`${idPrefix}-drag`, t('checklist_drag_title'));
+    addTooltip(`${idPrefix}-outdent`, t('checklist_outdent_title'));
+    addTooltip(`${idPrefix}-indent`, t('checklist_indent_title'));
+    addTooltip(`${idPrefix}-del`, t('checklist_remove_item_title'));
+  }
+
+  const removeWithTooltips = () => {
+    createdTooltips.forEach(tt => tt.remove());
+    item.remove();
+  };
+
   if (!isTrashed) {
     const checkbox = item.querySelector('md-checkbox');
     checkbox.addEventListener('change', () => {
@@ -313,7 +347,7 @@ export function createChecklistItemElement(text, isChecked, indent, isModal, isT
     const deleteBtn = item.querySelector('.modal-checklist-delete');
     deleteBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      item.remove();
+      removeWithTooltips();
       if (isModal) {
         saveModalChecklistChanges();
       }
@@ -344,7 +378,7 @@ export function createChecklistItemElement(text, isChecked, indent, isModal, isT
           const prevInput = prevItem.querySelector('.modal-checklist-input');
           if (prevInput) prevInput.focus();
         }
-        item.remove();
+        removeWithTooltips();
         if (isModal) {
           saveModalChecklistChanges();
         }
@@ -441,6 +475,9 @@ export function serializeModalChecklist() {
  * Renders an editable checklist view inside the note creator.
  */
 export function renderCreatorChecklist(bodyText) {
+  if (elements.noteCreator) {
+    elements.noteCreator.querySelectorAll('md-tooltip[for^="chk-"]').forEach(el => el.remove());
+  }
   elements.creatorChecklistView.innerHTML = '';
   const lines = bodyText.split('\n');
   let consecutiveText = [];

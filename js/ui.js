@@ -5,7 +5,14 @@
 import { t } from './i18n.js';
 import { state, elements, initElements } from './ui/state.js';
 import { initTheme } from './ui/theme.js';
-import { closeLightbox, showSnackbar } from './ui/utils.js';
+import {
+  closeLightbox,
+  triggerLightboxDelete,
+  downloadLightboxImage,
+  nextLightboxImage,
+  prevLightboxImage,
+  showSnackbar
+} from './ui/utils.js';
 import { getDragAfterElement } from './ui/checklist.js';
 import {
   initAccountUI,
@@ -17,14 +24,17 @@ import {
   showLoginModal,
   hideLoginModal
 } from './ui/account.js';
-import { initCreatorUI } from './ui/creator.js';
+import { initCreatorUI, updateCreatorPrompt } from './ui/creator.js';
 import { initModalUI, openNoteModal, openNewNoteModal } from './ui/modal.js';
 import {
   initCardsUI,
   renderNotesFeed,
   renderSidebarTags,
   updateSearchSuggestionsAndTags,
-  setCategory
+  setCategory,
+  toggleTagFilter,
+  getCategoryUrl,
+  navigateToCategory
 } from './ui/cards.js';
 
 // Re-export what other modules (like app.js) need
@@ -38,7 +48,11 @@ export {
   renderNotesFeed,
   updateSearchSuggestionsAndTags,
   setCategory,
-  showSnackbar
+  toggleTagFilter,
+  getCategoryUrl,
+  navigateToCategory,
+  showSnackbar,
+  updateCreatorPrompt
 };
 
 /**
@@ -55,12 +69,20 @@ export function initUI(callbacks) {
   const path = window.location.pathname;
   if (path.endsWith('archive.html')) {
     state.activeCategory = 'archive';
+    state.selectedTags = [];
   } else if (path.endsWith('trash.html')) {
     state.activeCategory = 'trash';
+    state.selectedTags = [];
   } else {
     const hash = window.location.hash;
     if (hash.startsWith('#tag-')) {
-      state.activeCategory = `tag:${decodeURIComponent(hash.substring(5))}`;
+      const raw = decodeURIComponent(hash.substring(5));
+      const tags = raw.split(/[,+]/).map(t => t.trim()).filter(Boolean);
+      state.selectedTags = tags;
+      state.activeCategory = tags.length > 0 ? `tag:${tags.join(',')}` : 'notes';
+    } else {
+      state.activeCategory = 'notes';
+      state.selectedTags = [];
     }
   }
 
@@ -170,9 +192,39 @@ export function initUI(callbacks) {
     window.addEventListener('scroll', onScrollThrottled, { passive: true });
   }
 
-  // Lightbox Modal closing event listeners
+  // Lightbox Modal closing and action event listeners
+  if (elements.btnLightboxPrev) {
+    elements.btnLightboxPrev.addEventListener('click', (e) => {
+      e.stopPropagation();
+      prevLightboxImage();
+    });
+  }
+  if (elements.btnLightboxNext) {
+    elements.btnLightboxNext.addEventListener('click', (e) => {
+      e.stopPropagation();
+      nextLightboxImage();
+    });
+  }
+  if (elements.btnLightboxDownload) {
+    elements.btnLightboxDownload.addEventListener('click', (e) => {
+      e.stopPropagation();
+      elements.btnLightboxDownload.selected = false;
+      downloadLightboxImage();
+    });
+  }
+  if (elements.btnLightboxDelete) {
+    elements.btnLightboxDelete.addEventListener('click', (e) => {
+      e.stopPropagation();
+      elements.btnLightboxDelete.selected = false;
+      triggerLightboxDelete();
+    });
+  }
   if (elements.btnLightboxClose) {
-    elements.btnLightboxClose.addEventListener('click', closeLightbox);
+    elements.btnLightboxClose.addEventListener('click', (e) => {
+      e.stopPropagation();
+      elements.btnLightboxClose.selected = false;
+      closeLightbox();
+    });
   }
   if (elements.lightboxModal) {
     elements.lightboxModal.addEventListener('click', (e) => {
@@ -182,8 +234,16 @@ export function initUI(callbacks) {
     });
   }
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && elements.lightboxModal && elements.lightboxModal.classList.contains('active')) {
-      closeLightbox();
+    if (elements.lightboxModal && elements.lightboxModal.classList.contains('active')) {
+      if (e.key === 'Escape') {
+        closeLightbox();
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        prevLightboxImage();
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        nextLightboxImage();
+      }
     }
   });
 
@@ -240,6 +300,7 @@ export function updateNotesData(notes) {
  * Re-render all dynamic UI components when the language is changed.
  */
 export function retranslateDynamicUI() {
+  updateCreatorPrompt();
   renderNotesFeed();
   renderSidebarTags();
   updateSearchSuggestionsAndTags();

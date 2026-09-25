@@ -4,7 +4,8 @@
 
 import { t } from '../i18n.js';
 import { state, elements } from './state.js';
-import { formatDate, compressImage, renderImageGrid } from './utils.js';
+import { formatDate, compressImage, renderImageGrid, showDeleteConfirmDialog } from './utils.js';
+import { attachRichLinkEditor, hideLinkPill } from './link-utils.js';
 import {
   hasChecklistItems,
   convertTextToChecklist,
@@ -12,12 +13,19 @@ import {
   renderModalChecklist,
   serializeModalChecklist
 } from './checklist.js';
+import { attachTagSuggestions } from './tag-suggestions.js';
+
+let modalTagSuggestionsController = null;
 
 /**
  * Initializes Note Modal event listeners
  */
 export function initModalUI() {
   if (!elements.noteModal) return;
+
+  if (elements.modalBodyText) {
+    attachRichLinkEditor(elements.modalBodyText);
+  }
 
   elements.btnModalClose.addEventListener('click', saveAndCloseModal);
   elements.btnModalBack.addEventListener('click', saveAndCloseModal);
@@ -32,6 +40,8 @@ export function initModalUI() {
   // Close open note modal on Escape key
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
+      const deleteDialog = elements.deleteConfirmDialog || document.getElementById('delete-confirm-dialog');
+      if (deleteDialog && deleteDialog.open) return;
       if (state.editingNoteId) {
         e.preventDefault();
         saveAndCloseModal();
@@ -81,18 +91,21 @@ export function initModalUI() {
     });
   });
 
-  // Modal Tag input adding
-  elements.modalTagInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      const val = elements.modalTagInput.value.trim().toLowerCase();
-      if (val && !state.noteModalTags.includes(val)) {
-        state.noteModalTags.push(val);
-        elements.modalTagInput.value = '';
-        renderModalTags();
+  // Modal Tag auto-suggestions & adding
+  if (elements.modalTagInput) {
+    modalTagSuggestionsController = attachTagSuggestions({
+      input: elements.modalTagInput,
+      container: elements.modalTagSuggestions,
+      list: elements.modalTagSuggestionsList,
+      getCurrentTags: () => state.noteModalTags,
+      onAddTag: (tag) => {
+        if (tag && !state.noteModalTags.includes(tag)) {
+          state.noteModalTags.push(tag);
+          renderModalTags();
+        }
       }
-    }
-  });
+    });
+  }
 
   // Focus textarea/checklist when clicking empty area of modal body
   elements.modalBody.addEventListener('click', (e) => {
@@ -268,7 +281,8 @@ export function initModalUI() {
     if (state.editingNoteId) {
       const note = state.decryptedNotes.find(n => n.id === state.editingNoteId);
       if (note && note.isTrashed) {
-        if (confirm(t('confirm_delete_note'))) {
+        const confirmed = await showDeleteConfirmDialog();
+        if (confirmed) {
           await state.onDeleteNoteCallback(note.id);
           closeModal();
         }
@@ -290,14 +304,22 @@ export function updateModalPinButton() {
   const isPinned = Boolean(state.isModalPinned);
   elements.btnModalPin.classList.toggle('active', isPinned);
   elements.btnModalPin.selected = isPinned;
+  elements.btnModalPin.removeAttribute('title');
+  const tooltip = document.getElementById('tooltip-modal-pin');
   if (isPinned) {
     elements.btnModalPin.setAttribute('selected', '');
-    elements.btnModalPin.title = t('btn_unpin_note_title');
     elements.btnModalPin.setAttribute('aria-label', t('btn_unpin_note_title'));
+    if (tooltip) {
+      tooltip.textContent = t('btn_unpin_note_title');
+      tooltip.value = t('btn_unpin_note_title');
+    }
   } else {
     elements.btnModalPin.removeAttribute('selected');
-    elements.btnModalPin.title = t('btn_pin_note_title');
     elements.btnModalPin.setAttribute('aria-label', t('btn_pin_note_title'));
+    if (tooltip) {
+      tooltip.textContent = t('btn_pin_note_title');
+      tooltip.value = t('btn_pin_note_title');
+    }
   }
 }
 
@@ -328,6 +350,8 @@ export function openNoteModal(noteId) {
   }
 
   state.noteModalTags = [...note.tags];
+  if (elements.modalTagInput) elements.modalTagInput.value = '';
+  if (modalTagSuggestionsController) modalTagSuggestionsController.hide();
   renderModalTags();
 
   state.noteModalImages = note.images ? [...note.images] : [];
@@ -336,10 +360,22 @@ export function openNoteModal(noteId) {
   elements.modalLastEdited.textContent = t('modal_last_edited', { time: formatDate(note.updatedAt) });
 
   elements.btnModalArchive.setAttribute('icon', note.isArchived ? 'unarchive' : 'archive');
-  elements.btnModalArchive.title = note.isArchived ? t('btn_modal_archive_unarchive_title') : t('btn_modal_archive_title');
+  elements.btnModalArchive.removeAttribute('title');
+  const archiveTooltip = document.getElementById('tooltip-modal-archive');
+  if (archiveTooltip) {
+    const archiveText = note.isArchived ? t('btn_modal_archive_unarchive_title') : t('btn_modal_archive_title');
+    archiveTooltip.textContent = archiveText;
+    archiveTooltip.value = archiveText;
+  }
 
   elements.btnModalTrash.setAttribute('icon', note.isTrashed ? 'restore' : 'delete');
-  elements.btnModalTrash.title = note.isTrashed ? t('btn_modal_trash_restore_title') : t('btn_modal_trash_delete_title');
+  elements.btnModalTrash.removeAttribute('title');
+  const trashTooltip = document.getElementById('tooltip-modal-trash');
+  if (trashTooltip) {
+    const trashText = note.isTrashed ? t('btn_modal_trash_restore_title') : t('btn_modal_trash_delete_title');
+    trashTooltip.textContent = trashText;
+    trashTooltip.value = trashText;
+  }
   elements.btnModalTrash.className = note.isTrashed ? 'btn-icon text-green' : 'btn-icon';
 
   const isTrashed = note.isTrashed || false;
@@ -436,6 +472,8 @@ export function openNewNoteModal() {
   }
 
   state.noteModalTags = [];
+  if (elements.modalTagInput) elements.modalTagInput.value = '';
+  if (modalTagSuggestionsController) modalTagSuggestionsController.hide();
   renderModalTags();
 
   state.noteModalImages = [];
@@ -444,10 +482,20 @@ export function openNewNoteModal() {
   elements.modalLastEdited.textContent = '';
 
   elements.btnModalArchive.setAttribute('icon', 'archive');
-  elements.btnModalArchive.title = t('btn_modal_archive_title');
+  elements.btnModalArchive.removeAttribute('title');
+  const archiveTooltip = document.getElementById('tooltip-modal-archive');
+  if (archiveTooltip) {
+    archiveTooltip.textContent = t('btn_modal_archive_title');
+    archiveTooltip.value = t('btn_modal_archive_title');
+  }
 
   elements.btnModalTrash.setAttribute('icon', 'delete');
-  elements.btnModalTrash.title = t('btn_modal_trash_delete_title');
+  elements.btnModalTrash.removeAttribute('title');
+  const trashTooltip = document.getElementById('tooltip-modal-trash');
+  if (trashTooltip) {
+    trashTooltip.textContent = t('btn_modal_trash_delete_title');
+    trashTooltip.value = t('btn_modal_trash_delete_title');
+  }
   elements.btnModalTrash.className = 'btn-icon';
 
   state.isModalChecklistMode = false;
@@ -527,12 +575,15 @@ export async function saveAndCloseModal() {
 }
 
 export function closeModal() {
+  hideLinkPill();
   const closedNoteId = state.editingNoteId;
 
   elements.noteModal.classList.remove('active');
 
   state.editingNoteId = null;
   state.noteModalImages = [];
+  if (elements.modalTagInput) elements.modalTagInput.value = '';
+  if (modalTagSuggestionsController) modalTagSuggestionsController.hide();
   state.isModalChecklistMode = false;
   elements.modalChecklistView.innerHTML = '';
   elements.modalChecklistView.classList.add('hidden');

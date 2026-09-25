@@ -5,6 +5,8 @@
 // Global State
 export const state = {
   activeCategory: 'notes',
+  selectedTags: [],         // Active tag filters
+  tagFilterIncludeArchived: false, // Include archived notes when filtering by tag
   decryptedNotes: [],       // Cache of all decrypted notes in memory
   noteCreatorTags: [],      // Current tags in the note creator
   noteModalTags: [],        // Current tags in the edit modal
@@ -53,11 +55,14 @@ export const elements = {
   // Note Creator
   noteCreator: null,
   creatorCollapsed: null,
+  creatorPromptText: null,
   creatorExpanded: null,
   creatorTitle: null,
   creatorBody: null,
   creatorTagsList: null,
   creatorTagInput: null,
+  creatorTagSuggestions: null,
+  creatorTagSuggestionsList: null,
   btnCreatorPin: null,
   btnCreatorArchive: null,
   btnCreatorClose: null,
@@ -89,11 +94,16 @@ export const elements = {
   modalBodyText: null,
   modalTagsList: null,
   modalTagInput: null,
+  modalTagSuggestions: null,
+  modalTagSuggestionsList: null,
   btnModalBack: null,
   btnModalPin: null,
   btnModalArchive: null,
   btnModalTrash: null,
   btnModalDeleteForever: null,
+  deleteConfirmDialog: null,
+  btnDeleteConfirmCancel: null,
+  btnDeleteConfirmAccept: null,
   modalColorPickerWrapper: null,
   btnModalClose: null,
   modalLastEdited: null,
@@ -109,11 +119,17 @@ export const elements = {
   settingsModal: null,
   btnSettingsClose: null,
   themeSelect: null,
+  settingTagIncludeArchived: null,
 
   // Lightbox Modal
   lightboxModal: null,
   lightboxImage: null,
   lightboxFilename: null,
+  lightboxIndicators: null,
+  btnLightboxPrev: null,
+  btnLightboxNext: null,
+  btnLightboxDownload: null,
+  btnLightboxDelete: null,
   btnLightboxClose: null,
 
   // Floating Action Button
@@ -162,11 +178,14 @@ export function initElements() {
   // Note Creator
   elements.noteCreator = document.getElementById('note-creator');
   elements.creatorCollapsed = document.getElementById('creator-collapsed');
+  elements.creatorPromptText = document.getElementById('creator-prompt-text');
   elements.creatorExpanded = document.getElementById('creator-expanded');
   elements.creatorTitle = document.getElementById('creator-title');
   elements.creatorBody = document.getElementById('creator-body');
   elements.creatorTagsList = document.getElementById('creator-tags-list');
   elements.creatorTagInput = document.getElementById('creator-tag-input');
+  elements.creatorTagSuggestions = document.getElementById('creator-tag-suggestions');
+  elements.creatorTagSuggestionsList = document.getElementById('creator-tag-suggestions-list');
   elements.btnCreatorPin = document.getElementById('btn-creator-pin');
   elements.btnCreatorArchive = document.getElementById('btn-creator-archive');
   elements.btnCreatorClose = document.getElementById('btn-creator-close');
@@ -198,11 +217,16 @@ export function initElements() {
   elements.modalBodyText = document.getElementById('modal-body-text');
   elements.modalTagsList = document.getElementById('modal-tags-list');
   elements.modalTagInput = document.getElementById('modal-tag-input');
+  elements.modalTagSuggestions = document.getElementById('modal-tag-suggestions');
+  elements.modalTagSuggestionsList = document.getElementById('modal-tag-suggestions-list');
   elements.btnModalBack = document.getElementById('btn-modal-back');
   elements.btnModalPin = document.getElementById('btn-modal-pin');
   elements.btnModalArchive = document.getElementById('btn-modal-archive');
   elements.btnModalTrash = document.getElementById('btn-modal-trash');
   elements.btnModalDeleteForever = document.getElementById('btn-modal-delete-forever');
+  elements.deleteConfirmDialog = document.getElementById('delete-confirm-dialog');
+  elements.btnDeleteConfirmCancel = document.getElementById('btn-delete-confirm-cancel');
+  elements.btnDeleteConfirmAccept = document.getElementById('btn-delete-confirm-accept');
   elements.modalColorPickerWrapper = document.querySelector('#note-modal .color-picker-wrapper');
   elements.btnModalClose = document.getElementById('btn-modal-close');
   elements.modalLastEdited = document.getElementById('modal-last-edited');
@@ -220,11 +244,17 @@ export function initElements() {
   elements.btnSettingsCloseIcon = document.getElementById('btn-settings-close-icon');
   elements.btnSettingsSave = document.getElementById('btn-settings-save');
   elements.themeSelect = document.getElementById('theme-select');
+  elements.settingTagIncludeArchived = document.getElementById('setting-tag-include-archived');
 
   // Lightbox Modal
   elements.lightboxModal = document.getElementById('lightbox-modal');
   elements.lightboxImage = document.getElementById('lightbox-image');
   elements.lightboxFilename = document.getElementById('lightbox-filename');
+  elements.lightboxIndicators = document.getElementById('lightbox-indicators');
+  elements.btnLightboxPrev = document.getElementById('btn-lightbox-prev');
+  elements.btnLightboxNext = document.getElementById('btn-lightbox-next');
+  elements.btnLightboxDownload = document.getElementById('btn-lightbox-download');
+  elements.btnLightboxDelete = document.getElementById('btn-lightbox-delete');
   elements.btnLightboxClose = document.getElementById('btn-lightbox-close');
 
   // Floating Action Button

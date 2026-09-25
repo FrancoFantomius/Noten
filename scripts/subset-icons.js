@@ -7,22 +7,16 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const rootDir = path.resolve(__dirname, '..');
 
-// Default fallback set of known icons in Noten and @francofantomius/material-components to guarantee safety
+// Default fallback set of known icons in Noten to guarantee safety
 const DEFAULT_ICONS = [
-  'account_circle',
   'add',
   'add_notes',
-  'apartment',
   'archive',
   'arrow_back',
-  'arrow_drop_down',
   'arrow_forward',
-  'badge',
   'balance',
-  'calendar_today',
   'check',
   'check_box',
-  'check_circle',
   'checklist',
   'chevron_left',
   'chevron_right',
@@ -37,47 +31,29 @@ const DEFAULT_ICONS = [
   'description',
   'devices',
   'download',
-  'drag_handle',
   'drag_indicator',
-  'edit',
-  'engineering',
-  'expand_more',
   'favorite',
   'format_color_reset',
-  'history',
   'image',
   'keep',
-  'keyboard',
   'light_mode',
   'lock',
-  'lock_reset',
   'logout',
   'mail',
-  'manage_accounts',
   'menu',
-  'more_vert',
   'note_stack',
   'palette',
-  'people',
-  'person_add',
-  'photo_camera',
   'push_pin',
   'restore',
-  'schedule',
-  'search',
   'security',
   'settings',
-  'shield',
   'tag',
   'translate',
   'unarchive',
-  'upload',
-  'verified_user',
-  'visibility',
-  'visibility_off'
+  'upload'
 ];
 
-function getAllFiles(dir, extensions = ['.html', '.js', '.css', '.handlebars']) {
+function getAllFiles(dir, extensions = ['.html', '.js', '.css', '.handlebars', '.hbs']) {
   let results = [];
   if (!fs.existsSync(dir)) return results;
   const entries = fs.readdirSync(dir, { withFileTypes: true });
@@ -133,15 +109,17 @@ export function scanIcons() {
     /<md-icon[^>]*\bname=["']([a-zA-Z0-9_-]+)["']/g,
     /<md-icon[^>]*\bname=\${[^}]*["']([a-zA-Z0-9_-]+)["']\}/g,
     /<md-icon[^>]*>([a-zA-Z0-9_-]+)<\/md-icon>/g,
-    /<span[^>]*class=["'][^"']*material-symbols-outlined[^"']*["'][^>]*>\s*([a-zA-Z0-9_-]+)\s*<\/span>/g,
-    /\.setAttribute\(\s*["'](?:icon|leading-icon|trailing-icon|selected-icon|active-leading-icon)["']\s*,\s*["']([a-zA-Z0-9_-]+)["']\s*\)/g,
-    /\.setAttribute\(\s*["'](?:icon|leading-icon|trailing-icon|selected-icon|active-leading-icon)["']\s*,\s*[^?]+\?\s*["']([a-zA-Z0-9_-]+)["']\s*:\s*["']([a-zA-Z0-9_-]+)["']/g,
+    /<(?:span|i)[^>]*class=["'][^"']*(?:material-symbols-outlined|material-icons)[^"']*["'][^>]*>\s*([a-zA-Z0-9_-]+)\s*<\/(?:span|i)>/g,
+    /\.setAttribute\(\s*["'](?:icon|leading-icon|trailing-icon|selected-icon|active-leading-icon|name)["']\s*,\s*["']([a-zA-Z0-9_-]+)["']\s*\)/g,
+    /\.setAttribute\(\s*["'](?:icon|leading-icon|trailing-icon|selected-icon|active-leading-icon|name)["']\s*,\s*[^?]+\?\s*["']([a-zA-Z0-9_-]+)["']\s*:\s*["']([a-zA-Z0-9_-]+)["']/g,
     /icon:\s*[^?]+\?\s*["']([a-zA-Z0-9_-]+)["']\s*:\s*(?:\([^?]+\?\s*["']([a-zA-Z0-9_-]+)["']\s*:\s*["']([a-zA-Z0-9_-]+)["']\)|["']([a-zA-Z0-9_-]+)["'])/g,
-    /\bicon:\s*["']([a-zA-Z0-9_-]+)["']/g,
+    /\b(?:icon|iconName)\s*:\s*["']([a-zA-Z0-9_-]+)["']/g,
     /\b(?:trailingIcon|leadingIcon|activeLeadingIcon|openIcon|selectedIcon)\s*=\s*["']([a-zA-Z0-9_-]+)["']/g,
     /\b(?:trailingIcon|leadingIcon|activeLeadingIcon|openIcon|selectedIcon)\s*:\s*["']([a-zA-Z0-9_-]+)["']/g,
-    /\bicon\s*=\s*["']([a-zA-Z0-9_-]+)["']/g,
-    /md-icon\[name=["']([a-zA-Z0-9_-]+)["']\]/g
+    /\b(?:icon|iconName)\s*=\s*["']([a-zA-Z0-9_-]+)["']/g,
+    /md-icon\[name=["']([a-zA-Z0-9_-]+)["']\]/g,
+    /setIcon\([^,]+,\s*["']([a-zA-Z0-9_-]+)["']\)/g,
+    /setIcon\([^,]+,\s*[^?]+\?\s*["']([a-zA-Z0-9_-]+)["']\s*:\s*["']([a-zA-Z0-9_-]+)["']\)/g
   ];
 
   for (const file of files) {
@@ -161,14 +139,56 @@ export function scanIcons() {
   return Array.from(iconSet).sort();
 }
 
-export async function generateIconSubset() {
-  const icons = scanIcons();
-  console.log(`[Icon Subsetting] Detected ${icons.length} icons across pages and code:`);
-  console.log(`  ${icons.join(', ')}`);
+export async function generateIconSubset(options = {}) {
+  const force = Boolean(options.force || (process.argv && process.argv.includes('--force')));
+  const neededIcons = scanIcons();
+
+  const outputDir = path.join(rootDir, 'fonts');
+  const outputPath = path.join(outputDir, 'material-symbols-outlined-subset.woff2');
+  const iconsFilePath = path.join(outputDir, 'icons.txt');
+  const fontsCssPath = path.join(rootDir, 'css/fonts.css');
+
+  // Check if existing icon package already has all needed icons
+  let existingIcons = [];
+  let hasExistingTracking = false;
+
+  if (fs.existsSync(iconsFilePath)) {
+    try {
+      const content = fs.readFileSync(iconsFilePath, 'utf-8');
+      existingIcons = content
+        .split(/\r?\n/)
+        .map(line => line.trim())
+        .filter(Boolean);
+      hasExistingTracking = true;
+    } catch (e) {
+      console.warn('[Icon Subsetting] Failed to read icons.txt:', e);
+    }
+  }
+
+  const existingIconsSet = new Set(existingIcons);
+  const missingIcons = neededIcons.filter(icon => !existingIconsSet.has(icon));
+
+  if (!force && hasExistingTracking && fs.existsSync(outputPath) && fs.existsSync(fontsCssPath) && missingIcons.length === 0) {
+    console.log(`[Icon Subsetting] Existing icon package already contains all ${neededIcons.length} needed icons. Skipping regeneration.`);
+    return;
+  }
+
+  if (missingIcons.length > 0 && hasExistingTracking) {
+    console.log(`[Icon Subsetting] Missing icons detected (${missingIcons.length}): ${missingIcons.join(', ')}. Regenerating subset...`);
+  } else if (force) {
+    console.log('[Icon Subsetting] Force regeneration requested.');
+  }
+
+  const allIcons = force
+    ? neededIcons
+    : Array.from(new Set([...neededIcons, ...existingIcons])).sort();
+
+  console.log(`[Icon Subsetting] Generating subset with ${allIcons.length} icons:`);
+  console.log(`  ${allIcons.join(', ')}`);
 
   const possibleSourceFonts = [
-    path.join(rootDir, 'node_modules/@fontsource-variable/material-symbols-outlined/files/material-symbols-outlined-latin-fill-normal.woff2'),
-    path.join(rootDir, 'node_modules/@fontsource-variable/material-symbols-outlined/files/material-symbols-outlined-latin-full-normal.woff2')
+    path.join(rootDir, 'node_modules/@fontsource-variable/material-symbols-outlined/files/material-symbols-outlined-latin-full-normal.woff2'),
+    path.join(rootDir, 'node_modules/@fontsource-variable/material-symbols-outlined/files/material-symbols-outlined-latin-fill-normal.woff2')
   ];
 
   const sourceFontPath = possibleSourceFonts.find(p => fs.existsSync(p));
@@ -177,19 +197,21 @@ export async function generateIconSubset() {
   }
 
   const fontBuffer = fs.readFileSync(sourceFontPath);
-  const subsetText = icons.join(' ') + ' ' + Array.from(new Set(icons.join(''))).join('');
+  const subsetText = allIcons.join(' ') + ' ' + Array.from(new Set(allIcons.join(''))).join('');
 
   const subsetBuffer = await subsetFont(fontBuffer, subsetText, {
     targetFormat: 'woff2'
   });
 
-  const outputDir = path.join(rootDir, 'fonts');
   if (!fs.existsSync(outputDir)) {
     fs.mkdirSync(outputDir, { recursive: true });
   }
 
-  const outputPath = path.join(outputDir, 'material-symbols-outlined-subset.woff2');
   fs.writeFileSync(outputPath, subsetBuffer);
+
+  // Update tracked icons list in fonts/icons.txt
+  fs.writeFileSync(iconsFilePath, allIcons.join('\n') + '\n', 'utf-8');
+  console.log(`[Icon Subsetting] Saved tracked icons list (${allIcons.length} icons) to: ${path.relative(rootDir, iconsFilePath)}`);
 
   const origSizeKB = (fontBuffer.length / 1024).toFixed(1);
   const subsetSizeKB = (subsetBuffer.length / 1024).toFixed(1);
@@ -199,10 +221,17 @@ export async function generateIconSubset() {
   console.log(`[Icon Subsetting] Original: ${origSizeKB} KB -> Subset: ${subsetSizeKB} KB (${savedPercent}% reduction)`);
 
   // Update css/fonts.css to use local subset font
-  const fontsCssPath = path.join(rootDir, 'css/fonts.css');
   const fontsCssContent = `/* Auto-generated by scripts/subset-icons.js */
 @font-face {
   font-family: 'Material Symbols Outlined';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 700;
+  src: url('../fonts/material-symbols-outlined-subset.woff2') format('woff2-variations');
+}
+
+@font-face {
+  font-family: 'Material Symbols Outlined Variable';
   font-style: normal;
   font-display: swap;
   font-weight: 100 700;
@@ -220,4 +249,3 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     process.exit(1);
   });
 }
-

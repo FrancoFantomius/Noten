@@ -126,25 +126,124 @@ export async function optimizeImageItem(img) {
   };
 }
 
-/**
- * Opens the fullscreen image lightbox.
- */
-export function openLightbox(src, name = '') {
-  elements.lightboxImage.src = src;
+let currentLightboxImages = [];
+let currentLightboxIndex = 0;
+let currentLightboxOnDelete = null;
 
-  let displayName = name;
-  if (!displayName) {
-    if (src && !src.startsWith('data:')) {
-      const parts = src.split('/');
-      displayName = parts[parts.length - 1]?.split('?')[0] || '';
-    } else {
-      displayName = 'image.jpg';
-    }
+function renderLightboxCurrentItem() {
+  if (currentLightboxImages.length === 0) {
+    closeLightbox();
+    return;
+  }
+
+  const currentItem = currentLightboxImages[currentLightboxIndex];
+  const src = getImageSrc(currentItem);
+  if (elements.lightboxImage) {
+    elements.lightboxImage.src = src;
+  }
+
+  let displayName = '';
+  if (typeof currentItem === 'object' && currentItem.alt) {
+    displayName = currentItem.alt;
+  } else if (src && !src.startsWith('data:')) {
+    const parts = src.split('/');
+    displayName = parts[parts.length - 1]?.split('?')[0] || '';
+  } else {
+    displayName = `image-${currentLightboxIndex + 1}.jpg`;
   }
 
   if (elements.lightboxFilename) {
     elements.lightboxFilename.textContent = displayName;
   }
+
+  // Update navigation buttons visibility (first image has no previous, last has no next)
+  const hasMultiple = currentLightboxImages.length > 1;
+  const hasPrev = hasMultiple && currentLightboxIndex > 0;
+  const hasNext = hasMultiple && currentLightboxIndex < currentLightboxImages.length - 1;
+
+  if (elements.btnLightboxPrev) {
+    elements.btnLightboxPrev.classList.toggle('hidden', !hasPrev);
+  }
+  if (elements.btnLightboxNext) {
+    elements.btnLightboxNext.classList.toggle('hidden', !hasNext);
+  }
+
+  // Update indicators (Image 2 style)
+  if (elements.lightboxIndicators) {
+    if (hasMultiple) {
+      elements.lightboxIndicators.classList.remove('hidden');
+      elements.lightboxIndicators.innerHTML = '';
+      currentLightboxImages.forEach((_, idx) => {
+        const dot = document.createElement('button');
+        dot.className = `lightbox-indicator-dot ${idx === currentLightboxIndex ? 'active' : ''}`;
+        dot.setAttribute('aria-label', `Go to image ${idx + 1}`);
+        dot.addEventListener('click', (e) => {
+          e.stopPropagation();
+          goToLightboxIndex(idx);
+        });
+        elements.lightboxIndicators.appendChild(dot);
+      });
+    } else {
+      elements.lightboxIndicators.classList.add('hidden');
+      elements.lightboxIndicators.innerHTML = '';
+    }
+  }
+}
+
+/**
+ * Navigates to a specific image index in the lightbox.
+ */
+export function goToLightboxIndex(index) {
+  if (currentLightboxImages.length === 0) return;
+  if (index < 0 || index >= currentLightboxImages.length) return;
+  currentLightboxIndex = index;
+  renderLightboxCurrentItem();
+}
+
+/**
+ * Navigates to the next image in the lightbox.
+ */
+export function nextLightboxImage() {
+  if (currentLightboxIndex < currentLightboxImages.length - 1) {
+    goToLightboxIndex(currentLightboxIndex + 1);
+  }
+}
+
+/**
+ * Navigates to the previous image in the lightbox.
+ */
+export function prevLightboxImage() {
+  if (currentLightboxIndex > 0) {
+    goToLightboxIndex(currentLightboxIndex - 1);
+  }
+}
+
+/**
+ * Opens the fullscreen image lightbox.
+ */
+export function openLightbox(src, name = '', onDelete = null, images = [], activeIndex = 0) {
+  currentLightboxOnDelete = typeof onDelete === 'function' ? onDelete : null;
+
+  if (images && images.length > 0) {
+    currentLightboxImages = [...images];
+    currentLightboxIndex = activeIndex >= 0 && activeIndex < images.length ? activeIndex : 0;
+  } else if (src) {
+    currentLightboxImages = [{ url: src, alt: name }];
+    currentLightboxIndex = 0;
+  } else {
+    currentLightboxImages = [];
+    currentLightboxIndex = 0;
+  }
+
+  if (elements.btnLightboxDelete) {
+    if (currentLightboxOnDelete) {
+      elements.btnLightboxDelete.classList.remove('hidden');
+    } else {
+      elements.btnLightboxDelete.classList.add('hidden');
+    }
+  }
+
+  renderLightboxCurrentItem();
 
   elements.lightboxModal.classList.add('active');
   elements.lightboxModal.classList.remove('hidden');
@@ -155,90 +254,150 @@ export function openLightbox(src, name = '') {
  */
 export function closeLightbox() {
   elements.lightboxModal.classList.remove('active');
+  currentLightboxOnDelete = null;
+  currentLightboxImages = [];
+  currentLightboxIndex = 0;
+  if (elements.btnLightboxDownload) elements.btnLightboxDownload.selected = false;
+  if (elements.btnLightboxDelete) elements.btnLightboxDelete.selected = false;
+  if (elements.btnLightboxClose) elements.btnLightboxClose.selected = false;
   setTimeout(() => {
     if (!elements.lightboxModal.classList.contains('active')) {
       elements.lightboxModal.classList.add('hidden');
-      elements.lightboxImage.src = '';
-      if (elements.lightboxFilename) {
-        elements.lightboxFilename.textContent = '';
-      }
+      if (elements.lightboxImage) elements.lightboxImage.src = '';
+      if (elements.lightboxFilename) elements.lightboxFilename.textContent = '';
+      if (elements.lightboxIndicators) elements.lightboxIndicators.innerHTML = '';
     }
   }, 200);
 }
 
 /**
+ * Downloads the image currently displayed in the fullscreen lightbox.
+ */
+export function downloadLightboxImage() {
+  const src = elements.lightboxImage?.src;
+  if (!src) return;
+
+  const filename = elements.lightboxFilename?.textContent || 'image.jpg';
+  const a = document.createElement('a');
+  a.href = src;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+/**
+ * Triggers deletion of the image currently opened in lightbox.
+ */
+export async function triggerLightboxDelete() {
+  if (currentLightboxOnDelete) {
+    const deletedIndex = currentLightboxIndex;
+    const deletedItem = currentLightboxImages[deletedIndex];
+    const handler = currentLightboxOnDelete;
+
+    await handler(deletedIndex, getImageSrc(deletedItem));
+
+    currentLightboxImages.splice(deletedIndex, 1);
+    if (currentLightboxImages.length === 0) {
+      closeLightbox();
+    } else {
+      if (currentLightboxIndex >= currentLightboxImages.length) {
+        currentLightboxIndex = currentLightboxImages.length - 1;
+      }
+      renderLightboxCurrentItem();
+    }
+  }
+}
+
+/**
  * Attaches reliable click/tap handling to an md-carousel for its items,
  * preventing pointer capture in md-carousel from swallowing click events
- * while properly distinguishing between swipes/drags and intentional clicks.
+ * while properly distinguishing between swipes/drags/scrolls and intentional clicks.
  */
 export function setupCarouselItemClicks(carousel, onItemClick) {
   if (!carousel) return;
 
   let startX = 0;
   let startY = 0;
-  let startTarget = null;
   let startTime = 0;
+  let isDragOrScroll = false;
+  let lastScrollTime = 0;
+  let lastTriggerTime = 0;
+
+  const onScroll = () => {
+    lastScrollTime = Date.now();
+    isDragOrScroll = true;
+  };
+
+  carousel.addEventListener('scroll', onScroll, { capture: true, passive: true });
+  carousel.addEventListener('wheel', onScroll, { capture: true, passive: true });
+  carousel.addEventListener('touchmove', () => { isDragOrScroll = true; }, { capture: true, passive: true });
 
   carousel.addEventListener('pointerdown', (e) => {
     startX = e.clientX;
     startY = e.clientY;
     startTime = Date.now();
-    const path = e.composedPath ? e.composedPath() : [e.target];
-    startTarget = path.find(el => el && el.tagName === 'MD-CAROUSEL-ITEM') || null;
+    isDragOrScroll = false;
   }, { capture: true });
 
-  carousel.addEventListener('pointerup', (e) => {
-    const diffX = Math.abs(e.clientX - startX);
-    const diffY = Math.abs(e.clientY - startY);
-    const duration = Date.now() - startTime;
-
-    // Movement must be small (within tap threshold) and quick (not a long drag)
-    if (diffX < 12 && diffY < 12 && duration < 600) {
-      const elAtPoint = document.elementFromPoint(e.clientX, e.clientY);
-      const isRemoveBtn = elAtPoint?.closest('.btn-remove-image') || (e.composedPath ? e.composedPath().some(el => el && el.classList && el.classList.contains('btn-remove-image')) : false);
-      if (isRemoveBtn) return;
-
-      const isControlBtn = elAtPoint?.closest('.control-button') || elAtPoint?.closest('.indicator-dot');
-      if (isControlBtn) return;
-
-      const item = elAtPoint?.closest('md-carousel-item') || startTarget;
-      if (item) {
-        const src = item.getAttribute('src') || item.src;
-        const name = item.getAttribute('alt') || item.getAttribute('name') || '';
-        if (src) {
-          e.stopPropagation();
-          onItemClick(src, item, name);
-        }
+  carousel.addEventListener('pointermove', (e) => {
+    if (startTime > 0) {
+      const dx = Math.abs(e.clientX - startX);
+      const dy = Math.abs(e.clientY - startY);
+      if (dx > 6 || dy > 6) {
+        isDragOrScroll = true;
       }
     }
+  }, { capture: true });
+
+  carousel.addEventListener('pointerup', () => {
+    if (startTime > 0 && Date.now() - startTime > 600) {
+      isDragOrScroll = true;
+    }
+  }, { capture: true });
+
+  const handleActivation = (e, targetItem = null) => {
+    const path = e.composedPath ? e.composedPath() : [e.target];
+    if (path.some(el => el && el.classList && (
+      el.classList.contains('btn-remove-image') ||
+      el.classList.contains('control-button') ||
+      el.classList.contains('indicator-dot') ||
+      el.tagName === 'MD-ICON-BUTTON'
+    ))) {
+      return;
+    }
+
+    const isRecentScroll = Date.now() - lastScrollTime < 300;
+    if (isDragOrScroll || isRecentScroll) {
+      return;
+    }
+
+    if (Date.now() - lastTriggerTime < 350) {
+      return;
+    }
+
+    const item = targetItem || path.find(el => el && el.tagName === 'MD-CAROUSEL-ITEM') || document.elementFromPoint(e.clientX, e.clientY)?.closest('md-carousel-item');
+    if (!item) return;
+
+    const imgEl = item.querySelector('img');
+    const src = item.getAttribute('src') || item.src || imgEl?.src || imgEl?.getAttribute('src');
+    const name = item.getAttribute('alt') || item.getAttribute('name') || imgEl?.getAttribute('alt') || '';
+
+    if (src) {
+      lastTriggerTime = Date.now();
+      e.stopPropagation();
+      e.preventDefault();
+      onItemClick(src, item, name);
+    }
+  };
+
+  carousel.addEventListener('carousel-item-click', (e) => {
+    const item = e.detail?.item || e.target;
+    handleActivation(e, item);
   });
 
   carousel.addEventListener('click', (e) => {
-    const path = e.composedPath ? e.composedPath() : [e.target];
-    if (path.some(el => el && el.classList && el.classList.contains('btn-remove-image'))) return;
-    if (path.some(el => el && el.classList && (el.classList.contains('control-button') || el.classList.contains('indicator-dot')))) return;
-
-    const item = path.find(el => el && el.tagName === 'MD-CAROUSEL-ITEM') || document.elementFromPoint(e.clientX, e.clientY)?.closest('md-carousel-item');
-    if (item) {
-      const src = item.getAttribute('src') || item.src;
-      const name = item.getAttribute('alt') || item.getAttribute('name') || '';
-      if (src) {
-        e.stopPropagation();
-        onItemClick(src, item, name);
-      }
-    }
-  });
-
-  carousel.addEventListener('carousel-item-click', (e) => {
-    const path = e.composedPath ? e.composedPath() : [e.target];
-    if (path.some(el => el && el.classList && el.classList.contains('btn-remove-image'))) return;
-    const item = e.detail?.item || e.target;
-    const src = item?.getAttribute?.('src') || item?.src;
-    const name = item?.getAttribute?.('alt') || item?.getAttribute?.('name') || '';
-    if (src) {
-      e.stopPropagation();
-      onItemClick(src, item, name);
-    }
+    handleActivation(e);
   });
 }
 
@@ -256,9 +415,8 @@ export function renderImageGrid(container, images, isEditable, onRemove) {
 
   container.classList.remove('hidden');
 
-  const isSingle = images.length === 1;
   const carousel = document.createElement('md-carousel');
-  carousel.setAttribute('layout', isSingle ? 'full-width' : 'multi-browse');
+  carousel.setAttribute('layout', 'uncontained');
   carousel.setAttribute('item-height', '240px');
   carousel.setAttribute('aria-label', 'Attached note images');
 
@@ -267,29 +425,30 @@ export function renderImageGrid(container, images, isEditable, onRemove) {
     if (!imgSrc) return;
 
     const item = document.createElement('md-carousel-item');
-    item.setAttribute('src', imgSrc);
-    item.setAttribute('alt', `image-${index + 1}.jpg`);
     item.setAttribute('interactive', '');
 
-    if (isEditable) {
-      const removeBtn = document.createElement('md-icon-button');
-      removeBtn.className = 'btn-remove-image';
-      removeBtn.setAttribute('variant', 'filled');
-      removeBtn.setAttribute('icon', 'close');
-      removeBtn.setAttribute('title', t('btn_remove_image_title'));
-      removeBtn.setAttribute('aria-label', t('btn_remove_image_title'));
-      removeBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        onRemove(index);
-      });
-      item.appendChild(removeBtn);
-    }
+    const imgEl = document.createElement('img');
+    imgEl.setAttribute('slot', 'media');
+    imgEl.setAttribute('src', imgSrc);
+    imgEl.setAttribute('alt', `image-${index + 1}.jpg`);
+    imgEl.setAttribute('loading', 'lazy');
+    item.appendChild(imgEl);
 
     carousel.appendChild(item);
   });
 
   setupCarouselItemClicks(carousel, (src, item, name) => {
-    openLightbox(src, name);
+    let onDelete = null;
+    const clickedIndex = images.findIndex(img => getImageSrc(img) === src);
+    if (isEditable && typeof onRemove === 'function') {
+      onDelete = (delIndex) => {
+        const targetIdx = delIndex !== undefined ? delIndex : clickedIndex;
+        if (targetIdx !== -1) {
+          onRemove(targetIdx);
+        }
+      };
+    }
+    openLightbox(src, name, onDelete, images, clickedIndex >= 0 ? clickedIndex : 0);
   });
 
   container.appendChild(carousel);
@@ -322,4 +481,56 @@ export function showSnackbar(message, options = {}) {
   }
 
   snackbar.show();
+}
+
+/**
+ * Prompts the user with a confirmation md-dialog before permanently deleting a note
+ * @returns {Promise<boolean>} Resolves to true if user confirmed, false otherwise
+ */
+export function showDeleteConfirmDialog() {
+  return new Promise((resolve) => {
+    const dialog = elements.deleteConfirmDialog || document.getElementById('delete-confirm-dialog');
+    if (!dialog) {
+      resolve(false);
+      return;
+    }
+
+    const cancelBtn = elements.btnDeleteConfirmCancel || document.getElementById('btn-delete-confirm-cancel');
+    const acceptBtn = elements.btnDeleteConfirmAccept || document.getElementById('btn-delete-confirm-accept');
+
+    let isResolved = false;
+
+    const cleanup = () => {
+      if (acceptBtn) acceptBtn.removeEventListener('click', onAccept);
+      if (cancelBtn) cancelBtn.removeEventListener('click', onCancel);
+      dialog.removeEventListener('close', onClose);
+    };
+
+    const finish = (result) => {
+      if (isResolved) return;
+      isResolved = true;
+      cleanup();
+      resolve(result);
+    };
+
+    const onAccept = () => {
+      dialog.close('accept');
+      finish(true);
+    };
+
+    const onCancel = () => {
+      dialog.close('cancel');
+      finish(false);
+    };
+
+    const onClose = (e) => {
+      finish(e.detail?.returnValue === 'accept');
+    };
+
+    if (acceptBtn) acceptBtn.addEventListener('click', onAccept);
+    if (cancelBtn) cancelBtn.addEventListener('click', onCancel);
+    dialog.addEventListener('close', onClose);
+
+    dialog.showModal();
+  });
 }

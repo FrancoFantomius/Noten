@@ -1,14 +1,30 @@
-/**
- * Noten UI - Account and Settings Controls
- */
-
 import { t } from '../i18n.js';
 import { state, elements } from './state.js';
+import { renderNotesFeed } from './cards.js';
 
 /**
  * Initializes account menu, profile actions, settings, and login modal event listeners
  */
 export function initAccountUI() {
+  // Initialize tag filter include archived setting from localStorage
+  const isTagIncludeArchivedSaved = localStorage.getItem('tag_filter_include_archived') === 'true';
+  state.tagFilterIncludeArchived = isTagIncludeArchivedSaved;
+  if (elements.settingTagIncludeArchived) {
+    elements.settingTagIncludeArchived.selected = isTagIncludeArchivedSaved;
+    if (isTagIncludeArchivedSaved) {
+      elements.settingTagIncludeArchived.setAttribute('selected', '');
+    } else {
+      elements.settingTagIncludeArchived.removeAttribute('selected');
+    }
+
+    elements.settingTagIncludeArchived.addEventListener('change', (e) => {
+      const isSelected = Boolean(e.detail?.selected ?? elements.settingTagIncludeArchived.selected);
+      state.tagFilterIncludeArchived = isSelected;
+      localStorage.setItem('tag_filter_include_archived', isSelected ? 'true' : 'false');
+      renderNotesFeed();
+    });
+  }
+
   // Settings Dialog Triggers
   if (elements.btnSettingsOpen) {
     elements.btnSettingsOpen.addEventListener('click', () => {
@@ -39,8 +55,10 @@ export function initAccountUI() {
         hideSettings();
       }
     });
-    elements.settingsModal.addEventListener('close', () => {
-      cleanupSettingsHash();
+    elements.settingsModal.addEventListener('close', (e) => {
+      if (e.target === elements.settingsModal) {
+        cleanupSettingsHash();
+      }
     });
   }
 
@@ -98,9 +116,11 @@ export function initAccountUI() {
         hideLoginModal();
       }
     });
-    elements.loginModal.addEventListener('close', () => {
-      const syncStatusMsg = document.getElementById('sync-settings-status');
-      if (syncStatusMsg) syncStatusMsg.textContent = '';
+    elements.loginModal.addEventListener('close', (e) => {
+      if (e.target === elements.loginModal) {
+        const syncStatusMsg = document.getElementById('sync-settings-status');
+        if (syncStatusMsg) syncStatusMsg.textContent = '';
+      }
     });
   }
 
@@ -150,6 +170,15 @@ function cleanupSettingsHash() {
  * Settings Modal trigger
  */
 export function showSettings() {
+  if (elements.settingTagIncludeArchived) {
+    elements.settingTagIncludeArchived.selected = Boolean(state.tagFilterIncludeArchived);
+    if (state.tagFilterIncludeArchived) {
+      elements.settingTagIncludeArchived.setAttribute('selected', '');
+    } else {
+      elements.settingTagIncludeArchived.removeAttribute('selected');
+    }
+  }
+
   if (elements.settingsModal) {
     if (typeof elements.settingsModal.showModal === 'function') {
       elements.settingsModal.showModal();
@@ -200,7 +229,13 @@ export function updateSyncStatusUI(status) {
     <span class="material-symbols-outlined">${icon}</span>
     ${text ? `<span class="sync-text">${text}</span>` : ''}
   `;
-  badge.title = text ? t('sync_status_title', { status: text }) : 'Filen Sync';
+  badge.removeAttribute('title');
+  const syncTooltip = document.getElementById('tooltip-sync-status');
+  if (syncTooltip) {
+    const tooltipText = text ? t('sync_status_title', { status: text }) : 'Filen Sync';
+    syncTooltip.textContent = tooltipText;
+    syncTooltip.value = tooltipText;
+  }
 }
 
 export function formatBytes(bytes) {

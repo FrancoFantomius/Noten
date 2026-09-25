@@ -5,6 +5,7 @@
 import { t } from '../i18n.js';
 import { state, elements } from './state.js';
 import { compressImage, renderImageGrid } from './utils.js';
+import { attachRichLinkEditor, hideLinkPill } from './link-utils.js';
 import {
   hasChecklistItems,
   convertTextToChecklist,
@@ -12,12 +13,53 @@ import {
   renderCreatorChecklist,
   serializeCreatorChecklist
 } from './checklist.js';
+import { attachTagSuggestions } from './tag-suggestions.js';
+
+let currentPromptIndex = 0;
+let creatorTagSuggestionsController = null;
+
+/**
+ * Returns the pool of rotating placeholder prompts
+ */
+export function getCreatorPrompts() {
+  return [
+    t('creator_prompt_1'),
+    t('creator_prompt_2'),
+    t('creator_prompt_3'),
+    t('creator_prompt_4')
+  ];
+}
+
+/**
+ * Updates the prompt text element and creator body placeholder
+ */
+export function updateCreatorPrompt() {
+  const prompts = getCreatorPrompts();
+  const promptText = prompts[currentPromptIndex % prompts.length];
+
+  if (elements.creatorPromptText) {
+    elements.creatorPromptText.textContent = promptText;
+  }
+  if (elements.creatorBody) {
+    elements.creatorBody.placeholder = promptText;
+    elements.creatorBody.setAttribute('data-placeholder', promptText);
+  }
+}
 
 /**
  * Initializes Note Creator event listeners
  */
 export function initCreatorUI() {
   if (!elements.noteCreator) return;
+
+  if (elements.creatorBody) {
+    attachRichLinkEditor(elements.creatorBody);
+  }
+
+  // Pick a random prompt on reload
+  const prompts = getCreatorPrompts();
+  currentPromptIndex = Math.floor(Math.random() * prompts.length);
+  updateCreatorPrompt();
 
   elements.creatorCollapsed.addEventListener('click', expandNoteCreator);
   elements.btnCreatorClose.addEventListener('click', closeNoteCreator);
@@ -32,18 +74,21 @@ export function initCreatorUI() {
     }
   });
 
-  // Note Creator Tag adding
-  elements.creatorTagInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      const val = elements.creatorTagInput.value.trim().toLowerCase();
-      if (val && !state.noteCreatorTags.includes(val)) {
-        state.noteCreatorTags.push(val);
-        elements.creatorTagInput.value = '';
-        renderCreatorTags();
+  // Note Creator Tag auto-suggestions & adding
+  if (elements.creatorTagInput) {
+    creatorTagSuggestionsController = attachTagSuggestions({
+      input: elements.creatorTagInput,
+      container: elements.creatorTagSuggestions,
+      list: elements.creatorTagSuggestionsList,
+      getCurrentTags: () => state.noteCreatorTags,
+      onAddTag: (tag) => {
+        if (tag && !state.noteCreatorTags.includes(tag)) {
+          state.noteCreatorTags.push(tag);
+          renderCreatorTags();
+        }
       }
-    }
-  });
+    });
+  }
 
   // Switch from creator title to creator body/checklist on Enter
   elements.creatorTitle.addEventListener('keydown', (e) => {
@@ -208,14 +253,22 @@ export function updateCreatorPinButton() {
   const isPinned = Boolean(state.isCreatorPinned);
   elements.btnCreatorPin.classList.toggle('active', isPinned);
   elements.btnCreatorPin.selected = isPinned;
+  elements.btnCreatorPin.removeAttribute('title');
+  const tooltip = document.getElementById('tooltip-creator-pin');
   if (isPinned) {
     elements.btnCreatorPin.setAttribute('selected', '');
-    elements.btnCreatorPin.title = t('btn_unpin_note_title');
     elements.btnCreatorPin.setAttribute('aria-label', t('btn_unpin_note_title'));
+    if (tooltip) {
+      tooltip.textContent = t('btn_unpin_note_title');
+      tooltip.value = t('btn_unpin_note_title');
+    }
   } else {
     elements.btnCreatorPin.removeAttribute('selected');
-    elements.btnCreatorPin.title = t('btn_pin_note_title');
     elements.btnCreatorPin.setAttribute('aria-label', t('btn_pin_note_title'));
+    if (tooltip) {
+      tooltip.textContent = t('btn_pin_note_title');
+      tooltip.value = t('btn_pin_note_title');
+    }
   }
 }
 
@@ -241,6 +294,8 @@ export function expandNoteCreator() {
   if (creatorColorWrapper) creatorColorWrapper.classList.remove('open');
   state.noteCreatorTags = [];
   state.noteCreatorImages = [];
+  if (elements.creatorTagInput) elements.creatorTagInput.value = '';
+  if (creatorTagSuggestionsController) creatorTagSuggestionsController.hide();
   state.isCreatorChecklistMode = false;
   elements.btnCreatorChecklistToggle.classList.remove('active');
   elements.creatorChecklistView.innerHTML = '';
@@ -285,6 +340,8 @@ export async function closeNoteCreator() {
   // Reset inputs
   elements.creatorTitle.value = '';
   elements.creatorBody.value = '';
+  if (elements.creatorTagInput) elements.creatorTagInput.value = '';
+  if (creatorTagSuggestionsController) creatorTagSuggestionsController.hide();
   elements.creatorChecklistView.innerHTML = '';
   elements.creatorChecklistView.classList.add('hidden');
   elements.creatorBody.classList.remove('hidden');
@@ -295,6 +352,7 @@ export async function closeNoteCreator() {
   renderCreatorImages();
 
   // Collapse UI
+  hideLinkPill();
   elements.creatorCollapsed.classList.remove('hidden');
   elements.creatorExpanded.classList.add('hidden');
 }
@@ -303,6 +361,8 @@ export function discardNoteCreator() {
   // Reset inputs without saving
   elements.creatorTitle.value = '';
   elements.creatorBody.value = '';
+  if (elements.creatorTagInput) elements.creatorTagInput.value = '';
+  if (creatorTagSuggestionsController) creatorTagSuggestionsController.hide();
   elements.creatorChecklistView.innerHTML = '';
   elements.creatorChecklistView.classList.add('hidden');
   elements.creatorBody.classList.remove('hidden');
@@ -313,6 +373,7 @@ export function discardNoteCreator() {
   renderCreatorImages();
 
   // Collapse UI
+  hideLinkPill();
   elements.creatorCollapsed.classList.remove('hidden');
   elements.creatorExpanded.classList.add('hidden');
 }
