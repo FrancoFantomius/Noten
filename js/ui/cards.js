@@ -42,29 +42,9 @@ export function initCardsUI() {
     item.addEventListener('click', (e) => {
       const btn = e.currentTarget;
       const category = btn.getAttribute('data-category');
-      const currentPath = window.location.pathname;
-
-      const isNotesPage = !currentPath.endsWith('archive.html') && !currentPath.endsWith('trash.html');
-      const isArchivePage = currentPath.endsWith('archive.html');
-      const isTrashPage = currentPath.endsWith('trash.html');
-
-      let shouldPreventDefault = false;
-      if (category === 'notes' && isNotesPage) {
-        shouldPreventDefault = true;
-      } else if (category === 'archive' && isArchivePage) {
-        shouldPreventDefault = true;
-      } else if (category === 'trash' && isTrashPage) {
-        shouldPreventDefault = true;
-      }
-
-      if (shouldPreventDefault) {
+      if (category) {
         e.preventDefault();
-
-        // Clear hash and tag highlight when switching to a main category in-memory
-        if (window.location.hash) {
-          history.pushState("", document.title, window.location.pathname);
-        }
-        setCategory(category);
+        navigateToCategory(category);
       }
     });
   });
@@ -72,18 +52,8 @@ export function initCardsUI() {
   if (elements.sidebarRail) {
     elements.sidebarRail.addEventListener('change', (e) => {
       const val = e.detail?.value || e.detail?.item?.getAttribute('data-category');
-      if (val) {
-        const currentPath = window.location.pathname;
-        const isNotesPage = !currentPath.endsWith('archive.html') && !currentPath.endsWith('trash.html');
-        const isArchivePage = currentPath.endsWith('archive.html');
-        const isTrashPage = currentPath.endsWith('trash.html');
-
-        if ((val === 'notes' && isNotesPage) || (val === 'archive' && isArchivePage) || (val === 'trash' && isTrashPage)) {
-          if (window.location.hash) {
-            history.pushState("", document.title, window.location.pathname);
-          }
-          setCategory(val);
-        }
+      if (val && (val === 'notes' || val === 'archive' || val === 'trash')) {
+        navigateToCategory(val);
       }
     });
   }
@@ -91,18 +61,8 @@ export function initCardsUI() {
   if (elements.navigationBar) {
     elements.navigationBar.addEventListener('change', (e) => {
       const val = e.detail?.value || e.detail?.item?.getAttribute('data-category') || e.detail?.item?.value;
-      if (val) {
-        const currentPath = window.location.pathname;
-        const isNotesPage = !currentPath.endsWith('archive.html') && !currentPath.endsWith('trash.html');
-        const isArchivePage = currentPath.endsWith('archive.html');
-        const isTrashPage = currentPath.endsWith('trash.html');
-
-        if ((val === 'notes' && isNotesPage) || (val === 'archive' && isArchivePage) || (val === 'trash' && isTrashPage)) {
-          if (window.location.hash) {
-            history.pushState("", document.title, window.location.pathname);
-          }
-          setCategory(val);
-        }
+      if (val && (val === 'notes' || val === 'archive' || val === 'trash')) {
+        navigateToCategory(val);
       }
     });
   }
@@ -138,11 +98,28 @@ export function initCardsUI() {
     });
   }
 
+  // Window popstate listener for SPA browser history navigation
+  window.addEventListener('popstate', () => {
+    const currentPath = window.location.pathname;
+    const hash = window.location.hash;
+
+    let targetCategory = 'notes';
+    if (currentPath.endsWith('archive.html')) {
+      targetCategory = 'archive';
+    } else if (currentPath.endsWith('trash.html')) {
+      targetCategory = 'trash';
+    } else if (hash.startsWith('#tag-')) {
+      const raw = decodeURIComponent(hash.substring(5));
+      const tags = raw.split(/[,+]/).map(t => t.trim()).filter(Boolean);
+      targetCategory = tags.length > 0 ? `tag:${tags.join(',')}` : 'notes';
+    }
+
+    setCategory(targetCategory);
+  });
+
   // Window hashchange listener for browser history navigation
   window.addEventListener('hashchange', () => {
     const hash = window.location.hash;
-    const currentPath = window.location.pathname;
-    const isNotesPage = !currentPath.endsWith('archive.html') && !currentPath.endsWith('trash.html');
 
     // Handle Settings modal hash navigation
     const isSettingsOpen = elements.settingsModal && elements.settingsModal.classList.contains('active');
@@ -168,12 +145,19 @@ export function initCardsUI() {
       }
     }
 
-    if (isNotesPage) {
-      if (hash.startsWith('#tag-')) {
-        const tag = decodeURIComponent(hash.substring(5));
-        setCategory(`tag:${tag}`);
-      } else if (!hash || hash === '#') {
-        if (state.activeCategory.startsWith('tag:')) {
+    if (hash.startsWith('#tag-')) {
+      const raw = decodeURIComponent(hash.substring(5));
+      const tags = raw.split(/[,+]/).map(t => t.trim()).filter(Boolean);
+      const targetCat = tags.length > 0 ? `tag:${tags.join(',')}` : 'notes';
+      setCategory(targetCat);
+    } else if (!hash || hash === '#') {
+      if (state.activeCategory.startsWith('tag:') || state.selectedTags.length > 0) {
+        const currentPath = window.location.pathname;
+        if (currentPath.endsWith('archive.html')) {
+          setCategory('archive');
+        } else if (currentPath.endsWith('trash.html')) {
+          setCategory('trash');
+        } else {
           setCategory('notes');
         }
       }
@@ -247,10 +231,94 @@ export function toggleSidebar() {
 }
 
 /**
+ * Computes target HTML URL for a given category maintaining the current basePath
+ */
+export function getCategoryUrl(category) {
+  const currentPath = window.location.pathname;
+  const lastSlashIndex = currentPath.lastIndexOf('/');
+  const basePath = lastSlashIndex >= 0 ? currentPath.substring(0, lastSlashIndex + 1) : '';
+  const pageName = category === 'notes' ? 'index.html' : `${category}.html`;
+  return basePath ? `${basePath}${pageName}` : pageName;
+}
+
+/**
+ * Navigates to a category smoothly without a full page reload (SPA navigation)
+ */
+export function navigateToCategory(category) {
+  if (!category) return;
+  state.selectedTags = [];
+  const targetUrl = getCategoryUrl(category);
+  const currentUrl = window.location.pathname + window.location.search + window.location.hash;
+  if (currentUrl !== targetUrl) {
+    history.pushState({ category }, '', targetUrl);
+  }
+  setCategory(category);
+}
+
+/**
+ * Toggles a tag filter on or off (supports multiple tag selection and deselection)
+ * @param {string} tag
+ */
+export function toggleTagFilter(tag) {
+  if (!tag) return;
+  const tagLower = tag.toLowerCase().trim();
+  let currentTags = [...state.selectedTags];
+  const idx = currentTags.findIndex(t => t.toLowerCase().trim() === tagLower);
+
+  if (idx >= 0) {
+    // Deselect tag if pressed again
+    currentTags.splice(idx, 1);
+  } else {
+    // Select tag
+    currentTags.push(tag.trim());
+  }
+
+  if (currentTags.length > 0) {
+    const newCategory = `tag:${currentTags.join(',')}`;
+    const tagHash = `#tag-${currentTags.map(t => encodeURIComponent(t)).join(',')}`;
+    const currentPath = window.location.pathname;
+    const isNotesPage = !currentPath.endsWith('archive.html') && !currentPath.endsWith('trash.html');
+
+    if (isNotesPage) {
+      const targetUrl = `${getCategoryUrl('notes')}${tagHash}`;
+      const currentUrl = window.location.pathname + window.location.search + window.location.hash;
+      if (currentUrl !== targetUrl) {
+        history.pushState({ category: newCategory }, '', targetUrl);
+      }
+      setCategory(newCategory);
+    } else {
+      window.location.href = `index.html${tagHash}`;
+    }
+  } else {
+    // All tags deselected -> switch back to base category (notes, archive, or trash)
+    const currentPath = window.location.pathname;
+    let baseCategory = 'notes';
+    if (currentPath.endsWith('archive.html')) {
+      baseCategory = 'archive';
+    } else if (currentPath.endsWith('trash.html')) {
+      baseCategory = 'trash';
+    }
+    const targetUrl = getCategoryUrl(baseCategory);
+    const currentUrl = window.location.pathname + window.location.search + window.location.hash;
+    if (currentUrl !== targetUrl) {
+      history.pushState({ category: baseCategory }, '', targetUrl);
+    }
+    setCategory(baseCategory);
+  }
+}
+
+/**
  * Switch active categories
  */
 export function setCategory(category) {
   state.activeCategory = category;
+
+  if (category.startsWith('tag:')) {
+    const raw = category.substring(4);
+    state.selectedTags = raw.split(/[,+]/).map(t => t.trim()).filter(Boolean);
+  } else {
+    state.selectedTags = [];
+  }
 
   // Close mobile sidebar on select
   if (elements.sidebar) {
@@ -317,21 +385,8 @@ export function setCategory(category) {
     }
   });
 
-  // Highlights tag chip in sidebar
-  if (elements.sidebarTagsList) {
-    const tagChips = elements.sidebarTagsList.querySelectorAll('md-chip');
-    tagChips.forEach(chip => {
-      const tagVal = chip.getAttribute('label');
-      const isSelected = `tag:${tagVal}` === category;
-      if (isSelected) {
-        chip.setAttribute('selected', '');
-        if ('selected' in chip) chip.selected = true;
-      } else {
-        chip.removeAttribute('selected');
-        if ('selected' in chip) chip.selected = false;
-      }
-    });
-  }
+  // Re-render sidebar tags so all chips reflect the latest selectedTags accurately
+  renderSidebarTags();
 
   // Adjust placeholder empty states based on category
   updateEmptyStateDetails();
@@ -346,7 +401,7 @@ export function setCategory(category) {
 export function updateEmptyStateDetails() {
   if (!elements.emptyStateTitle || !elements.emptyStateDesc) return;
 
-  if (state.activeCategory === 'notes') {
+  if (state.activeCategory === 'notes' && state.selectedTags.length === 0) {
     elements.emptyStateTitle.textContent = t('empty_state_notes_title');
     elements.emptyStateDesc.textContent = t('empty_state_notes_desc');
   } else if (state.activeCategory === 'archive') {
@@ -355,9 +410,9 @@ export function updateEmptyStateDetails() {
   } else if (state.activeCategory === 'trash') {
     elements.emptyStateTitle.textContent = t('empty_state_trash_title');
     elements.emptyStateDesc.textContent = t('empty_state_trash_desc');
-  } else if (state.activeCategory.startsWith('tag:')) {
-    const tag = state.activeCategory.substring(4);
-    elements.emptyStateTitle.textContent = t('empty_state_tags_title', { tag: tag });
+  } else if (state.activeCategory.startsWith('tag:') || state.selectedTags.length > 0) {
+    const tagDisplay = state.selectedTags.join(', #');
+    elements.emptyStateTitle.textContent = t('empty_state_tags_title', { tag: tagDisplay });
     elements.emptyStateDesc.textContent = t('empty_state_tags_desc');
   }
 }
@@ -370,23 +425,34 @@ export function renderNotesFeed() {
 
   // Filter notes by category, tags, and search
   const filtered = state.decryptedNotes.filter(note => {
+    const noteTagsLower = Array.isArray(note.tags)
+      ? note.tags.map(t => (typeof t === 'string' ? t.toLowerCase().trim() : '')).filter(Boolean)
+      : [];
+
+    // Tag filter matching: Note MUST contain ALL selected tags
+    if (state.selectedTags.length > 0) {
+      const hasAllSelectedTags = state.selectedTags.every(targetTag =>
+        noteTagsLower.includes(targetTag.toLowerCase().trim())
+      );
+      if (!hasAllSelectedTags) return false;
+    }
+
     // 1. Category/Search Filter
     if (searchQuery) {
       if (note.isTrashed) return false;
-      if (state.activeCategory.startsWith('tag:')) {
-        const targetTag = state.activeCategory.substring(4);
-        if (!note.tags.includes(targetTag)) return false;
-      }
     } else {
-      if (state.activeCategory === 'notes') {
+      if (state.selectedTags.length > 0 || state.activeCategory.startsWith('tag:')) {
+        if (state.tagFilterIncludeArchived) {
+          if (note.isTrashed) return false;
+        } else {
+          if (note.isArchived || note.isTrashed) return false;
+        }
+      } else if (state.activeCategory === 'notes') {
         if (note.isArchived || note.isTrashed) return false;
       } else if (state.activeCategory === 'archive') {
         if (!note.isArchived || note.isTrashed) return false;
       } else if (state.activeCategory === 'trash') {
         if (!note.isTrashed) return false;
-      } else if (state.activeCategory.startsWith('tag:')) {
-        const targetTag = state.activeCategory.substring(4);
-        if (note.isTrashed || !note.tags.includes(targetTag)) return false;
       }
     }
 
@@ -398,7 +464,6 @@ export function renderNotesFeed() {
 
       // All #tag tokens must match note tags
       if (tagTokens.length > 0) {
-        const noteTagsLower = (note.tags || []).map(t => t.toLowerCase());
         const hasAllTags = tagTokens.every(tag => noteTagsLower.includes(tag));
         if (!hasAllTags) return false;
       }
@@ -407,11 +472,10 @@ export function renderNotesFeed() {
       if (textTokens.length > 0) {
         const matchTitle = (note.title || '').toLowerCase();
         const matchBody = (note.body || '').toLowerCase();
-        const matchTags = (note.tags || []).map(t => t.toLowerCase());
         return textTokens.every(term =>
           matchTitle.includes(term) ||
           matchBody.includes(term) ||
-          matchTags.some(t => t.includes(term))
+          noteTagsLower.some(t => t.includes(term))
         );
       }
 
@@ -428,8 +492,8 @@ export function renderNotesFeed() {
   const pinned = filtered.filter(n => n.isPinned);
   const unpinned = filtered.filter(n => !n.isPinned);
 
-  // Show pinned section only if there are pinned notes, we are in 'notes' category, and NOT searching
-  const showPinnedSection = pinned.length > 0 && state.activeCategory === 'notes' && !searchQuery;
+  // Show pinned section only if there are pinned notes, we are in 'notes' category, and NOT searching/tag-filtering
+  const showPinnedSection = pinned.length > 0 && state.activeCategory === 'notes' && !searchQuery && state.selectedTags.length === 0;
 
   // Render Pinned Section
   if (showPinnedSection) {
@@ -493,7 +557,10 @@ export function renderCardsToGrid(notes, gridElement) {
     if (note.tags && note.tags.length > 0) {
       tagsHtml = `
         <md-chip-set class="card-tags">
-          ${note.tags.map(t => `<md-chip label="${escapeHtml(t)}" variant="suggestion"></md-chip>`).join('')}
+          ${note.tags.map(t => {
+            const isSelected = state.selectedTags.some(st => st.toLowerCase() === (t || '').toLowerCase().trim());
+            return `<md-chip label="${escapeHtml(t)}" variant="filter" ${isSelected ? 'selected' : ''}></md-chip>`;
+          }).join('')}
         </md-chip-set>
       `;
     }
@@ -593,8 +660,16 @@ export function renderCardsToGrid(notes, gridElement) {
       const carouselEl = path.find(el => el && el.tagName === 'MD-CAROUSEL') || e.target.closest('md-carousel');
       const checklistClick = path.find(el => el && el.classList && el.classList.contains('checklist-item')) || e.target.closest('.checklist-item');
 
+      const tagChip = path.find(el => el && el.tagName === 'MD-CHIP' && el.closest('.card-tags')) || e.target.closest('.card-tags md-chip');
+
       if (linkClick) {
         e.stopPropagation();
+      } else if (tagChip) {
+        e.stopPropagation();
+        const tagLabel = tagChip.getAttribute('label');
+        if (tagLabel) {
+          toggleTagFilter(tagLabel);
+        }
       } else if (pinBtn && (e.target === pinBtn || pinBtn.contains(e.target) || path.includes(pinBtn))) {
         e.stopPropagation();
         toggleNotePin(note.id);
@@ -730,21 +805,16 @@ export function renderSidebarTags() {
     chip.setAttribute('label', tag);
     chip.setAttribute('icon', 'tag');
     chip.setAttribute('variant', 'filter');
-    if (state.activeCategory === `tag:${tag}`) {
+    const isSelected = state.selectedTags.some(t => t.toLowerCase() === tag.toLowerCase());
+    if (isSelected) {
       chip.setAttribute('selected', '');
+      chip.selected = true;
     }
 
     chip.addEventListener('click', (e) => {
       e.preventDefault();
-      const currentPath = window.location.pathname;
-      const isNotesPage = !currentPath.endsWith('archive.html') && !currentPath.endsWith('trash.html');
-
-      if (isNotesPage) {
-        window.location.hash = `tag-${encodeURIComponent(tag)}`;
-        setCategory(`tag:${tag}`);
-      } else {
-        window.location.href = `index.html#tag-${encodeURIComponent(tag)}`;
-      }
+      e.stopPropagation();
+      toggleTagFilter(tag);
     });
 
     elements.sidebarTagsList.appendChild(chip);
@@ -844,6 +914,7 @@ export function updateSearchSuggestionsAndTags() {
         chip.setAttribute('variant', 'filter');
         if (isSelected) {
           chip.setAttribute('selected', '');
+          chip.selected = true;
         }
 
         chip.addEventListener('click', (e) => {

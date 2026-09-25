@@ -28,7 +28,10 @@
             <md-chip-set id="creator-tags-list" class="note-tags-container"></md-chip-set>
             <div class="tag-input-wrapper">
               <input type="text" id="creator-tag-input" data-i18n-placeholder="creator_tag_input_placeholder"
-                placeholder="Add tag + press Enter...">
+                placeholder="Add tag + press Enter..." autocomplete="off">
+              <div id="creator-tag-suggestions" class="tag-suggestions-container hidden">
+                <md-chip-set id="creator-tag-suggestions-list" class="tag-suggestions-chip-set"></md-chip-set>
+              </div>
             </div>
 
             <!-- Toolbar and Actions -->

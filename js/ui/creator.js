@@ -13,8 +13,10 @@ import {
   renderCreatorChecklist,
   serializeCreatorChecklist
 } from './checklist.js';
+import { attachTagSuggestions } from './tag-suggestions.js';
 
 let currentPromptIndex = 0;
+let creatorTagSuggestionsController = null;
 
 /**
  * Returns the pool of rotating placeholder prompts
@@ -72,18 +74,21 @@ export function initCreatorUI() {
     }
   });
 
-  // Note Creator Tag adding
-  elements.creatorTagInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      const val = elements.creatorTagInput.value.trim().toLowerCase();
-      if (val && !state.noteCreatorTags.includes(val)) {
-        state.noteCreatorTags.push(val);
-        elements.creatorTagInput.value = '';
-        renderCreatorTags();
+  // Note Creator Tag auto-suggestions & adding
+  if (elements.creatorTagInput) {
+    creatorTagSuggestionsController = attachTagSuggestions({
+      input: elements.creatorTagInput,
+      container: elements.creatorTagSuggestions,
+      list: elements.creatorTagSuggestionsList,
+      getCurrentTags: () => state.noteCreatorTags,
+      onAddTag: (tag) => {
+        if (tag && !state.noteCreatorTags.includes(tag)) {
+          state.noteCreatorTags.push(tag);
+          renderCreatorTags();
+        }
       }
-    }
-  });
+    });
+  }
 
   // Switch from creator title to creator body/checklist on Enter
   elements.creatorTitle.addEventListener('keydown', (e) => {
@@ -289,6 +294,8 @@ export function expandNoteCreator() {
   if (creatorColorWrapper) creatorColorWrapper.classList.remove('open');
   state.noteCreatorTags = [];
   state.noteCreatorImages = [];
+  if (elements.creatorTagInput) elements.creatorTagInput.value = '';
+  if (creatorTagSuggestionsController) creatorTagSuggestionsController.hide();
   state.isCreatorChecklistMode = false;
   elements.btnCreatorChecklistToggle.classList.remove('active');
   elements.creatorChecklistView.innerHTML = '';
@@ -333,6 +340,8 @@ export async function closeNoteCreator() {
   // Reset inputs
   elements.creatorTitle.value = '';
   elements.creatorBody.value = '';
+  if (elements.creatorTagInput) elements.creatorTagInput.value = '';
+  if (creatorTagSuggestionsController) creatorTagSuggestionsController.hide();
   elements.creatorChecklistView.innerHTML = '';
   elements.creatorChecklistView.classList.add('hidden');
   elements.creatorBody.classList.remove('hidden');
@@ -351,6 +360,8 @@ export function discardNoteCreator() {
   // Reset inputs without saving
   elements.creatorTitle.value = '';
   elements.creatorBody.value = '';
+  if (elements.creatorTagInput) elements.creatorTagInput.value = '';
+  if (creatorTagSuggestionsController) creatorTagSuggestionsController.hide();
   elements.creatorChecklistView.innerHTML = '';
   elements.creatorChecklistView.classList.add('hidden');
   elements.creatorBody.classList.remove('hidden');

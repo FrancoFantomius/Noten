@@ -5,6 +5,8 @@
 // Global State
 export const state = {
   activeCategory: 'notes',
+  selectedTags: [],         // Active tag filters
+  tagFilterIncludeArchived: false, // Include archived notes when filtering by tag
   decryptedNotes: [],       // Cache of all decrypted notes in memory
   noteCreatorTags: [],      // Current tags in the note creator
   noteModalTags: [],        // Current tags in the edit modal
@@ -59,6 +61,8 @@ export const elements = {
   creatorBody: null,
   creatorTagsList: null,
   creatorTagInput: null,
+  creatorTagSuggestions: null,
+  creatorTagSuggestionsList: null,
   btnCreatorPin: null,
   btnCreatorArchive: null,
   btnCreatorClose: null,
@@ -90,6 +94,8 @@ export const elements = {
   modalBodyText: null,
   modalTagsList: null,
   modalTagInput: null,
+  modalTagSuggestions: null,
+  modalTagSuggestionsList: null,
   btnModalBack: null,
   btnModalPin: null,
   btnModalArchive: null,
@@ -113,6 +119,7 @@ export const elements = {
   settingsModal: null,
   btnSettingsClose: null,
   themeSelect: null,
+  settingTagIncludeArchived: null,
 
   // Lightbox Modal
   lightboxModal: null,
@@ -177,6 +184,8 @@ export function initElements() {
   elements.creatorBody = document.getElementById('creator-body');
   elements.creatorTagsList = document.getElementById('creator-tags-list');
   elements.creatorTagInput = document.getElementById('creator-tag-input');
+  elements.creatorTagSuggestions = document.getElementById('creator-tag-suggestions');
+  elements.creatorTagSuggestionsList = document.getElementById('creator-tag-suggestions-list');
   elements.btnCreatorPin = document.getElementById('btn-creator-pin');
   elements.btnCreatorArchive = document.getElementById('btn-creator-archive');
   elements.btnCreatorClose = document.getElementById('btn-creator-close');
@@ -208,6 +217,8 @@ export function initElements() {
   elements.modalBodyText = document.getElementById('modal-body-text');
   elements.modalTagsList = document.getElementById('modal-tags-list');
   elements.modalTagInput = document.getElementById('modal-tag-input');
+  elements.modalTagSuggestions = document.getElementById('modal-tag-suggestions');
+  elements.modalTagSuggestionsList = document.getElementById('modal-tag-suggestions-list');
   elements.btnModalBack = document.getElementById('btn-modal-back');
   elements.btnModalPin = document.getElementById('btn-modal-pin');
   elements.btnModalArchive = document.getElementById('btn-modal-archive');
@@ -233,6 +244,7 @@ export function initElements() {
   elements.btnSettingsCloseIcon = document.getElementById('btn-settings-close-icon');
   elements.btnSettingsSave = document.getElementById('btn-settings-save');
   elements.themeSelect = document.getElementById('theme-select');
+  elements.settingTagIncludeArchived = document.getElementById('setting-tag-include-archived');
 
   // Lightbox Modal
   elements.lightboxModal = document.getElementById('lightbox-modal');

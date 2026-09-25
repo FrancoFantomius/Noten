@@ -18,7 +18,10 @@
         <md-chip-set id="modal-tags-list" class="note-tags-container"></md-chip-set>
         <div class="tag-input-wrapper">
           <input type="text" id="modal-tag-input" data-i18n-placeholder="modal_tag_input_placeholder"
-            placeholder="Add tag + press Enter...">
+            placeholder="Add tag + press Enter..." autocomplete="off">
+          <div id="modal-tag-suggestions" class="tag-suggestions-container hidden">
+            <md-chip-set id="modal-tag-suggestions-list" class="tag-suggestions-chip-set"></md-chip-set>
+          </div>
         </div>
       </div>
 

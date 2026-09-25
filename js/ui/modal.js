@@ -13,6 +13,9 @@ import {
   renderModalChecklist,
   serializeModalChecklist
 } from './checklist.js';
+import { attachTagSuggestions } from './tag-suggestions.js';
+
+let modalTagSuggestionsController = null;
 
 /**
  * Initializes Note Modal event listeners
@@ -88,18 +91,21 @@ export function initModalUI() {
     });
   });
 
-  // Modal Tag input adding
-  elements.modalTagInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      const val = elements.modalTagInput.value.trim().toLowerCase();
-      if (val && !state.noteModalTags.includes(val)) {
-        state.noteModalTags.push(val);
-        elements.modalTagInput.value = '';
-        renderModalTags();
+  // Modal Tag auto-suggestions & adding
+  if (elements.modalTagInput) {
+    modalTagSuggestionsController = attachTagSuggestions({
+      input: elements.modalTagInput,
+      container: elements.modalTagSuggestions,
+      list: elements.modalTagSuggestionsList,
+      getCurrentTags: () => state.noteModalTags,
+      onAddTag: (tag) => {
+        if (tag && !state.noteModalTags.includes(tag)) {
+          state.noteModalTags.push(tag);
+          renderModalTags();
+        }
       }
-    }
-  });
+    });
+  }
 
   // Focus textarea/checklist when clicking empty area of modal body
   elements.modalBody.addEventListener('click', (e) => {
@@ -344,6 +350,8 @@ export function openNoteModal(noteId) {
   }
 
   state.noteModalTags = [...note.tags];
+  if (elements.modalTagInput) elements.modalTagInput.value = '';
+  if (modalTagSuggestionsController) modalTagSuggestionsController.hide();
   renderModalTags();
 
   state.noteModalImages = note.images ? [...note.images] : [];
@@ -464,6 +472,8 @@ export function openNewNoteModal() {
   }
 
   state.noteModalTags = [];
+  if (elements.modalTagInput) elements.modalTagInput.value = '';
+  if (modalTagSuggestionsController) modalTagSuggestionsController.hide();
   renderModalTags();
 
   state.noteModalImages = [];
@@ -571,6 +581,8 @@ export function closeModal() {
 
   state.editingNoteId = null;
   state.noteModalImages = [];
+  if (elements.modalTagInput) elements.modalTagInput.value = '';
+  if (modalTagSuggestionsController) modalTagSuggestionsController.hide();
   state.isModalChecklistMode = false;
   elements.modalChecklistView.innerHTML = '';
   elements.modalChecklistView.classList.add('hidden');

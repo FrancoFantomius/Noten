@@ -1,14 +1,30 @@
-/**
- * Noten UI - Account and Settings Controls
- */
-
 import { t } from '../i18n.js';
 import { state, elements } from './state.js';
+import { renderNotesFeed } from './cards.js';
 
 /**
  * Initializes account menu, profile actions, settings, and login modal event listeners
  */
 export function initAccountUI() {
+  // Initialize tag filter include archived setting from localStorage
+  const isTagIncludeArchivedSaved = localStorage.getItem('tag_filter_include_archived') === 'true';
+  state.tagFilterIncludeArchived = isTagIncludeArchivedSaved;
+  if (elements.settingTagIncludeArchived) {
+    elements.settingTagIncludeArchived.selected = isTagIncludeArchivedSaved;
+    if (isTagIncludeArchivedSaved) {
+      elements.settingTagIncludeArchived.setAttribute('selected', '');
+    } else {
+      elements.settingTagIncludeArchived.removeAttribute('selected');
+    }
+
+    elements.settingTagIncludeArchived.addEventListener('change', (e) => {
+      const isSelected = Boolean(e.detail?.selected ?? elements.settingTagIncludeArchived.selected);
+      state.tagFilterIncludeArchived = isSelected;
+      localStorage.setItem('tag_filter_include_archived', isSelected ? 'true' : 'false');
+      renderNotesFeed();
+    });
+  }
+
   // Settings Dialog Triggers
   if (elements.btnSettingsOpen) {
     elements.btnSettingsOpen.addEventListener('click', () => {
@@ -154,6 +170,15 @@ function cleanupSettingsHash() {
  * Settings Modal trigger
  */
 export function showSettings() {
+  if (elements.settingTagIncludeArchived) {
+    elements.settingTagIncludeArchived.selected = Boolean(state.tagFilterIncludeArchived);
+    if (state.tagFilterIncludeArchived) {
+      elements.settingTagIncludeArchived.setAttribute('selected', '');
+    } else {
+      elements.settingTagIncludeArchived.removeAttribute('selected');
+    }
+  }
+
   if (elements.settingsModal) {
     if (typeof elements.settingsModal.showModal === 'function') {
       elements.settingsModal.showModal();

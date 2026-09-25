@@ -31,7 +31,10 @@ import {
   renderNotesFeed,
   renderSidebarTags,
   updateSearchSuggestionsAndTags,
-  setCategory
+  setCategory,
+  toggleTagFilter,
+  getCategoryUrl,
+  navigateToCategory
 } from './ui/cards.js';
 
 // Re-export what other modules (like app.js) need
@@ -45,6 +48,9 @@ export {
   renderNotesFeed,
   updateSearchSuggestionsAndTags,
   setCategory,
+  toggleTagFilter,
+  getCategoryUrl,
+  navigateToCategory,
   showSnackbar,
   updateCreatorPrompt
 };
@@ -63,12 +69,20 @@ export function initUI(callbacks) {
   const path = window.location.pathname;
   if (path.endsWith('archive.html')) {
     state.activeCategory = 'archive';
+    state.selectedTags = [];
   } else if (path.endsWith('trash.html')) {
     state.activeCategory = 'trash';
+    state.selectedTags = [];
   } else {
     const hash = window.location.hash;
     if (hash.startsWith('#tag-')) {
-      state.activeCategory = `tag:${decodeURIComponent(hash.substring(5))}`;
+      const raw = decodeURIComponent(hash.substring(5));
+      const tags = raw.split(/[,+]/).map(t => t.trim()).filter(Boolean);
+      state.selectedTags = tags;
+      state.activeCategory = tags.length > 0 ? `tag:${tags.join(',')}` : 'notes';
+    } else {
+      state.activeCategory = 'notes';
+      state.selectedTags = [];
     }
   }
 
