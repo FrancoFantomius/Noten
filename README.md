@@ -1,6 +1,6 @@
 # Noten
 
-[![Version 2.1.1](https://img.shields.io/badge/Version-2.1.1-blue.svg)](https://github.com/FrancoFantomius/noten/releases)
+[![Version 2.2.0](https://img.shields.io/badge/Version-2.2.0-blue.svg)](https://github.com/FrancoFantomius/noten/releases)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 [![PWA Support](https://img.shields.io/badge/PWA-Supported-orange.svg)](#key-features)
 [![Local-First](https://img.shields.io/badge/Architecture-Local--First-green.svg)](#sync-setup-filen)
