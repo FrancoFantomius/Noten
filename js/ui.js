@@ -29,6 +29,7 @@ import { initModalUI, openNoteModal, openNewNoteModal } from './ui/modal.js';
 import {
   initCardsUI,
   renderNotesFeed,
+  loadMoreNotes,
   renderSidebarTags,
   updateSearchSuggestionsAndTags,
   setCategory,
@@ -46,6 +47,7 @@ export {
   showLoginModal,
   hideLoginModal,
   renderNotesFeed,
+  loadMoreNotes,
   updateSearchSuggestionsAndTags,
   setCategory,
   toggleTagFilter,

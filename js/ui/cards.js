@@ -15,6 +15,7 @@ import { showSettings, hideSettings } from './account.js';
  */
 export function initCardsUI() {
   fixSidebarSpacing();
+  initInfiniteScroll();
 
   // Restore saved sidebar collapsed state across page navigations
   try {
@@ -417,10 +418,148 @@ export function updateEmptyStateDetails() {
   }
 }
 
+// Infinite scrolling / Chunk pagination state
+const PAGE_SIZE = 10;
+let visibleNotesLimit = PAGE_SIZE;
+let currentFilteredNotes = [];
+let currentPinnedNotes = [];
+let currentUnpinnedNotes = [];
+let currentShowPinnedSection = false;
+let isLoadingMore = false;
+let feedObserver = null;
+let infiniteScrollInitialized = false;
+
+/**
+ * Gets or creates the bottom sentinel DOM element used for infinite scroll
+ */
+function getOrCreateSentinel() {
+  let sentinel = document.getElementById('infinite-scroll-sentinel');
+  if (!sentinel) {
+    sentinel = document.createElement('div');
+    sentinel.id = 'infinite-scroll-sentinel';
+    sentinel.className = 'infinite-scroll-sentinel';
+    sentinel.setAttribute('aria-hidden', 'true');
+    const container = elements.notesViewContent || elements.contentPanel || document.querySelector('.content-panel');
+    if (container) {
+      container.appendChild(sentinel);
+    }
+  }
+  return sentinel;
+}
+
+/**
+ * Checks if the sentinel is in/near the viewport and loads more notes if needed
+ */
+function checkSentinelNearBottom() {
+  if (!currentFilteredNotes || visibleNotesLimit >= currentFilteredNotes.length) return;
+  const sentinel = getOrCreateSentinel();
+  if (sentinel) {
+    const rect = sentinel.getBoundingClientRect();
+    const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+    if (rect.top <= viewportHeight + 300) {
+      loadMoreNotes();
+    }
+  }
+}
+
+/**
+ * Loads the next batch of 10 notes when the user scrolls near the bottom
+ */
+export function loadMoreNotes() {
+  if (isLoadingMore) return;
+  if (!currentFilteredNotes || visibleNotesLimit >= currentFilteredNotes.length) return;
+
+  isLoadingMore = true;
+
+  const previousLimit = visibleNotesLimit;
+  visibleNotesLimit += PAGE_SIZE;
+
+  if (currentShowPinnedSection) {
+    const oldPinnedCount = Math.min(currentPinnedNotes.length, previousLimit);
+    const newPinnedCount = Math.min(currentPinnedNotes.length, visibleNotesLimit);
+    if (newPinnedCount > oldPinnedCount) {
+      const nextPinned = currentPinnedNotes.slice(oldPinnedCount, newPinnedCount);
+      renderCardsToGrid(nextPinned, elements.pinnedGrid, true);
+    }
+
+    const oldUnpinnedCount = Math.min(currentUnpinnedNotes.length, Math.max(0, previousLimit - currentPinnedNotes.length));
+    const newUnpinnedCount = Math.min(currentUnpinnedNotes.length, Math.max(0, visibleNotesLimit - currentPinnedNotes.length));
+    if (newUnpinnedCount > oldUnpinnedCount) {
+      if (oldUnpinnedCount === 0 && elements.sectionTitleFeed) {
+        elements.sectionTitleFeed.classList.remove('hidden');
+      }
+      const nextUnpinned = currentUnpinnedNotes.slice(oldUnpinnedCount, newUnpinnedCount);
+      renderCardsToGrid(nextUnpinned, elements.notesGrid, true);
+    }
+  } else {
+    const nextNotes = currentFilteredNotes.slice(previousLimit, Math.min(currentFilteredNotes.length, visibleNotesLimit));
+    renderCardsToGrid(nextNotes, elements.notesGrid, true);
+  }
+
+  isLoadingMore = false;
+
+  if (visibleNotesLimit < currentFilteredNotes.length) {
+    requestAnimationFrame(checkSentinelNearBottom);
+  }
+}
+
+/**
+ * Initializes IntersectionObserver and scroll listeners for infinite scrolling
+ */
+export function initInfiniteScroll() {
+  if (infiniteScrollInitialized) return;
+  infiniteScrollInitialized = true;
+
+  const sentinel = getOrCreateSentinel();
+  if ('IntersectionObserver' in window) {
+    if (feedObserver) {
+      feedObserver.disconnect();
+    }
+    feedObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          loadMoreNotes();
+        }
+      });
+    }, {
+      root: null,
+      rootMargin: '300px',
+      threshold: 0
+    });
+
+    if (sentinel) {
+      feedObserver.observe(sentinel);
+    }
+  }
+
+  let isScrollTicking = false;
+  const handleScroll = () => {
+    if (!isScrollTicking) {
+      window.requestAnimationFrame(() => {
+        checkSentinelNearBottom();
+        isScrollTicking = false;
+      });
+      isScrollTicking = true;
+    }
+  };
+
+  if (elements.contentPanel) {
+    elements.contentPanel.addEventListener('scroll', handleScroll, { passive: true });
+  }
+  window.addEventListener('scroll', handleScroll, { passive: true });
+}
+
 /**
  * Filter and render note grid cards
+ * @param {Object} [options]
+ * @param {boolean} [options.preserveCount=false] If true, retains the currently loaded batch size
  */
-export function renderNotesFeed() {
+export function renderNotesFeed(options = {}) {
+  const { preserveCount = false } = typeof options === 'object' && options !== null ? options : {};
+  if (!preserveCount) {
+    visibleNotesLimit = PAGE_SIZE;
+  }
+
   const searchQuery = elements.searchInput ? elements.searchInput.value.trim().toLowerCase() : '';
 
   // Filter notes by category, tags, and search
@@ -495,32 +634,45 @@ export function renderNotesFeed() {
   // Show pinned section only if there are pinned notes, we are in 'notes' category, and NOT searching/tag-filtering
   const showPinnedSection = pinned.length > 0 && state.activeCategory === 'notes' && !searchQuery && state.selectedTags.length === 0;
 
+  currentFilteredNotes = filtered;
+  currentPinnedNotes = pinned;
+  currentUnpinnedNotes = unpinned;
+  currentShowPinnedSection = showPinnedSection;
+
+  // Clear card tooltips container on fresh render
+  const cardTooltipsContainer = document.getElementById('card-tooltips-container');
+  if (cardTooltipsContainer) cardTooltipsContainer.innerHTML = '';
+
   // Render Pinned Section
   if (showPinnedSection) {
     if (elements.pinnedSection) elements.pinnedSection.classList.remove('hidden');
-    renderCardsToGrid(pinned, elements.pinnedGrid);
+    const pinnedToRender = pinned.slice(0, visibleNotesLimit);
+    renderCardsToGrid(pinnedToRender, elements.pinnedGrid, false);
   } else {
     if (elements.pinnedSection) elements.pinnedSection.classList.add('hidden');
     if (elements.pinnedGrid) elements.pinnedGrid.innerHTML = '';
   }
 
   // Render Unpinned Section (or all notes if pinned section is hidden)
-  const mainGridNotes = showPinnedSection ? unpinned : filtered;
-  if (mainGridNotes.length > 0) {
-    renderCardsToGrid(mainGridNotes, elements.notesGrid);
-    if (showPinnedSection) {
+  if (showPinnedSection) {
+    const unpinnedLimit = Math.max(0, visibleNotesLimit - pinned.length);
+    const unpinnedToRender = unpinned.slice(0, unpinnedLimit);
+    if (unpinnedToRender.length > 0) {
+      renderCardsToGrid(unpinnedToRender, elements.notesGrid, false);
       if (elements.sectionTitleFeed) elements.sectionTitleFeed.classList.remove('hidden');
     } else {
+      if (elements.notesGrid) elements.notesGrid.innerHTML = '';
       if (elements.sectionTitleFeed) elements.sectionTitleFeed.classList.add('hidden');
     }
   } else {
-    if (elements.notesGrid) elements.notesGrid.innerHTML = '';
+    const mainGridNotes = filtered.slice(0, visibleNotesLimit);
+    if (mainGridNotes.length > 0) {
+      renderCardsToGrid(mainGridNotes, elements.notesGrid, false);
+    } else {
+      if (elements.notesGrid) elements.notesGrid.innerHTML = '';
+    }
     if (elements.sectionTitleFeed) elements.sectionTitleFeed.classList.add('hidden');
   }
-
-  // Clear card tooltips container on re-render
-  const cardTooltipsContainer = document.getElementById('card-tooltips-container');
-  if (cardTooltipsContainer) cardTooltipsContainer.innerHTML = '';
 
   // Handle Empty State display
   if (filtered.length === 0) {
@@ -537,12 +689,22 @@ export function renderNotesFeed() {
     if (elements.notesViewContent) elements.notesViewContent.classList.remove('hidden');
   }
 
+  // Ensure sentinel is present and re-observed
+  const sentinel = getOrCreateSentinel();
+  if (feedObserver && sentinel) {
+    feedObserver.unobserve(sentinel);
+    feedObserver.observe(sentinel);
+  }
 
+  // If initial batch doesn't fill the viewport, schedule check to load more
+  requestAnimationFrame(checkSentinelNearBottom);
 }
 
-export function renderCardsToGrid(notes, gridElement) {
+export function renderCardsToGrid(notes, gridElement, append = false) {
   if (!gridElement) return;
-  gridElement.innerHTML = '';
+  if (!append) {
+    gridElement.innerHTML = '';
+  }
   const cardTooltipsContainer = document.getElementById('card-tooltips-container');
 
   notes.forEach(note => {
@@ -643,7 +805,7 @@ export function renderCardsToGrid(notes, gridElement) {
             if (state.onSaveNoteCallback) {
               await state.onSaveNoteCallback(note.id, note);
             }
-            renderNotesFeed();
+            renderNotesFeed({ preserveCount: true });
           }
         } : null;
         openLightbox(src, name, onDelete, validImages, clickedIndex >= 0 ? clickedIndex : 0);
@@ -695,7 +857,7 @@ export function renderCardsToGrid(notes, gridElement) {
               if (state.onSaveNoteCallback) {
                 await state.onSaveNoteCallback(note.id, note);
               }
-              renderNotesFeed();
+              renderNotesFeed({ preserveCount: true });
             }
           } : null;
           openLightbox(src, name, onDelete, validImages, clickedIndex >= 0 ? clickedIndex : 0);
@@ -721,7 +883,7 @@ export async function toggleNotePin(noteId) {
     if (state.onSaveNoteCallback) {
       await state.onSaveNoteCallback(note.id, note);
     }
-    renderNotesFeed();
+    renderNotesFeed({ preserveCount: true });
   }
 }
 
@@ -734,7 +896,7 @@ export async function restoreNote(noteId) {
     if (state.onSaveNoteCallback) {
       await state.onSaveNoteCallback(note.id, note);
     }
-    renderNotesFeed();
+    renderNotesFeed({ preserveCount: true });
   }
 }
 

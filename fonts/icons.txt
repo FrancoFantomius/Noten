@@ -68,6 +68,7 @@ menu
 more_vert
 music_note
 note_stack
+open_in_new
 palette
 pause
 pause_circle

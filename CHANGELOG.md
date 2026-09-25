@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [2.2.1] - 2026-09-25
+
+### Added
+- Chunked feed loading and infinite scrolling: Loads the initial 10 notes on page and category switch to prevent UI freezes with large note databases, and dynamically loads batches of 10 more notes as the user scrolls using `IntersectionObserver`.
+
+### Changed
+- Bumped package version and Service Worker cache version to `noten-v2.2.1`.
+
 ## [2.2.0] - 2026-09-25
 
 ### Added
@@ -154,7 +162,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Fixed
 - Mobile responsiveness groundwork (WIP).
 
-[Unreleased]: https://github.com/FrancoFantomius/noten/compare/v2.2.0...HEAD
+[Unreleased]: https://github.com/FrancoFantomius/noten/compare/v2.2.1...HEAD
+[2.2.1]: https://github.com/FrancoFantomius/noten/compare/v2.2.0...v2.2.1
 [2.2.0]: https://github.com/FrancoFantomius/noten/compare/v2.1.1...v2.2.0
 [2.1.1]: https://github.com/FrancoFantomius/noten/compare/v2.1.0...v2.1.1
 [2.1.0]: https://github.com/FrancoFantomius/noten/compare/v2.0.0...v2.1.0
