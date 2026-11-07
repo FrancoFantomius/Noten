@@ -194,7 +194,7 @@ export function renderModalChecklist(bodyText) {
   if (!isTrashed) {
     const addBtn = document.createElement('button');
     addBtn.className = 'modal-checklist-add';
-    addBtn.innerHTML = `<span class="material-symbols-outlined">add</span> <span>${t('checklist_add_item')}</span>`;
+    addBtn.innerHTML = `<md-icon name="add" size="20"></md-icon> <span>${t('checklist_add_item')}</span>`;
     addBtn.addEventListener('click', () => {
       const newItem = addChecklistItemAfter(null, true);
       newItem.querySelector('.modal-checklist-input').focus();
@@ -283,20 +283,20 @@ export function createChecklistItemElement(text, isChecked, indent, isModal, isT
 
   const dragHandleHtml = isTrashed ? '' : `
     <div id="${idPrefix}-drag" class="checklist-drag-handle" aria-label="${t('checklist_drag_title')}">
-      <span class="material-symbols-outlined">drag_indicator</span>
+      <md-icon name="drag_indicator" size="20"></md-icon>
     </div>
   `;
 
   const actionsHtml = isTrashed ? '' : `
     <div class="checklist-actions">
       <button id="${idPrefix}-outdent" class="btn-icon checklist-outdent" aria-label="${t('checklist_outdent_title')}">
-        <span class="material-symbols-outlined">chevron_left</span>
+        <md-icon name="chevron_left" size="20"></md-icon>
       </button>
       <button id="${idPrefix}-indent" class="btn-icon checklist-indent" aria-label="${t('checklist_indent_title')}">
-        <span class="material-symbols-outlined">chevron_right</span>
+        <md-icon name="chevron_right" size="20"></md-icon>
       </button>
       <button id="${idPrefix}-del" class="modal-checklist-delete btn-icon" aria-label="${t('checklist_remove_item_title')}">
-        <span class="material-symbols-outlined">close</span>
+        <md-icon name="close" size="20"></md-icon>
       </button>
     </div>
   `;
@@ -515,7 +515,7 @@ export function renderCreatorChecklist(bodyText) {
 
   const addBtn = document.createElement('button');
   addBtn.className = 'modal-checklist-add';
-  addBtn.innerHTML = `<span class="material-symbols-outlined">add</span> <span>${t('checklist_add_item')}</span>`;
+  addBtn.innerHTML = `<md-icon name="add" size="20"></md-icon> <span>${t('checklist_add_item')}</span>`;
   addBtn.addEventListener('click', () => {
     const newItem = addChecklistItemAfter(null, false);
     newItem.querySelector('.modal-checklist-input').focus();

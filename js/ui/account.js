@@ -226,7 +226,7 @@ export function updateSyncStatusUI(status) {
   }
 
   badge.innerHTML = `
-    <span class="material-symbols-outlined">${icon}</span>
+    <md-icon name="${icon}" size="20"></md-icon>
     ${text ? `<span class="sync-text">${text}</span>` : ''}
   `;
   badge.removeAttribute('title');

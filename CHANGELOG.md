@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [2.3.0] - 2026-11-07
+
+### Added
+- Direct SVG Material Design 3 icon support via `@francofantomius/material-components` `<md-icon>` web components.
+- Automated SVG icon downloader script (`scripts/download-m3-icons.js`) dynamically fetching and caching required Material Symbols icons locally in `img/M3icons/`.
+
+### Changed
+- Bumped package version and Service Worker cache version to `noten-v2.3.0`.
+- Upgraded `@francofantomius/material-components` to version `^1.4.1` and `vite` to `^8.3.6`.
+- Replaced Material Symbols font subsetting with standalone local SVG icons across UI templates, account menus, checklists, modals, and toolbars for improved rendering and performance.
+- Updated Service Worker to pre-cache local SVG icons for offline PWA operation.
+- Removed deprecated font-face declarations and font subset assets (`css/fonts.css`, `fonts/material-symbols-outlined-subset.woff2`, `fonts/icons.txt`), and uninstalled unused `subset-font` dependency.
+
 ## [2.2.1] - 2026-09-25
 
 ### Added

@@ -1,6 +1,6 @@
 # Noten
 
-[![Version 2.2.1](https://img.shields.io/badge/Version-2.2.1-blue.svg)](https://github.com/FrancoFantomius/noten/releases)
+[![Version 2.3.0](https://img.shields.io/badge/Version-2.3.0-blue.svg)](https://github.com/FrancoFantomius/noten/releases)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 [![PWA Support](https://img.shields.io/badge/PWA-Supported-orange.svg)](#key-features)
 [![Local-First](https://img.shields.io/badge/Architecture-Local--First-green.svg)](#sync-setup-filen)
@@ -144,7 +144,6 @@ You can synchronize your notes across multiple devices (desktops, phones, tablet
 ├── manifest.json        # PWA manifest configurations
 ├── css/                 # Application styles
 │   ├── variables.css    # CSS Variables (colors, fonts, sizes)
-│   ├── fonts.css        # Self-hosted font-face declarations
 │   ├── reset.css        # Basic reset stylesheet
 │   ├── layout.css       # Layout grids, sidebar, and container styles
 │   ├── notes.css        # Note grids and specific note card layouts
@@ -181,7 +180,7 @@ You can synchronize your notes across multiple devices (desktops, phones, tablet
 - **Local Storage**: IndexedDB (managed via PouchDB 9)
 - **Replication & E2E Encryption**: Filen SDK Integration (`@filen/sdk`)
 - **Bundler**: Vite & Vite Node Polyfills Plugin
-- **Fonts & Icons**: Self-hosted Roboto (`@fontsource/roboto`) & Material Symbols Outlined dynamic subset (`@fontsource-variable/material-symbols-outlined`, `subset-font`)
+- **Fonts & Icons**: Self-hosted Roboto (`@fontsource/roboto`) & Material Design 3 SVG icons (`@francofantomius/material-components`)
 
 ---
 

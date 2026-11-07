@@ -1,4 +1,4 @@
-const CACHE_NAME = 'noten-v2.2.1';
+const CACHE_NAME = 'noten-v2.3.0';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -20,7 +20,6 @@ const ASSETS_TO_CACHE = [
   './img/icons/noten_x384.png',
   './img/icons/noten_x512.png',
   './css/style.css',
-  './fonts/material-symbols-outlined-subset.woff2',
   './js/app.js'
 ];
 

@@ -1,4 +1,5 @@
 import '@francofantomius/material-components';
+import './ui/icons.js';
 import * as db from './db.js';
 import * as ui from './ui.js';
 import { t, getLanguage, setLanguage, applyTranslations, initTranslations } from './i18n.js';

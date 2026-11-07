@@ -1,4 +1,5 @@
 import '@francofantomius/material-components';
+import './ui/icons.js';
 
 /**
  * Initialize theme for static pages (Privacy Policy, Terms of Service)
